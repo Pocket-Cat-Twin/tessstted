@@ -1,0 +1,27 @@
+{
+  "name": "@yuyu/db",
+  "version": "1.0.0",
+  "description": "Database schema and utilities for YuYu Lolita project",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "drizzle-kit generate:pg",
+    "migrate": "bun run src/migrate.ts",
+    "seed": "bun run src/seed.ts",
+    "studio": "drizzle-kit studio",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.29.3",
+    "drizzle-zod": "^0.5.1",
+    "postgres": "^3.4.3",
+    "@yuyu/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.8",
+    "typescript": "^5.4.2",
+    "@types/pg": "^8.10.9"
+  }
+}
