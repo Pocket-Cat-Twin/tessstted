@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<link rel="stylesheet" href="common.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Извлеченный RibbonRegion</title>
+    
+<style>
+.css-173 {width: inherit; display: flex; align-items: unset;}
+.css-221 > :not(:first-child) {margin-top: 2px;}
+.css-228 {display: flex; flex-flow: column; width: auto; height: auto; box-sizing: border-box; align-items: flex-start; justify-content: flex-start;}
+.css-228 > * {text-overflow: ellipsis;}
+.css-228 > :not(:first-child) {margin-top: 2px;}
+.css-240 {font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; color: var(--colorNeutralForeground1); height: 16px; line-height: 16px; background-color: transparent; box-sizing: border-box; width: 100%; border-style: none; outline: none; text-overflow: ellipsis; padding: 0px; font-size: 12px;}
+.root-245 {outline: transparent; position: absolute; font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; font-size: 12px; font-weight: 400; border: none; border-radius: 2px; box-sizing: border-box; cursor: default; display: inline-flex; align-items: center; justify-content: center; padding: 0px; text-decoration: none; text-align: center; width: 12px; height: 24px; background-color: var(--colorNeutralBackground1); color: rgb(121, 119, 117); top: -1px; line-height: 30px; min-width: 12px; margin: 0px; right: -1px; user-select: none;}
+.icon-246 {font-size: 12px; margin: 0px; height: 8px; line-height: 8px; text-align: center; flex-shrink: 0; display: flex; width: 8px; fill: rgb(37, 36, 35);}
+.css-251 {display: flex; align-items: center; height: 24px; margin: 0px 2px 0px 0px;}
+.css-252 {font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; font-weight: 400; height: 24px; width: 128px; line-height: 22px; padding: 0px 12px 0px 0px; border-color: var(--colorNeutralStroke1); z-index: 0; box-shadow: none; position: relative; outline: 0px; background-color: var(--colorNeutralBackground1); border-width: 1px; border-style: solid; cursor: text; display: block; overflow: hidden; white-space: nowrap; box-sizing: border-box; border-radius: var(--borderRadiusMedium); user-select: none;}
+.css-252 input[type="text"] {padding-top: var(--spacingHorizontalNone); padding-right: var(--spacingHorizontalNone); padding-bottom: var(--spacingHorizontalNone); padding-left: var(--spacingHorizontalS);}
+.css-252 button {border-color: var(--colorNeutralBackground1); border-top-right-radius: var(--borderRadiusMedium); border-bottom-right-radius: var(--borderRadiusMedium);}
+.css-568 #pivotOverflowButton {display: none;}
+.css-568 #PeripheralOverflowRoot {display: none;}
+.css-569 [data-lid] {display: none;}
+.css-569 [data-lid="-1"] {display: inline-flex; position: absolute; visibility: hidden;}
+.root-570 {display: flex; text-decoration: inherit; align-items: center; justify-content: center;}
+.css-572 {font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; font-weight: 400; height: 24px; width: 60px; line-height: 22px; padding: 0px 12px 0px 0px; border-color: var(--colorNeutralStroke1); z-index: 0; box-shadow: none; position: relative; outline: 0px; background-color: var(--colorNeutralBackground1); border-width: 1px; border-style: solid; cursor: text; display: block; overflow: hidden; white-space: nowrap; box-sizing: border-box; border-radius: var(--borderRadiusMedium); user-select: none;}
+.css-572 input[type="text"] {padding-top: var(--spacingHorizontalNone); padding-right: var(--spacingHorizontalNone); padding-bottom: var(--spacingHorizontalNone); padding-left: var(--spacingHorizontalS);}
+.css-572 button {border-color: var(--colorNeutralBackground1); border-top-right-radius: var(--borderRadiusMedium); border-bottom-right-radius: var(--borderRadiusMedium);}
+.root-575 {font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; font-size: 12px; font-weight: 400; color: rgb(50, 49, 48); box-sizing: border-box; box-shadow: none; margin: 6px 4px 7px; display: block; padding: 5px 0px; overflow-wrap: break-word; pointer-events: none;}
+.css-577 {margin: 0px; top: -3px; left: 699.859px; width: 23.8281px; height: var(--strokeWidthThick); pointer-events: none; position: relative; transition: 400ms cubic-bezier(0.17, 0.17, 0, 1); float: left; background-color: var(--colorCompoundBrandStroke); border-radius: var(--borderRadiusCircular);}
+svg > path.OfficeIconColors_m25 {fill: rgb(0, 99, 177);}
+svg > path.OfficeIconColors_m26 {fill: rgb(131, 190, 236);}
+svg > path.OfficeIconColors_m27 {fill: rgb(55, 158, 78);}
+svg > path.OfficeIconColors_m28 {fill: rgb(48, 144, 72);}
+svg > path.OfficeIconColors_m213 {fill: rgb(237, 61, 59);}
+svg > path.OfficeIconColors_m223 {fill: rgb(220, 237, 250);}
+.r1q22k1j {position: relative; display: inline-flex; cursor: pointer; vertical-align: middle; color: var(--colorNeutralForeground3);}
+.ruo9svu {box-sizing: border-box; cursor: inherit; height: 100%; margin: 0px; opacity: 0; position: absolute; top: 0px; width: calc(16px + 2 * var(--spacingHorizontalS));}
+.rl7ci6d {align-self: flex-start; box-sizing: border-box; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--fui-Checkbox__indicator--color); background-color: var(--fui-Checkbox__indicator--backgroundColor); border-color: var(--fui-Checkbox__indicator--borderColor, var(--colorNeutralStrokeAccessible)); border-style: solid; border-width: var(--strokeWidthThin); border-radius: var(--borderRadiusSmall); margin: var(--spacingVerticalS) var(--spacingHorizontalS); fill: currentcolor; pointer-events: none; font-size: 12px; height: 16px; width: 16px;}
+.fkln5zr {gap: var(--spacingHorizontalXS);}
+.f1f5q0n8 {padding: var(--spacingVerticalS) var(--spacingHorizontalS);}
+.f1i3iumi {line-height: var(--lineHeightBase300);}
+.f7x41pl {padding-right: var(--spacingHorizontalXS);}
+.fkl3uby {padding-left: var(--spacingHorizontalNone);}
+.fytdu2e {line-height: normal;}
+.fueg7zk {padding-top: var(--spacingHorizontalNone);}
+.f1y8shg2 {padding-bottom: var(--spacingHorizontalNone);}
+.f1x82gua {height: 8px;}
+.f1n0apg3 {font-size: 8px;}
+.f1g7p50k {line-height: 8px;}
+.f1o3cbw4 {width: 8px;}
+.f6zblan {padding-right: 3px;}
+.f2lugmd {padding-left: 3px;}
+.f24sm58 {opacity: 0.4;}
+.f10pi13n {position: relative;}
+.fu6ou0d .ribbon-menu-chevron {width: 8px;}
+.f11q6fjs .ribbon-menu-chevron {height: 8px;}
+.f3vqvi8 .ribbon-menu-chevron {padding-left: 2px;}
+.f1aehjj5 {pointer-events: none;}
+.f1pha7fy {min-height: 24px;}
+.f17fgpbq {min-width: 24px;}
+.f13eh0sx {min-width: 12px;}
+.f4ybsrx {font-size: 16px;}
+.fn3zbbb i {height: 16px;}
+.f1cghtph i {width: 16px;}
+.f1c21dwh {background-color: var(--colorTransparentBackground);}
+.f1khb0e9 {padding-top: 3px;}
+.f1jnq6q7 {padding-bottom: 3px;}
+.f1qdrhsn .ribbon-menu-chevron {line-height: 8px;}
+.f1mr27x9 .ribbon-menu-chevron {padding-top: 1px;}
+.f8s0o .ribbon-menu-chevron {padding-bottom: 4px;}
+.f1lhv3j4 .ribbon-menu-chevron {fill: var(--colorNeutralForeground1);}
+.fwzt8cw .ribbon-menu-text {font-size: var(--fontSizeBase200);}
+.fp0vk1e .ribbon-menu-text {line-height: normal;}
+.fkg6glo .ribbon-menu-line2 {font-size: var(--fontSizeBase200);}
+.f1iw1751 .ribbon-menu-line2 {line-height: var(--lineHeightBase200);}
+.f7nlbp4 {align-self: center;}
+.f1lzf7iy {}
+.f1wk884o {}
+.fztplxc {padding-top: var(--spacingVerticalNone);}
+.fgiv446 {padding-left: var(--spacingHorizontalXXS);}
+.fywfov9 {padding-bottom: var(--spacingVerticalXXS);}
+.f1s2aq7o {color: var(--colorNeutralForegroundDisabled);}
+.fdrzuqr {cursor: not-allowed;}
+.f15x8b5r .fui-Button__icon {color: var(--colorNeutralForegroundDisabled);}
+.f2nno2a {min-width: 22px !important;}
+.f1z0y6ju {padding-left: 2px !important;}
+.fqo4y0b {padding-right: 2px !important;}
+.fppmu3e {border-right-width: 1px !important;}
+.f16kf41h .fui-SplitButton__primaryActionButton {border-right-color: var(--colorTransparentBackground);}
+.fz18gu8 .fui-SplitButton__menuButton {width: 12px;}
+.f1kmk2v2 .fui-SplitButton__menuButton {min-width: 12px;}
+.ftuwxu6 {display: inline-flex;}
+.fsxf2b5 {justify-content: stretch;}
+.fmrv4ls {vertical-align: middle;}
+.f14uur2j .fui-SplitButton__primaryActionButton {border-top-right-radius: 0px;}
+.fye5tvs .fui-SplitButton__primaryActionButton {border-bottom-right-radius: 0px;}
+.f1e8brtx .fui-SplitButton__menuButton {border-left-width: 0px;}
+.fxp12j1 .fui-SplitButton__menuButton {border-top-left-radius: 0px;}
+.fr7y8no .fui-SplitButton__menuButton {border-bottom-left-radius: 0px;}
+.f1vgc2s3 {left: 0px;}
+.fclwglc {padding-top: var(--spacingVerticalXXS);}
+.f17ge1r8 {width: calc(16px + 2 * var(--spacingHorizontalSNudge));}
+.f1qx5pwe {margin-top: var(--spacingHorizontalXXS);}
+.f1xk557c {margin-right: var(--spacingHorizontalXXS);}
+.f1h9en5y {margin-left: var(--spacingHorizontalXXS);}
+.f8e0ul7 {margin-bottom: var(--spacingHorizontalXXS);}
+.fkihque {padding-right: var(--spacingVerticalNone);}
+.f1g4cjja {padding-left: var(--spacingVerticalNone);}
+.f9g1xly {padding-bottom: var(--spacingVerticalNone);}
+.f16e5gn0 {margin-right: var(--spacingVerticalNone);}
+.f7qb4ng {margin-left: var(--spacingVerticalNone);}
+.f5i1nj6 {margin-bottom: var(--spacingVerticalNone);}
+.flejl4v > .fui-Checkbox__indicator {background-color: var(--colorNeutralBackground1);}
+.ft3piiw > .fui-Checkbox__indicator {border-top-color: var(--colorNeutralStrokeAccessible);}
+.f1ot4uw5 > .fui-Checkbox__indicator {border-right-color: var(--colorNeutralStrokeAccessible);}
+.f1qj7yi2 > .fui-Checkbox__indicator {border-left-color: var(--colorNeutralStrokeAccessible);}
+.fa06p7s > .fui-Checkbox__indicator {border-bottom-color: var(--colorNeutralStrokeAccessible);}
+.f1m2y7n8 > .fui-Checkbox__indicator {color: var(--colorNeutralForeground2);}
+.f35ds98 {--fui-Checkbox__indicator--backgroundColor: var(--colorCompoundBrandBackground);}
+.f12mnkne {--fui-Checkbox__indicator--color: var(--colorNeutralForegroundInverted);}
+.fei9a8h {--fui-Checkbox__indicator--borderColor: var(--colorCompoundBrandBackground);}
+.f1ym3bx4 {color: inherit;}
+.fpo1scq {cursor: inherit;}
+.css-568 {margin: 0px 8px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.ghostPivotElement {display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;}
+.extracted-element-k6wuuora9 {width: calc(100% - 28px); display: inline-flex; position: absolute; will-change: transform;}
+.extracted-element-itg04gc8h {display: inline-block; position: relative; white-space: nowrap; width: min-content;}
+.extracted-element-9hilnts1s {position: fixed; top: 0px; left: 0px; font-size: 1px; user-select: none; overflow: hidden; z-index: -1; pointer-events: none;}
+.ms-Stack {justify-content: center;}
+.ms-Stack {flex-grow: 0.105263;}
+.ms-Stack {flex-grow: 1;}
+.ms-Stack {flex-grow: 0.105263;}
+.ms-Stack {flex-grow: 0.105263;}
+#SelectZoomOption-input {font-family: inherit;}
+#SelectZoomOption-aria-describedby {display: none;}
+.ms-Stack {flex-grow: 0.105263;}
+.ms-Stack {flex-grow: 0.105263;}
+#NamedSheetViewSelect-input {font-family: inherit;}
+#NamedSheetViewSelect-aria-describedby {display: none;}
+.ms-Stack {flex-grow: 0.105263;}
+.ms-Stack {flex-grow: 0.105263;}
+.ms-Stack {justify-content: center;}
+.ms-Stack {flex-grow: 0.105263;}
+</style>
+</head>
+<body>
+<div id="RibbonRegion" class="Region" style="">
+   <div id="m_excelWebRenderer_ewaCtl_commandUIContainer" style="position:relative">
+      <div class="ewa-ribbon region-composer MLRVisualRefresh" id="m_excelWebRenderer_ewaCtl_commandUIPlaceHolder" style="z-index: 997;">
+         <div class="fui-FluentProvider fui-FluentProviderr0 ___1wli6bv f19n0e5 f3rmtva f1o700av fk6fouc fkhj508 figsok6 f5lt7tx f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5" dir="ltr">
+            <div class="___l53e2o0 f3rmtva f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5 body-149 ms-Fabric--isFocusHidden">
+               <div style="flex: 1 1 auto;" class="extracted-element-g76g1g418">
+                  <div class="css-150 body-149">
+                     <div class="fui-FluentProvider fui-FluentProviderr1 ___1wli6bv f19n0e5 f3rmtva f1o700av fk6fouc fkhj508 figsok6 f5lt7tx f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5" dir="ltr">
+                        <div class="___l53e2o0 f3rmtva f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5 body-149">
+                           <div>
+                              <div id="RibbonContainer" class="css-151">
+                                 <div id="id__2" role="toolbar" aria-label="Лента" tabindex="0" data-is-focusable="true" data-tabster="{&quot;uncontrolled&quot;: {&quot;completely&quot;: true}}">
+                                    <div aria-hidden="true" tabindex="0" data-is-visible="true" data-is-focus-trap-zone-bumper="true" style="pointer-events: none; position: fixed;" class="extracted-element-adfonus36"></div>
+                                    <div>
+                                       <div style="background-color: var(--colorNeutralBackground3);" class="extracted-element-f1zkfm4rl">
+                                          <div style="position: relative; white-space: nowrap;" class="extracted-element-ly7e0ivwc">
+                                             <div class="css-568" style="margin: 0px 8px;">
+                                                <div data-automation-type="RibbonTopBarContainer" id="RibbonTopBarContainer" style="background-color: var(--colorNeutralBackground3); display: flex; justify-content: space-between; white-space: nowrap; height: 36px; position: relative; z-index: 3;">
+                                                   <div id="TabListContainer" style="border-radius: 0px; margin-left: 0px; margin-top: 0px;">
+                                                      <div id="FileMenuLauncherContainer" class="r1hp6i1l">
+                                                         <div><button type="button" title="Файл" id="FileMenuFlyoutLauncher" aria-expanded="false" class="fui-Button r1alrhcs fui-MenuButton ms-Button ms-ButtonNext ___1jmwytf fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 figsok6 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 fwbmr0d f1nbblvp f1vdfbxk f1ov4xf1 f1f5gg8d f16xq7d1 f1aa9q02 f16jpd5f f1jar5jt fyu767a f192inf7 f5tn483 f1vxd6vx f1ojsxk5 fkfq4zb f158kwzp fkhj508 f1mo0ibp fyjnmpg f1h648pw fu37p9p f1tx4pjd f1l1uqyl fj239l fvmrufv foyvcke fk59q3o fm4hebn f5evwcs f1u3j2wj f172rvg1 f12gwge8 f12roa1c f10slqfg f1qhl0h4 f3n1fcu f16wmbz5 f7bf1bw f1f4jgw7 f1xyzmyh" aria-label="Файл" data-automation-type="RibbonFileButton" data-unique-id="FileMenuFlyoutLauncher" aria-haspopup="true" data-ktp-target="ktp-ф" data-ktp-execute-target="ktp-ф" aria-describedby="ktp-layer-id ktp-ф"><span class="textContainer ___1wut5zj fz5stix fruq291">Файл</span></button></div>
+                                                      </div>
+                                                      <span style="display: inline-block;" class="extracted-element-7wokw2ebl">
+                                                         <div class="css-153">
+                                                            <div id="tablist" aria-label="Вкладки ленты" data-tabster="{&quot;uncontrolled&quot;: {}}" class="ms-FocusZone css-154" data-focuszone-id="FocusZone4">
+                                                               <div role="tablist" class="ms-OverflowSet root-155">
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Home-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Home" data-automation-type="RibbonTab" data-unique-id="Home" aria-selected="false" aria-posinset="1" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-я" data-is-focusable="true" data-ktp-target="ktp-я" data-ktp-execute-target="ktp-я" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__5">Главная</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Главная</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Insert-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Insert" data-automation-type="RibbonTab" data-unique-id="Insert" aria-selected="false" aria-posinset="2" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-с" data-is-focusable="true" data-ktp-target="ktp-с" data-ktp-execute-target="ktp-с" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__8">Вставка</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Вставка</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Share-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Share" data-automation-type="RibbonTab" data-unique-id="Share" aria-selected="false" aria-posinset="3" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-s" data-is-focusable="true" data-ktp-target="ktp-s" data-ktp-execute-target="ktp-s" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__11">Поделиться</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Поделиться</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="PageLayout-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="PageLayout" data-automation-type="RibbonTab" data-unique-id="PageLayout" aria-selected="false" aria-posinset="4" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-з" data-is-focusable="true" data-ktp-target="ktp-з" data-ktp-execute-target="ktp-з" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__14">Разметка страницы</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Разметка страницы</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Formulas-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Formulas" data-automation-type="RibbonTab" data-unique-id="Formulas" aria-selected="false" aria-posinset="5" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-л" data-is-focusable="true" data-ktp-target="ktp-л" data-ktp-execute-target="ktp-л" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__17">Формулы</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Формулы</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Data-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Data" data-automation-type="RibbonTab" data-unique-id="Data" aria-selected="false" aria-posinset="6" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-ё" data-is-focusable="true" data-ktp-target="ktp-ё" data-ktp-execute-target="ktp-ё" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__20">Данные</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Данные</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Review-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Review" data-automation-type="RibbonTab" data-unique-id="Review" aria-selected="false" aria-posinset="7" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-и" data-is-focusable="true" data-ktp-target="ktp-и" data-ktp-execute-target="ktp-и" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__23">Рецензирование</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Рецензирование</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="View-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="View" data-automation-type="RibbonTab" data-unique-id="View" aria-selected="true" aria-posinset="8" aria-setsize="20" class="ms-Button root-446" aria-describedby="ktp-layer-id ktp-о" data-is-focusable="true" data-ktp-target="ktp-о" data-ktp-execute-target="ktp-о" tabindex="0" aria-controls="View-tabpanel"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-447" id="id__26">Вид</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Вид</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Help-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Help" data-automation-type="RibbonTab" data-unique-id="Help" aria-selected="false" aria-posinset="9" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-y-1" data-is-focusable="true" data-ktp-target="ktp-y-1" data-ktp-execute-target="ktp-y-1" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__29">Справка</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Справка</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-item item-156" role="none">
+                                                                     <div class="pivot-header-root" id="Draw-wrapper" role="none" style="text-align: center; position: relative;"><button type="button" role="tab" id="Draw" data-automation-type="RibbonTab" data-unique-id="Draw" aria-selected="false" aria-posinset="10" aria-setsize="20" class="ms-Button root-158" aria-describedby="ktp-layer-id ktp-б-ы" data-is-focusable="true" data-ktp-target="ktp-б-ы" data-ktp-execute-target="ktp-б-ы" tabindex="-1"><span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary"><span class="ms-Button-textContainer textContainer-160"><span class="ms-Button-label pivot-header-label label-162" id="id__32">Рисование</span></span></span></button><span class="ghostPivotElement" style="display: block; visibility: hidden; font-weight: 600; height: 0px; padding: 0px 11px;">Рисование</span></div>
+                                                                  </div>
+                                                                  <div class="ms-OverflowSet-overflowButton overflowButton-157">
+                                                                     <div>
+                                                                        <button type="button" data-unique-id="pivotOverflowButton" id="pivotOverflowButton" class="ms-Button ms-Button--hasMenu root-165" aria-label="Другие вкладки" aria-describedby="ktp-layer-id ktp-0-0" data-is-focusable="true" aria-expanded="false" aria-haspopup="true" data-ktp-target="ktp-0-0" data-ktp-execute-target="ktp-0-0" tabindex="-1">
+                                                                           <span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary">
+                                                                              <i data-icon-name="CommonControlChevronDownGlyph_12" aria-hidden="true" class="ms-Button-icon icon-168">
+                                                                                 <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                    <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_HighContrast"></path>
+                                                                                    <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                 </svg>
+                                                                              </i>
+                                                                           </span>
+                                                                        </button>
+                                                                     </div>
+                                                                  </div>
+                                                               </div>
+                                                            </div>
+                                                         </div>
+                                                         <div>
+                                                            <div class="fui-FluentProvider fui-FluentProviderr4j ___1wli6bv f19n0e5 f3rmtva f1o700av fk6fouc fkhj508 figsok6 f5lt7tx f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5">
+                                                               <div class="___l53e2o0 f3rmtva f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5 body-149">
+                                                                  <div id="selectedPivotIndicator" class="css-577"></div>
+                                                               </div>
+                                                            </div>
+                                                         </div>
+                                                      </span>
+                                                   </div>
+                                                   <div class="ms-FocusZone css-154 css-169" data-automation-type="RibbonTopBarContainer" role="toolbar" aria-label="Дополнительные элементы управления" data-tabster="{&quot;uncontrolled&quot;: {}}" data-focuszone-id="FocusZone38">
+                                                      <div class="css-170" id="NearPeripheralControlsContainer"></div>
+                                                      <div class="root-171" id="FarPeripheralControlsContainer" style="display: flex;">
+                                                         <div role="group" class="ms-OverflowSet root-155">
+                                                            <div class="ms-OverflowSet-item item-156" role="none">
+                                                               <button type="button" id="ShowCommentsTopBar" aria-pressed="false" aria-label="Примечания" data-automation-type="RibbonPeripheralToggleButton" data-unique-id="FarPeripheralControls-ShowCommentsTopBar" class="fui-Button r1alrhcs fui-ToggleButton ms-ButtonNext ___vg6v9c0 f10tiqix f1ov4xf1 f1nbblvp fneth5b f16jpd5f f1aa9q02 fyu767a f1jar5jt ft85np5 fy9rknc figsok6 fwrc4pm fazmxh fww94b8 f1osuteh f8l5zjj foyynoy frvgh55 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 fqlkmmp" data-ktp-target="ktp-ю-в" data-ktp-execute-target="ktp-ю-в" aria-describedby="ktp-layer-id ktp-ю-в" tabindex="0">
+                                                                  <span class="fui-Button__icon rywnvv2 fui-ToggleButton__icon ___1ks6ldx f1osuteh fe5j1ua fd461yt fjw5fx7 fbaiahx fg4l7m0 f1e4rr03 f10r0c9q">
+                                                                     <i data-icon-name="CommentsGlyphWord_16" aria-hidden="true" class="root-172">
+                                                                        <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                           <path type="path" class="OfficeIconColors_HighContrast" d="M128 578q0-87 44-163 42-73 114-115 75-44 162-44h1152q87 0 162 44 72 43 114 115 44 75 44 163v644q0 87-44 162-42 73-114 116-75 44-162 44h-488l-392 345q-39 35-90 31-48-3-82-38-36-36-36-88v-250h-64q-87 0-162-44-72-43-114-116-44-75-44-162v-644z m320-193q-80 0-136 56-56 57-56 137v644q0 80 56 136 56 57 136 57h192v373l424-373h536q80 0 136-57 56-57 56-136v-644q0-80-56-137-56-57-136-56h-1152z"></path>
+                                                                           <path type="path" class="OfficeIconColors_m22" d="M128 578q0-87 44-163 42-73 114-115 75-44 162-44h1152q87 0 162 44 72 43 114 115 44 75 44 163v644q0 87-44 162-42 73-114 116-75 44-162 44h-488l-392 345q-39 35-90 31-48-3-82-38-36-36-36-88v-250h-64q-87 0-162-44-72-43-114-116-44-75-44-162v-644z m320-193q-80 0-136 56-56 57-56 137v644q0 80 56 136 56 57 136 57h192v373l424-373h536q80 0 136-57 56-57 56-136v-644q0-80-56-137-56-57-136-56h-1152z"></path>
+                                                                        </svg>
+                                                                     </i>
+                                                                  </span>
+                                                                  <span class="textContainer ___wg8g4k0 fkrn0sh fruq291">Примечания</span>
+                                                               </button>
+                                                            </div>
+                                                            <div class="ms-OverflowSet-item item-156" role="none">
+                                                               <button type="button" id="CatchUpWithChanges" aria-pressed="false" aria-label="Встреча" data-automation-type="RibbonPeripheralToggleButton" data-unique-id="FarPeripheralControls-CatchUpWithChanges" class="fui-Button r1alrhcs fui-ToggleButton ms-ButtonNext ___vg6v9c0 f10tiqix f1ov4xf1 f1nbblvp fneth5b f16jpd5f f1aa9q02 fyu767a f1jar5jt ft85np5 fy9rknc figsok6 fwrc4pm fazmxh fww94b8 f1osuteh f8l5zjj foyynoy frvgh55 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 fqlkmmp" data-ktp-target="ktp-ю-п" data-ktp-execute-target="ktp-ю-п" aria-describedby="ktp-layer-id ktp-ю-п" tabindex="-1">
+                                                                  <span class="fui-Button__icon rywnvv2 fui-ToggleButton__icon ___1ks6ldx f1osuteh fe5j1ua fd461yt fjw5fx7 fbaiahx fg4l7m0 f1e4rr03 f10r0c9q">
+                                                                     <i data-icon-name="Activity_16" aria-hidden="true" class="root-172">
+                                                                        <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                           <path type="path" class="OfficeIconColors_HighContrast" d="M752 691q11-27 38-36 25-9 50 2 26 12 33 41l156 543q26 90 108 124 78 32 155-1 82-35 106-125l46-168q6-21 23-34 17-13 39-13h41q20 57 69 92 50 36 112 36 80 0 136-56 56-56 56-136 0-80-56-136-56-56-136-56-62 0-112 36-49 35-69 92h-41q-65 0-117 39-52 39-68 102l-46 168q-8 30-36 42-26 11-51 0-28-11-36-41l-156-544q-24-85-101-120-73-34-148-8-80 28-113 110l-85 212q-13 33-48 39-20-56-69-91-50-36-112-36-80 0-136 56-56 56-56 136 0 80 56 136 56 56 136 56 62 0 112-36 49-35 69-92 55-3 101-36 45-33 66-85l84-212z"></path>
+                                                                           <path type="path" class="OfficeIconColors_m22" d="M752 691q11-27 38-36 25-9 50 2 26 12 33 41l156 543q26 90 108 124 78 32 155-1 82-35 106-125l46-168q6-21 23-34 17-13 39-13h41q20 57 69 92 50 36 112 36 80 0 136-56 56-56 56-136 0-80-56-136-56-56-136-56-62 0-112 36-49 35-69 92h-41q-65 0-117 39-52 39-68 102l-46 168q-8 30-36 42-26 11-51 0-28-11-36-41l-156-544q-24-85-101-120-73-34-148-8-80 28-113 110l-85 212q-13 33-48 39-20-56-69-91-50-36-112-36-80 0-136 56-56 56-56 136 0 80 56 136 56 56 136 56 62 0 112-36 49-35 69-92 55-3 101-36 45-33 66-85l84-212z"></path>
+                                                                        </svg>
+                                                                     </i>
+                                                                  </span>
+                                                                  <span class="textContainer ___wg8g4k0 fkrn0sh fruq291">Встреча</span>
+                                                               </button>
+                                                            </div>
+                                                            <div class="ms-OverflowSet-item item-156" role="none">
+                                                               <div id="ModeSwitcher-container">
+                                                                  <div>
+                                                                     <button type="button" id="ModeSwitcher" aria-expanded="false" aria-label="Меню &quot;Режим&quot;;Редактирование Выбрано" data-automation-type="RibbonPeripheralFlyoutAnchor" data-unique-id="FarPeripheralControls-ModeSwitcher" aria-describedby="fui-r7  ktp-layer-id ktp-ю-м" class="fui-Button r1alrhcs fui-MenuButton ms-ButtonNext ___vg6v9c0 f10tiqix f1ov4xf1 f1nbblvp fneth5b f16jpd5f f1aa9q02 fyu767a f1jar5jt ft85np5 fy9rknc figsok6 fwrc4pm fazmxh fww94b8 f1osuteh f8l5zjj foyynoy frvgh55 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 fqlkmmp" aria-haspopup="true" data-ktp-target="ktp-ю-м" data-ktp-execute-target="ktp-ю-м" tabindex="-1">
+                                                                        <span class="fui-Button__icon rywnvv2 fui-MenuButton__icon ___vt7uif0 f1osuteh fe5j1ua fd461yt fjw5fx7 fbaiahx f1e4rr03 f10r0c9q">
+                                                                           <i data-icon-name="EditExcel_16" aria-hidden="true" class="root-89">
+                                                                              <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                 <path type="path" class="OfficeIconColors_HighContrast" d="M1822 226q-64-64-152-88-85-22-170 0-88 23-152 88l-1008 1007q-73 73-99 174l-111 433q-9 35 17 61 26 26 61 17l433-111q100-26 174-99l1007-1008q64-64 88-152 22-85 0-170-23-88-88-152z m-384 90q61-61 147-60 86 0 147 60 61 61 60 147 0 86-60 147l-100 99-293-293 99-100z m-190 190l293 294-817 817q-48 48-115 66l-328 84 84-328q17-66 66-115l817-818z"></path>
+                                                                                 <path type="path" class="OfficeIconColors_m22" d="M1822 226q-64-64-152-88-85-22-170 0-88 23-152 88l-1008 1007q-73 73-99 174l-111 433q-9 35 17 61 26 26 61 17l433-111q100-26 174-99l1007-1008q64-64 88-152 22-85 0-170-23-88-88-152z m-384 90q61-61 147-60 86 0 147 60 61 61 60 147 0 86-60 147l-100 99-293-293 99-100z m-190 190l293 294-817 817q-48 48-115 66l-328 84 84-328q17-66 66-115l817-818z"></path>
+                                                                              </svg>
+                                                                           </i>
+                                                                        </span>
+                                                                        <span class="textContainer ___wg8g4k0 fkrn0sh fruq291">Редактирование</span><span class="acui-hidden-content" id="fui-r7"></span>
+                                                                        <span class="fui-MenuButton__menuIcon ___1vuzyw0 fp4gqsa f1ugzwwg fvblgha frx94fk fbyavb5 f10r0c9q f1e4rr03">
+                                                                           <i data-icon-name="CommonControlChevronDownGlyph_12" aria-hidden="true" class="root-89">
+                                                                              <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                 <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_HighContrast"></path>
+                                                                                 <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                              </svg>
+                                                                           </i>
+                                                                        </span>
+                                                                     </button>
+                                                                  </div>
+                                                               </div>
+                                                            </div>
+                                                            <div class="ms-OverflowSet-item item-156" role="none">
+                                                               <div>
+                                                                  <button type="button" id="ShareMenu" aria-expanded="false" aria-label="Поделиться" data-automation-type="RibbonPeripheralFlyoutAnchor" data-unique-id="FarPeripheralControls-ShareMenu" class="fui-Button r1alrhcs fui-MenuButton ms-ButtonNext ___16gmv54 ffp7eso f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1phragk f15wkkf3 f1s2uweq fr80ssc f1ukrpxl fecsdlb f1rq72xc fnp9lpt f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1d6v5y2 f1rirnrt f1uu00uk fkvaka8 f1ux7til f9a0qzu f1lkg8j3 fkc42ay fq7113v ff1wgvm fiob0tu f1j6scgf f1x4h75k f4xjyn1 fbgcvur f1ks1yx8 f1o6qegi fcnxywj fmxjhhp f9ddjv3 f10tiqix f1ov4xf1 f1nbblvp fneth5b f16jpd5f f1aa9q02 fyu767a f1jar5jt ft85np5 fy9rknc figsok6 fwrc4pm f17t0x8g f194v5ow f1qgg65p fk7jm04 fhgccpy f32wu9k fu5nqqq f13prjl2 f1czftr5 f1nl83rv f12k37oa fr96u23 fazmxh fww94b8 f1osuteh f8l5zjj foyynoy frvgh55 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 fqlkmmp f1e4rr03 f1xepfs9" aria-haspopup="true" data-ktp-target="ktp-ю-т" data-ktp-execute-target="ktp-ю-т" aria-describedby="fui-r9  ktp-layer-id ktp-ю-т" tabindex="-1">
+                                                                     <span class="fui-Button__icon rywnvv2 fui-MenuButton__icon ___tk9fqv0 f1osuteh fe5j1ua fd461yt fjw5fx7 fbaiahx f1e4rr03 f1r9easw f1xepfs9">
+                                                                        <i data-icon-name="PeopleSharedIcon_16" aria-hidden="true" class="root-172">
+                                                                           <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                              <path type="path" class="OfficeIconColors_HighContrast" d="M704 896q133 0 226-94 94-94 94-226 0-133-94-226-94-94-226-94-133 0-226 94-94 94-94 226 0 133 94 226 94 94 226 94z m0-128q-80 0-136-56-56-56-56-136 0-80 56-136 56-56 136-56 80 0 136 56 56 56 56 136 0 80-56 136-56 56-136 56z m832 128q106 0 181-75 75-75 75-181 0-106-75-181-75-75-181-75-106 0-181 75-75 75-75 181 0 106 75 181 75 75 181 75z m0-128q-53 0-91-37-37-37-37-91 0-53 37-91 37-37 91-37 53 0 91 37 37 37 37 91 0 53-37 91-37 37-91 37z m-1408 480q0-93 66-158 66-66 158-66h704q93 0 158 66 66 66 66 158 0 148-74 275-72 123-195 195-127 74-275 74h-64q-148 0-275-74-123-72-195-195-74-127-74-275z m224-96q-40 0-68 28-28 28-28 68 0 113 57 210 55 94 149 149 97 57 210 57h64q113 0 210-57 94-55 149-149 57-97 57-210 0-40-28-68-28-28-68-28h-704z m1164 400q-86 0-163-38 26-60 40-125 56 35 123 35h40q98 0 167-69 69-69 69-167 0-15-11-25-11-11-25-11h-361q-20-71-67-128h428q68 0 116 48 48 48 48 116 0 99-50 184-48 82-130 130-85 50-184 50h-40z"></path>
+                                                                              <path type="path" class="OfficeIconColors_m22" d="M704 896q133 0 226-94 94-94 94-226 0-133-94-226-94-94-226-94-133 0-226 94-94 94-94 226 0 133 94 226 94 94 226 94z m0-128q-80 0-136-56-56-56-56-136 0-80 56-136 56-56 136-56 80 0 136 56 56 56 56 136 0 80-56 136-56 56-136 56z m832 128q106 0 181-75 75-75 75-181 0-106-75-181-75-75-181-75-106 0-181 75-75 75-75 181 0 106 75 181 75 75 181 75z m0-128q-53 0-91-37-37-37-37-91 0-53 37-91 37-37 91-37 53 0 91 37 37 37 37 91 0 53-37 91-37 37-91 37z m-1408 480q0-93 66-158 66-66 158-66h704q93 0 158 66 66 66 66 158 0 148-74 275-72 123-195 195-127 74-275 74h-64q-148 0-275-74-123-72-195-195-74-127-74-275z m224-96q-40 0-68 28-28 28-28 68 0 113 57 210 55 94 149 149 97 57 210 57h64q113 0 210-57 94-55 149-149 57-97 57-210 0-40-28-68-28-28-68-28h-704z m1164 400q-86 0-163-38 26-60 40-125 56 35 123 35h40q98 0 167-69 69-69 69-167 0-15-11-25-11-11-25-11h-361q-20-71-67-128h428q68 0 116 48 48 48 48 116 0 99-50 184-48 82-130 130-85 50-184 50h-40z"></path>
+                                                                           </svg>
+                                                                        </i>
+                                                                     </span>
+                                                                     <span class="textContainer ___wg8g4k0 fkrn0sh fruq291">Поделиться</span><span class="acui-hidden-content" id="fui-r9">: к этому файлу предоставлен общий доступ</span>
+                                                                     <span class="fui-MenuButton__menuIcon ___13w8kug fp4gqsa f1ugzwwg fvblgha frx94fk fbyavb5 f1r9easw f1e4rr03 f1xepfs9">
+                                                                        <i data-icon-name="CommonControlChevronDownGlyph_12" aria-hidden="true" class="root-89">
+                                                                           <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                              <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_HighContrast"></path>
+                                                                              <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                           </svg>
+                                                                        </i>
+                                                                     </span>
+                                                                  </button>
+                                                               </div>
+                                                            </div>
+                                                            <div class="ms-OverflowSet-overflowButton overflowButton-157">
+                                                               <div>
+                                                                  <div>
+                                                                     <button type="button" id="PeripheralOverflowRoot" role="menu" aria-expanded="false" aria-label="Дополнительные параметры совместной работы" data-automation-type="RibbonPeripheralFlyoutAnchor" data-unique-id="PeripheralOverflow-PeripheralOverflowRoot" class="fui-Button r1alrhcs fui-MenuButton ms-ButtonNext ___vg6v9c0 f10tiqix f1ov4xf1 f1nbblvp fneth5b f16jpd5f f1aa9q02 fyu767a f1jar5jt ft85np5 fy9rknc figsok6 fwrc4pm fazmxh fww94b8 f1osuteh f8l5zjj foyynoy frvgh55 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 fqlkmmp" aria-haspopup="true" data-ktp-target="ktp-0-2" data-ktp-execute-target="ktp-0-2" aria-describedby="ktp-layer-id ktp-0-2" tabindex="-1">
+                                                                        <span class="fui-Button__icon rywnvv2 fui-MenuButton__icon ___1v3td80 fe5j1ua fd461yt fjw5fx7 fbaiahx fibjyge f1e4rr03 f10r0c9q">
+                                                                           <i data-icon-name="HintBarEllipses_20" aria-hidden="true" class="root-89">
+                                                                              <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                 <path type="path" class="OfficeIconColors_HighContrast" d="M 256 819 q 32 0 60 12 q 28 12 49 33 q 21 21 33 49 q 12 28 12 60 q 0 32 -12 60 q -12 28 -33 48 q -21 21 -49 33 q -28 12 -60 12 q -32 0 -60 -12 q -28 -12 -49 -33 q -21 -20 -33 -48 q -12 -28 -12 -60 q 0 -32 12 -60 q 12 -28 33 -49 q 21 -21 49 -33 q 28 -12 60 -12 m 717 0 q 32 0 60 12 q 28 12 49 33 q 20 21 32 49 q 12 28 12 60 q 0 32 -12 60 q -12 28 -32 48 q -21 21 -49 33 q -28 12 -60 12 q -32 0 -60 -12 q -28 -12 -49 -33 q -21 -20 -33 -48 q -12 -28 -12 -60 q 0 -32 12 -60 q 12 -28 33 -49 q 21 -21 49 -33 q 28 -12 60 -12 m 717 0 q 31 0 59 12 q 28 12 49 33 q 21 21 33 49 q 12 28 12 60 q 0 32 -12 60 q -12 28 -33 48 q -21 21 -49 33 q -28 12 -59 12 q -32 0 -60 -12 q -28 -12 -49 -33 q -21 -20 -33 -48 q -12 -28 -12 -60 q 0 -32 12 -60 q 12 -28 33 -49 q 21 -21 49 -33 q 28 -12 60 -12 z"></path>
+                                                                                 <path type="path" class="OfficeIconColors_m22" d="M 256 819 q 32 0 60 12 q 28 12 49 33 q 21 21 33 49 q 12 28 12 60 q 0 32 -12 60 q -12 28 -33 48 q -21 21 -49 33 q -28 12 -60 12 q -32 0 -60 -12 q -28 -12 -49 -33 q -21 -20 -33 -48 q -12 -28 -12 -60 q 0 -32 12 -60 q 12 -28 33 -49 q 21 -21 49 -33 q 28 -12 60 -12 m 717 0 q 32 0 60 12 q 28 12 49 33 q 20 21 32 49 q 12 28 12 60 q 0 32 -12 60 q -12 28 -32 48 q -21 21 -49 33 q -28 12 -60 12 q -32 0 -60 -12 q -28 -12 -49 -33 q -21 -20 -33 -48 q -12 -28 -12 -60 q 0 -32 12 -60 q 12 -28 33 -49 q 21 -21 49 -33 q 28 -12 60 -12 m 717 0 q 31 0 59 12 q 28 12 49 33 q 21 21 33 49 q 12 28 12 60 q 0 32 -12 60 q -12 28 -33 48 q -21 21 -49 33 q -28 12 -59 12 q -32 0 -60 -12 q -28 -12 -49 -33 q -21 -20 -33 -48 q -12 -28 -12 -60 q 0 -32 12 -60 q 12 -28 33 -49 q 21 -21 49 -33 q 28 -12 60 -12 z"></path>
+                                                                              </svg>
+                                                                           </i>
+                                                                        </span>
+                                                                     </button>
+                                                                  </div>
+                                                                  <div></div>
+                                                               </div>
+                                                            </div>
+                                                         </div>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div id="appshycomponent">
+                                          <div data-is-focusable="true" class="ms-FocusZone css-154 outerContainer-200" data-tabster="{&quot;uncontrolled&quot;: {}}" data-focuszone-id="FocusZone21704">
+                                             <div class="root-201 bottomBarContainer" aria-labelledby="View" role="tabpanel" id="View-tabpanel">
+                                                <div id="paddleContainer">
+                                                   <div style="width: calc(100% - 28px); display: inline-flex; position: absolute; will-change: transform;">
+                                                      <div style="display: inline-block; position: relative; white-space: nowrap; width: min-content;">
+                                                         <div class="css-569">
+                                                            <div class="tabContentContainer-202" id="outerRibbonContainer">
+                                                               <p elementtiming="TabSwitch" data-ui-mutation-time="1456032.1999999993" data-ui-mutation-context-value="TabSwitch_View-panel" style="position: fixed; top: 0px; left: 0px; font-size: 1px; user-select: none; overflow: hidden; z-index: -1; pointer-events: none;">.</p>
+                                                               <div class="bottomBarContainer-203" data-automation-type="RibbonBottomBarContainerMLR" data-unique-id="RibbonBottomBarContainerMLR" id="innerRibbonContainer">
+                                                                  <div class="groupContainer-204">
+                                                                     <div class="root-208">
+                                                                        <div class="root-215" data-unique-id="Freeze_MLR" id="Freeze_MLR-group" role="group" aria-labelledby="Freeze_MLR-label">
+                                                                           <div class="container-216">
+                                                                              <div class="layoutWrapper-219 layoutWrapper">
+                                                                                 <div class="ms-Stack css-220" style="justify-content: center;">
+                                                                                    <div class="ms-Stack css-221">
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <div>
+                                                                                             <button type="button" id="FreezeUnfreezePanesFlyout" aria-expanded="false" class="fui-Button r1alrhcs fui-MenuButton ms-Button ms-ButtonNext ___1co81e4 f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751" aria-label="Закрепить области" data-automation-type="RibbonFlyoutAnchor" data-unique-id="Ribbon-FreezeUnfreezePanesFlyout" aria-describedby="fui-r1fj  ktp-layer-id ktp-о-ь" aria-haspopup="true" data-ktp-target="ktp-о-ь" data-ktp-execute-target="ktp-о-ь" tabindex="0">
+                                                                                                <span class="fui-Button__icon rywnvv2 fui-MenuButton__icon ms-RibbonButton-icon ___12cvz6i f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                   <i data-icon-name="FreezePanes_32" aria-hidden="true" class="root-89">
+                                                                                                      <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                         <path type="path" class="OfficeIconColors_HighContrast" d="M469 256q-88 0-151 62-62 62-62 151v1110q0 88 62 151 62 62 151 62h478l0 0q-2-5-5-10-4-14-4-34 0-16 4-30 2-6 5-11l1 0h-180v-939h939v448l85-51v-696q0-88-62-151-62-62-151-62h-1110z m1067 811q0-18-12-31-12-12-31-12-18 0-30 12-12 12-12 31v351l-362-217q-15-9-33-5-17 4-26 19-9 15-5 33 4 17 20 26l365 219-365 220q-15 9-20 26-4 17 5 32 9 15 26 20 17 4 33-5l362-217v351q0 18 12 30 12 12 30 13 18 0 31-13 12-12 12-30v-351l362 217q15 9 32 5 17-4 27-20 9-15 4-32-4-17-19-26l-366-220 366-219q15-9 19-26 4-17-4-33-9-15-27-19-17-4-32 5l-362 217v-351z"></path>
+                                                                                                         <path type="path" class="OfficeIconColors_m22" d="M1792 1163v-438h-85v490l85-52z m-846 629q-2-7-4-14-4-16-3-25 0-25 7-46h-221v85h221z"></path>
+                                                                                                         <path type="path" class="OfficeIconColors_m26" d="M1749 469v256h-981q-18 0-30 13-12 12-13 30v981h-256q-71 0-120-50-50-50-50-120v-1110q0-71 50-120 50-50 120-50h1110q71 0 120 50 50 50 50 120z"></path>
+                                                                                                         <path type="path" class="OfficeIconColors_m24" d="M1493 1024q18 0 31 12 12 12 12 31v351l362-217q15-9 32-5 17 4 27 19 9 15 4 33-4 17-19 26l-366 219 366 220q15 9 19 26 4 17-4 32-9 15-27 20-17 4-32-5l-362-217v351q0 18-12 30-12 13-31 13-18 0-30-13-12-12-12-30v-351l-362 217q-15 9-33 5-17-4-26-20-9-15-5-32 4-17 20-26l365-220-365-219q-15-9-20-26-4-17 5-33 9-15 26-19 17-4 33 5l362 217v-351q0-18 12-31 12-12 30-12z"></path>
+                                                                                                         <path type="path" class="OfficeIconColors_m25" d="M256 469q0-88 62-151 62-62 151-62h1110q88 0 151 62 62 62 62 151v299h-1024v1024h-299q-88 0-151-62-62-62-62-151v-1110z m213-128q-53 0-90 38-37 37-38 90v1110q0 53 38 90 37 37 90 38h214v-982q0-18 12-30 12-12 30-12h982v-214q0-53-38-90-37-37-90-38h-1110z"></path>
+                                                                                                      </svg>
+                                                                                                   </i>
+                                                                                                </span>
+                                                                                                <div class="ribbon-menu-text">
+                                                                                                   Закрепить
+                                                                                                   <div class="ribbon-menu-line2">
+                                                                                                      области
+                                                                                                      <i data-icon-name="CommonControlChevronDownGlyph_8" aria-hidden="true" class="ribbon-menu-chevron root-89">
+                                                                                                         <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                            <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                            <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </div>
+                                                                                                </div>
+                                                                                                <span class="acui-hidden-content" id="fui-r1fj">Закрепить на экране часть листа, чтобы она оставалась видимой при прокрутке остальной части листа.</span><span class="fui-MenuButton__menuIcon ___wph5t30 faaz57k f4ybsrx fd461yt fjw5fx7 fbyavb5 fhuob2q"></span>
+                                                                                             </button>
+                                                                                             <span class="ms-layer"></span>
+                                                                                          </div>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                 </div>
+                                                                              </div>
+                                                                              <div class="groupLabelContainer-218"><label class="groupLabel-217" for="Freeze_MLR-group" id="Freeze_MLR-label">Закрепить</label></div>
+                                                                           </div>
+                                                                        </div>
+                                                                     </div>
+                                                                     <span class="ribbon-divider-wrapper wrapper-226"><span class="ribbon-bottom-bar-divider divider-227"></span></span>
+                                                                  </div>
+                                                                  <div class="groupContainer-204">
+                                                                     <div class="root-208">
+                                                                        <div class="root-215" data-unique-id="Show_MLR" id="Show_MLR-group" role="group" aria-labelledby="Show_MLR-label">
+                                                                           <div class="container-216">
+                                                                              <div class="layoutWrapper-219 layoutWrapper">
+                                                                                 <div class="ms-Stack css-220">
+                                                                                    <div class="ms-Stack css-221">
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 1;">
+                                                                                          <div class="ms-Stack css-228">
+                                                                                             <div id="ShowGridlines">
+                                                                                                <span class="fui-Checkbox r1q22k1j ___150wq1u f19n0e5 f35ds98 f12mnkne fei9a8h fix56y3 f1bcv2js f7dr4go f1r5cpua flejl4v ft3piiw f1ot4uw5 fa06p7s f1qj7yi2 f1m2y7n8 fipgza4 f1d3mhsu fu8c0oy fm4ihi7 fy7d2rf f1tzkegs f1i2ds2e fy0rl7r fo76l3p f1x850lg f1pdhdei fzot6sx fkln5zr f1jkagg5 f1osuteh fi2ljxd f62i5r0 fclwglc f7x41pl fywfov9 fruq291">
+                                                                                                   <input type="checkbox" id="Ribbon-ShowGridlines-input" aria-label="Линии сетки" data-automation-type="RibbonCheckbox" data-unique-id="Ribbon-ShowGridlines-input" role="checkbox" class="fui-Checkbox__input ruo9svu ___1wmv20z f1vgc2s3 f17ge1r8" checked="" data-ktp-target="ktp-о-с" data-ktp-execute-target="ktp-о-с" aria-describedby="ktp-layer-id ktp-о-с" tabindex="-1">
+                                                                                                   <div aria-hidden="true" class="fui-Checkbox__indicator rl7ci6d ___1vei1px f1aa9q02 f16jpd5f f1jar5jt fyu767a f1qx5pwe f1xk557c f8e0ul7 f1h9en5y">
+                                                                                                      <i data-icon-name="CheckmarkWithDynamicColor_16" aria-hidden="true" class="root-570">
+                                                                                                         <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </div>
+                                                                                                   <label for="Ribbon-ShowGridlines-input" class="fui-Label fui-Checkbox__label ___lanszn0 fk6fouc f1ym3bx4 fy9rknc f1i3iumi f7nlbp4 fpo1scq f9g1xly f1g4cjja fkihque fztplxc f1f5q0n8 f10saiw2 f5i1nj6 f16e5gn0 f7qb4ng">Линии сетки</label>
+                                                                                                </span>
+                                                                                             </div>
+                                                                                             <div id="ShowHeadings">
+                                                                                                <span class="fui-Checkbox r1q22k1j ___150wq1u f19n0e5 f35ds98 f12mnkne fei9a8h fix56y3 f1bcv2js f7dr4go f1r5cpua flejl4v ft3piiw f1ot4uw5 fa06p7s f1qj7yi2 f1m2y7n8 fipgza4 f1d3mhsu fu8c0oy fm4ihi7 fy7d2rf f1tzkegs f1i2ds2e fy0rl7r fo76l3p f1x850lg f1pdhdei fzot6sx fkln5zr f1jkagg5 f1osuteh fi2ljxd f62i5r0 fclwglc f7x41pl fywfov9 fruq291">
+                                                                                                   <input type="checkbox" id="Ribbon-ShowHeadings-input" aria-label="Заголовки" data-automation-type="RibbonCheckbox" data-unique-id="Ribbon-ShowHeadings-input" role="checkbox" class="fui-Checkbox__input ruo9svu ___1wmv20z f1vgc2s3 f17ge1r8" checked="" data-ktp-target="ktp-о-х-з" data-ktp-execute-target="ktp-о-х-з" aria-describedby="ktp-layer-id ktp-о-х-з" tabindex="-1">
+                                                                                                   <div aria-hidden="true" class="fui-Checkbox__indicator rl7ci6d ___1vei1px f1aa9q02 f16jpd5f f1jar5jt fyu767a f1qx5pwe f1xk557c f8e0ul7 f1h9en5y">
+                                                                                                      <i data-icon-name="CheckmarkWithDynamicColor_16" aria-hidden="true" class="root-570">
+                                                                                                         <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </div>
+                                                                                                   <label for="Ribbon-ShowHeadings-input" class="fui-Label fui-Checkbox__label ___lanszn0 fk6fouc f1ym3bx4 fy9rknc f1i3iumi f7nlbp4 fpo1scq f9g1xly f1g4cjja fkihque fztplxc f1f5q0n8 f10saiw2 f5i1nj6 f16e5gn0 f7qb4ng">Заголовки</label>
+                                                                                                </span>
+                                                                                             </div>
+                                                                                             <div id="ShowFormulaBar">
+                                                                                                <span class="fui-Checkbox r1q22k1j ___150wq1u f19n0e5 f35ds98 f12mnkne fei9a8h fix56y3 f1bcv2js f7dr4go f1r5cpua flejl4v ft3piiw f1ot4uw5 fa06p7s f1qj7yi2 f1m2y7n8 fipgza4 f1d3mhsu fu8c0oy fm4ihi7 fy7d2rf f1tzkegs f1i2ds2e fy0rl7r fo76l3p f1x850lg f1pdhdei fzot6sx fkln5zr f1jkagg5 f1osuteh fi2ljxd f62i5r0 fclwglc f7x41pl fywfov9 fruq291">
+                                                                                                   <input type="checkbox" id="Ribbon-ShowFormulaBar-input" aria-label="Панель формул" data-automation-type="RibbonCheckbox" data-unique-id="Ribbon-ShowFormulaBar-input" role="checkbox" class="fui-Checkbox__input ruo9svu ___1wmv20z f1vgc2s3 f17ge1r8" checked="" data-ktp-target="ktp-о-v-f" data-ktp-execute-target="ktp-о-v-f" aria-describedby="ktp-layer-id ktp-о-v-f" tabindex="-1">
+                                                                                                   <div aria-hidden="true" class="fui-Checkbox__indicator rl7ci6d ___1vei1px f1aa9q02 f16jpd5f f1jar5jt fyu767a f1qx5pwe f1xk557c f8e0ul7 f1h9en5y">
+                                                                                                      <i data-icon-name="CheckmarkWithDynamicColor_16" aria-hidden="true" class="root-570">
+                                                                                                         <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </div>
+                                                                                                   <label for="Ribbon-ShowFormulaBar-input" class="fui-Label fui-Checkbox__label ___lanszn0 fk6fouc f1ym3bx4 fy9rknc f1i3iumi f7nlbp4 fpo1scq f9g1xly f1g4cjja fkihque fztplxc f1f5q0n8 f10saiw2 f5i1nj6 f16e5gn0 f7qb4ng">Панель формул</label>
+                                                                                                </span>
+                                                                                             </div>
+                                                                                          </div>
+                                                                                          <div class="ms-Stack css-228">
+                                                                                             <div id="ShowDataTypeIcons">
+                                                                                                <span class="fui-Checkbox r1q22k1j ___150wq1u f19n0e5 f35ds98 f12mnkne fei9a8h fix56y3 f1bcv2js f7dr4go f1r5cpua flejl4v ft3piiw f1ot4uw5 fa06p7s f1qj7yi2 f1m2y7n8 fipgza4 f1d3mhsu fu8c0oy fm4ihi7 fy7d2rf f1tzkegs f1i2ds2e fy0rl7r fo76l3p f1x850lg f1pdhdei fzot6sx fkln5zr f1jkagg5 f1osuteh fi2ljxd f62i5r0 fclwglc f7x41pl fywfov9 fruq291">
+                                                                                                   <input type="checkbox" id="Ribbon-ShowDataTypeIcons-input" aria-label="Значки типов данных" data-automation-type="RibbonCheckbox" data-unique-id="Ribbon-ShowDataTypeIcons-input" role="checkbox" class="fui-Checkbox__input ruo9svu ___1wmv20z f1vgc2s3 f17ge1r8" checked="" data-ktp-target="ktp-о-з-т" data-ktp-execute-target="ktp-о-з-т" aria-describedby="ktp-layer-id ktp-о-з-т" tabindex="-1">
+                                                                                                   <div aria-hidden="true" class="fui-Checkbox__indicator rl7ci6d ___1vei1px f1aa9q02 f16jpd5f f1jar5jt fyu767a f1qx5pwe f1xk557c f8e0ul7 f1h9en5y">
+                                                                                                      <i data-icon-name="CheckmarkWithDynamicColor_16" aria-hidden="true" class="root-570">
+                                                                                                         <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                            <path type="path" d="m704 1562-474-474 90-90 384 384 896-896 90 90z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </div>
+                                                                                                   <label for="Ribbon-ShowDataTypeIcons-input" class="fui-Label fui-Checkbox__label ___lanszn0 fk6fouc f1ym3bx4 fy9rknc f1i3iumi f7nlbp4 fpo1scq f9g1xly f1g4cjja fkihque fztplxc f1f5q0n8 f10saiw2 f5i1nj6 f16e5gn0 f7qb4ng">Значки типов данных</label>
+                                                                                                </span>
+                                                                                             </div>
+                                                                                             <div id="FocusActiveCellSplitButton" data-unique-id="Ribbon-FocusActiveCellSplitButton" aria-roledescription="Разворачивающаяся кнопка" data-automation-type="RibbonSplitButton" data-ktp-target="ktp-о-е" role="group" class="fui-SplitButton ___r3oxzu0 ftuwxu6 fsxf2b5 f10pi13n fmrv4ls f14uur2j fye5tvs f1e8brtx fxp12j1 fr7y8no f1kmk2v2 f16kf41h fz18gu8">
+                                                                                                <button type="button" class="fui-Button r1alrhcs fui-ToggleButton ms-Button ms-ButtonNext fui-SplitButton__primaryActionButton ___1y7ym0h f2nno2a f1jnq6q7 f1z0y6ju fqo4y0b f1khb0e9 fneth5b ft85np5 fy9rknc figsok6 fwrc4pm fn4c73s f1x37qnr fazmxh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 frvgh55 f1pha7fy fppmu3e fcep1m2 f15wtks5 fu319zo" aria-pressed="false" aria-label="Фокусировка на ячейке" data-automation-type="RibbonSplitButton" data-unique-id="Ribbon-FocusActiveCellSplitButton" aria-describedby="fui-r1fq " tabindex="-1">
+                                                                                                   <span class="fui-Button__icon rywnvv2 fui-ToggleButton__icon ms-RibbonButton-icon ___1iwlpak f1osuteh fod5ikn f1lzf7iy f1wk884o fbaiahx fg4l7m0 f1jkagg5 fi2ljxd f62i5r0 f1cghtph fn3zbbb f1i3iumi">
+                                                                                                      <i data-icon-name="FocusCell_16" aria-hidden="true" class="root-89">
+                                                                                                         <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                            <path type="path" class="OfficeIconColors_HighContrast" d="M1280 768v512h-512v-512h512z m-640-128v768h768v-768h-768z m602-512h-436q-69 0-117 49-49 49-49 117v218h128v-218q0-16 11-27 11-11 27-11h436q16 0 27 11 11 11 11 27v218h128v-218q0-69-49-117-49-49-117-49z m-436 1792h436q69 0 117-49 49-49 49-117v-218h-128v218q0 16-11 27-11 11-27 11h-436q-16 0-27-11-11-11-11-27v-218h-128v218q0 69 49 117 49 49 117 49z m1114-678v-436q0-69-49-117-49-49-117-49h-218v128h218q16 0 27 11 11 11 11 27v436q0 16-11 27-11 11-27 11h-218v128h218q69 0 117-49 49-49 49-117z m-1792 0v-436q0-69 49-117 49-49 117-49h218v128h-218q-16 0-27 11-11 11-11 27v436q0 16 11 27 11 11 27 11h218v128h-218q-69 0-117-49-49-49-49-117z"></path>
+                                                                                                            <path type="path" class="OfficeIconColors_m223" d="M704 512v-192q1-17 2-35 6-39 28-61 22-22 62-29 20-3 36-3 0 0 0 0h384q17 2 34 3 39 7 61 30 22 22 30 61 4 19 3 34 0 0 0 0l0 192h-640z m832 192v640l192 0q18-1 35-1 39-6 61-28 22-22 29-63 1-18 3-36v-384q-3-18-5-37-9-40-27-59-18-20-59-28-20-4-37-4 0 0 0 0h-192z m-192 832h-640l0 192q2 17 3 34 7 39 30 61 22 22 60 30 19 4 35 3 0 0 0 0h384q18-1 36-3 40-7 62-29 22-22 28-61 3-20 2-35 0 0 0 0v-192z m-832-192h-192q-19-2-37-4-41-8-60-28-17-19-26-59-4-20-5-37 0 0 0 0v-384q1-18 2-36 7-41 29-63 22-22 62-28 18-1 35-1l192 0v640z"></path>
+                                                                                                            <path type="path" class="OfficeIconColors_m28" d="M1280 768v512h-512v-512h512z m-640-128v768h768v-768h-768z"></path>
+                                                                                                            <path type="path" class="OfficeIconColors_m25" d="M1242 128h-436q-69 0-117 49-49 49-49 117v218h128v-218q0-16 11-27 11-11 27-11h436q16 0 27 11 11 11 11 27v218h128v-218q0-69-49-117-49-49-117-49z m-436 1792h436q69 0 117-49 49-49 49-117v-218h-128v218q0 16-11 27-11 11-27 11h-436q-16 0-27-11-11-11-11-27v-218h-128v218q0 69 49 117 49 49 117 49z m1114-678v-436q0-69-49-117-49-49-117-49h-218v128h218q16 0 27 11 11 11 11 27v436q0 16-11 27-11 11-27 11h-218v128h218q69 0 117-49 49-49 49-117z m-1792 0v-436q0-69 49-117 49-49 117-49h218v128h-218q-16 0-27 11-11 11-11 27v436q0 16 11 27 11 11 27 11h218v128h-218q-69 0-117-49-49-49-49-117z"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </span>
+                                                                                                   <span class="textContainer ___1jerrxy fz5stix fruq291 flk2ux3">Фокусировка на ячейке</span><span class="acui-hidden-content" id="fui-r1fq">Выделение столбца и строки активной ячейки, с которой вы работаете.</span>
+                                                                                                </button>
+                                                                                                <button type="button" data-ktp-execute-target="ktp-о-е" data-ktp-aria-target="data-ktp-aria-target" aria-expanded="false" class="fui-Button r1alrhcs fui-MenuButton ms-Button ms-ButtonNext fui-SplitButton__menuButton ___rpdmto0 f13eh0sx f1jnq6q7 fgiv446 f136y8j8 f1khb0e9 fneth5b ft85np5 fy9rknc figsok6 fwrc4pm f6pwzcr f1um7c6d fazmxh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 frvgh55 frx94fk frrbwxo f15wtks5 fu319zo" aria-label="Фокусировка на ячейке Показать дополнительные параметры" data-automation-type="RibbonSplitButton" data-unique-id="Ribbon-FocusActiveCellSplitButton-Menu" aria-describedby="fui-r1fr  ktp-layer-id ktp-о-е" aria-haspopup="true" tabindex="-1">
+                                                                                                   <span class="acui-hidden-content" id="fui-r1fr"></span>
+                                                                                                   <span class="fui-MenuButton__menuIcon ___1448b7f f1g7p50k f1n0apg3 f1x82gua f1o3cbw4 f62i5r0 fhuob2q">
+                                                                                                      <i data-icon-name="CommonControlChevronDownGlyph_8" aria-hidden="true" class="root-89">
+                                                                                                         <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                            <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                            <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </span>
+                                                                                                </button>
+                                                                                             </div>
+                                                                                             <span class="ms-layer"></span>
+                                                                                          </div>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                    <div data-lid="-1">
+                                                                                       <div class="ms-Stack css-221">
+                                                                                          <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                             <div>
+                                                                                                <button type="button" id="Show_MLR" aria-expanded="false" class="fui-Button r1alrhcs fui-MenuButton ms-Button ms-ButtonNext ___1co81e4 f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751" aria-label="Показать" data-automation-type="RibbonFlyoutAnchor" data-unique-id="Ribbon-Show_MLR" aria-haspopup="true" data-ktp-target="ktp-о-ю-т" data-ktp-execute-target="ktp-о-ю-т" aria-describedby="ktp-layer-id ktp-о-ю-т" tabindex="-1">
+                                                                                                   <span class="fui-Button__icon rywnvv2 fui-MenuButton__icon ms-RibbonButton-icon ___12cvz6i f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                      <i data-icon-name="Ruler_32" aria-hidden="true" class="root-89">
+                                                                                                         <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                            <path type="path" class="OfficeIconColors_HighContrast" d="M1524 1378q13 13 12 30v171q0 18-12 30-12 12-31 12h-341q-18 0-30-12-13-12-13-30v-171q0-18 13-30l171-171q12-12 30-12 18 0 30 12l171 171z m-73 48l-128-128-128 128v110h256v-110z m-1195-786q0-18 12-30 12-12 31-13h42v214q0 18 13 30 12 12 30 12 18 0 30-12 12-12 13-30v-214h85v384q0 18 12 31 12 12 31 12 18 0 30-12 12-12 12-31v-384h86v214q0 18 12 30 12 12 30 12 18 0 31-12 12-12 12-30v-214h85v384q0 18 13 31 12 12 30 12 18 0 30-12 12-12 13-31v-384h85v214q0 18 12 30 12 12 31 12 18 0 30-12 12-12 12-30v-214h86v384q0 18 12 31 12 12 30 12 18 0 31-12 12-12 12-31v-384h85v214q0 18 13 30 12 12 30 12 18 0 30-12 12-12 13-30v-214h85v384q0 18 12 31 12 12 31 12 18 0 30-12 12-12 12-31v-384h43q18 0 30 13 12 12 13 30v597q0 18-13 31-12 12-30 12h-118l38 37q21 21 30 48h50q53 0 91-37 37-37 37-91v-597q0-53-37-91-37-37-91-37h-1365q-53 0-91 37-37 37-37 91v597q0 53 37 91 37 37 91 37h732q10-27 30-48l38-37h-800q-18 0-31-12-12-12-12-31v-597z"></path>
+                                                                                                            <path type="path" class="OfficeIconColors_m22" d="M1524 1378q13 13 12 30v171q0 18-12 30-12 12-31 12h-341q-18 0-30-12-13-12-13-30v-171q0-18 13-30l171-171q12-12 30-12 18 0 30 12l171 171z m-73 48l-128-128-128 128v110h256v-110z m-1195-786q0-18 12-30 12-12 31-13h42v214q0 18 13 30 12 12 30 12 18 0 30-12 12-12 13-30v-214h85v384q0 18 12 31 12 12 31 12 18 0 30-12 12-12 12-31v-384h86v214q0 18 12 30 12 12 30 12 18 0 31-12 12-12 12-30v-214h85v384q0 18 13 31 12 12 30 12 18 0 30-12 12-12 13-31v-384h85v214q0 18 12 30 12 12 31 12 18 0 30-12 12-12 12-30v-214h86v384q0 18 12 31 12 12 30 12 18 0 31-12 12-12 12-31v-384h85v214q0 18 13 30 12 12 30 12 18 0 30-12 12-12 13-30v-214h85v384q0 18 12 31 12 12 31 12 18 0 30-12 12-12 12-31v-384h43q18 0 30 13 12 12 13 30v597q0 18-13 31-12 12-30 12h-118l38 37q21 21 30 48h50q53 0 91-37 37-37 37-91v-597q0-53-37-91-37-37-91-37h-1365q-53 0-91 37-37 37-37 91v597q0 53 37 91 37 37 91 37h732q10-27 30-48l38-37h-800q-18 0-31-12-12-12-12-31v-597z"></path>
+                                                                                                         </svg>
+                                                                                                      </i>
+                                                                                                   </span>
+                                                                                                   <div class="ribbon-menu-text">
+                                                                                                      Показать
+                                                                                                      <div class="ribbon-menu-line2">
+                                                                                                         <i data-icon-name="CommonControlChevronDownGlyph_8" aria-hidden="true" class="ribbon-menu-chevron root-89">
+                                                                                                            <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                               <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                               <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                            </svg>
+                                                                                                         </i>
+                                                                                                      </div>
+                                                                                                   </div>
+                                                                                                   <span class="fui-MenuButton__menuIcon ___wph5t30 faaz57k f4ybsrx fd461yt fjw5fx7 fbyavb5 fhuob2q"></span>
+                                                                                                </button>
+                                                                                                <span class="ms-layer"></span>
+                                                                                             </div>
+                                                                                          </div>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                 </div>
+                                                                              </div>
+                                                                              <div class="groupLabelContainer-218"><label class="groupLabel-217" for="Show_MLR-group" id="Show_MLR-label">Показать</label></div>
+                                                                           </div>
+                                                                        </div>
+                                                                     </div>
+                                                                     <span class="ribbon-divider-wrapper wrapper-226"><span class="ribbon-bottom-bar-divider divider-227"></span></span>
+                                                                  </div>
+                                                                  <div class="groupContainer-204">
+                                                                     <div class="root-208">
+                                                                        <div class="root-215" data-unique-id="Zoom_MLR" id="Zoom_MLR-group" role="group" aria-labelledby="Zoom_MLR-label">
+                                                                           <div class="container-216">
+                                                                              <div class="layoutWrapper-219 layoutWrapper">
+                                                                                 <div class="ms-Stack css-220">
+                                                                                    <div class="ms-Stack css-221">
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <div class="css-173">
+                                                                                             <div data-automation-type="RibbonComboBox" data-unique-id="Ribbon-SelectZoomOption" id="SelectZoomOption" class="css-251">
+                                                                                                <div class="textContainer"><label for="SelectZoomOption-input" id="SelectZoomOption-label" class="ms-Label root-575">Масштаб</label></div>
+                                                                                                <div data-ktp-target="ktp-о-м-л" id="SelectZoomOptionwrapper" class="css-572">
+                                                                                                   <input autocapitalize="off" autocomplete="off" aria-autocomplete="list" data-ktp-execute-target="ktp-о-м-л" data-is-interactable="true" id="SelectZoomOption-input" class="css-240" type="text" aria-expanded="false" role="combobox" aria-labelledby="SelectZoomOption-label" aria-describedby="SelectZoomOption-aria-describedby ktp-layer-id ktp-о-м-л" aria-disabled="false" aria-invalid="false" spellcheck="false" data-lpignore="true" value="100 %" tabindex="-1" style="font-family: inherit;">
+                                                                                                   <button type="button" class="ms-Button ms-Button--icon ms-ComboBox-CaretDown-button root-245" aria-hidden="false" aria-labelledby="SelectZoomOption-label" data-is-focusable="false" tabindex="-1">
+                                                                                                      <span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary">
+                                                                                                         <i data-icon-name="CommonControlChevronDownGlyph_8" aria-hidden="true" class="ms-Icon root-89 ms-Button-icon icon-246">
+                                                                                                            <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                               <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                               <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                            </svg>
+                                                                                                         </i>
+                                                                                                      </span>
+                                                                                                   </button>
+                                                                                                </div>
+                                                                                                <span class="ms-layer"></span>
+                                                                                             </div>
+                                                                                             <span id="SelectZoomOption-aria-describedby" style="display: none;">Масштаб</span>
+                                                                                          </div>
+                                                                                       </div>
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <button type="button" id="ZoomTo100" aria-label="Установить масштаб 100%" data-automation-type="RibbonButton" data-unique-id="Ribbon-ZoomTo100" aria-describedby="fui-r1fu  ktp-layer-id ktp-о-а" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___7g59l40 f17fgpbq f1jnq6q7 f2lugmd f6zblan f1khb0e9 fneth5b ft85np5 fy9rknc figsok6 fwrc4pm fazmxh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 frvgh55 f1pha7fy" data-ktp-target="ktp-о-а" data-ktp-execute-target="ktp-о-а" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___aloaro0 f1osuteh fod5ikn f1lzf7iy f1wk884o fbaiahx f1jkagg5 fi2ljxd f62i5r0 f1cghtph fn3zbbb f1i3iumi">
+                                                                                                <i data-icon-name="ZoomCurrent100_16" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M128 448q0-133 94-226 94-94 226-94h1152q133 0 226 94 94 94 94 226v192h-128v-192q0-80-56-136-56-56-136-56h-1152q-80 0-136 56-56 56-56 136v192h-128v-192z m1664 1088h128v64q0 133-94 226-94 94-226 94h-1152q-133 0-226-94-94-94-94-226v-64h128v64q0 80 56 136 56 56 136 56h1152q80 0 136-56 56-56 56-136v-64z m-1320-891q18 7 29 23 11 16 11 36v768q0 27-19 45-19 19-45 19-27 0-45-19-19-19-19-45v-613l-147 146q-19 19-45 19-27 0-45-19-19-19-19-45 0-27 19-45l256-256q14-14 33-18 19-4 36 4z m424 891q70 0 129-61 58-59 92-161 35-104 35-226 0-122-35-226-34-101-92-161-60-61-129-61-70 0-129 61-58 59-92 161-35 104-35 226 0 122 35 226 34 101 92 161 60 61 129 61z m70-195q-23 40-47 57-14 10-23 10-9 0-23-10-24-17-47-57-58-102-58-253 0-152 58-253 23-40 47-57 14-10 23-10 9 0 23 10 24 17 47 57 58 102 58 253 0 152-58 253z m826-253q0 122-35 226-34 101-92 161-60 61-129 61-70 0-129-61-58-59-92-161-35-104-35-226 0-122 35-226 34-101 92-161 60-61 129-61 70 0 129 61 58 59 92 161 35 104 35 226z m-256 320q9 0 23-10 24-17 47-57 58-102 58-253 0-152-58-253-23-40-47-57-14-10-23-10-9 0-23 10-24 17-47 57-58 102-58 253 0 152 58 253 23 40 47 57 14 10 23 10z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M448 128q-133 0-226 94-94 94-94 226v192h128v-192q0-80 56-136 56-56 136-56h1152q80 0 136 56 56 56 56 136v192h128v-192q0-133-94-226-94-94-226-94h-1152z m1472 1408h-128v64q0 80-56 136-56 56-136 56h-1152q-80 0-136-56-56-56-56-136v-64h-128v64q0 133 94 226 94 94 226 94h1152q133 0 226-94 94-94 94-226v-64z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m24" d="M472 645q18 7 29 23 11 16 11 36v768q0 27-19 45-19 19-45 19-27 0-45-19-19-19-19-45v-613l-147 146q-19 19-45 19-27 0-45-19-19-19-19-45 0-27 19-45l256-256q14-14 33-18 19-4 36 4z m494 696q-23 40-47 57-14 10-23 10-9 0-23-10-24-17-47-57-58-102-58-253 0-152 58-253 23-40 47-57 14-10 23-10 9 0 23 10 24 17 47 57 58 102 58 253 0 152-58 253z m-70 195q70 0 129-61 58-59 92-161 35-104 35-226 0-122-35-226-34-101-92-161-60-61-129-61-70 0-129 61-58 59-92 161-35 104-35 226 0 122 35 226 34 101 92 161 60 61 129 61z m710-195q-23 40-47 57-14 10-23 10-9 0-23-10-24-17-47-57-58-102-58-253 0-152 58-253 23-40 47-57 14-10 23-10 9 0 23 10 24 17 47 57 58 102 58 253 0 152-58 253z m-70 195q70 0 129-61 58-59 92-161 35-104 35-226 0-122-35-226-34-101-92-161-60-61-129-61-70 0-129 61-58 59-92 161-35 104-35 226 0 122 35 226 34 101 92 161 60 61 129 61z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___1jerrxy fz5stix fruq291 flk2ux3">100%</span><span class="acui-hidden-content" id="fui-r1fu"></span>
+                                                                                          </button>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                 </div>
+                                                                              </div>
+                                                                              <div class="groupLabelContainer-218"><label class="groupLabel-217" for="Zoom_MLR-group" id="Zoom_MLR-label">Масштаб</label></div>
+                                                                           </div>
+                                                                        </div>
+                                                                     </div>
+                                                                     <span class="ribbon-divider-wrapper wrapper-226"><span class="ribbon-bottom-bar-divider divider-227"></span></span>
+                                                                  </div>
+                                                                  <div class="groupContainer-204">
+                                                                     <div class="root-208">
+                                                                        <div class="root-215" data-unique-id="SheetView_MLR" id="SheetView_MLR-group" role="group" aria-labelledby="SheetView_MLR-label">
+                                                                           <div class="container-216">
+                                                                              <div class="layoutWrapper-219 layoutWrapper">
+                                                                                 <div class="ms-Stack css-220">
+                                                                                    <div class="ms-Stack css-221">
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <div class="css-173">
+                                                                                             <div data-automation-type="RibbonComboBox" data-unique-id="Ribbon-NamedSheetViewSelect" id="NamedSheetViewSelect" class="css-251">
+                                                                                                <div class="textContainer"><label for="NamedSheetViewSelect-input" id="NamedSheetViewSelect-label" class="ms-Label root-575">Представление листа </label></div>
+                                                                                                <div data-ktp-target="ktp-о-v-c" id="NamedSheetViewSelectwrapper" class="css-252">
+                                                                                                   <input autocapitalize="off" autocomplete="off" aria-autocomplete="list" data-ktp-execute-target="ktp-о-v-c" data-is-interactable="true" id="NamedSheetViewSelect-input" class="css-240" type="text" aria-expanded="false" role="combobox" aria-labelledby="NamedSheetViewSelect-label" aria-describedby="NamedSheetViewSelect-aria-describedby ktp-layer-id ktp-о-v-c" aria-disabled="false" aria-invalid="false" spellcheck="false" data-lpignore="true" value="Стандартный " tabindex="-1" style="font-family: inherit;">
+                                                                                                   <button type="button" class="ms-Button ms-Button--icon ms-ComboBox-CaretDown-button root-245" aria-hidden="false" aria-labelledby="NamedSheetViewSelect-label" data-is-focusable="false" tabindex="-1">
+                                                                                                      <span class="ms-Button-flexContainer flexContainer-159" data-automationid="splitbuttonprimary">
+                                                                                                         <i data-icon-name="CommonControlChevronDownGlyph_8" aria-hidden="true" class="ms-Icon root-89 ms-Button-icon icon-246">
+                                                                                                            <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                                                               <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_HighContrast"></path>
+                                                                                                               <path type="path" d="M896 1589 165 859l182-182 549 550 549-550 182 182z" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                                                                            </svg>
+                                                                                                         </i>
+                                                                                                      </span>
+                                                                                                   </button>
+                                                                                                </div>
+                                                                                                <span class="ms-layer"></span>
+                                                                                             </div>
+                                                                                             <span id="NamedSheetViewSelect-aria-describedby" style="display: none;">Переключить представление листа</span>
+                                                                                          </div>
+                                                                                       </div>
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <button type="button" id="NamedSheetViewKeep" aria-disabled="true" aria-label="Сохранить" data-automation-type="RibbonButton" data-unique-id="Ribbon-NamedSheetViewKeep" aria-describedby="fui-r1fv  ktp-layer-id ktp-о-v-k" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___k6lvm00 f17fgpbq f1jnq6q7 f2lugmd f6zblan f1khb0e9 fneth5b ft85np5 fy9rknc figsok6 fwrc4pm f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2aq7o fdrzuqr f15x8b5r fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb fvgxktp fphbwmw f19vpps7 fv5swzo f1al02dq fwiml72 f1h0usnq fs4ktlq f16h9ulv fx2bmrt fcvwxyo f8w4c43 f1ol4fw6 f1q1lw4e f1dwjv2g f4lkoma fg455y9 f1rvyvqg f1cwzwz f14g86mu f1dcs8yz fuigjrg fjwq6ea f1lr3nhc fn5gmvv f1mbxvi6 f1vmkb5g f53ppgq f1663y11 f18v5270 f80fkiy f1kc2mi9 f4dhi0o f1y0svfh fihuait fnxhupq fx507ft fyd6l6x fb3rf2x fequ9m0 fazmxh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f8gmj8i f1ap8nzx f1igan7k fjag8bx f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 frvgh55 f1aehjj5 f1pha7fy" data-ktp-target="ktp-о-v-k" data-ktp-execute-target="ktp-о-v-k" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___1slztlb f1osuteh fod5ikn f1lzf7iy f1wk884o fbaiahx f1jkagg5 fi2ljxd f62i5r0 f1cghtph fn3zbbb f24sm58 f9dbb4x f3qs60o fwd1oij f5u9ap2 f1atnns1 f1i3iumi">
+                                                                                                <i data-icon-name="WdLegoCreateTable_16" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M512 384q-53 0-90 37-37 37-38 91v1024q0 53 38 90 37 37 90 38v-448q0-80 56-136 56-56 136-56h640q80 0 136 56 56 56 56 136v448q53 0 91-38 37-37 37-90v-816q0-53-37-91l-208-208q-37-37-91-37h-48v192q0 80-56 136-56 56-136 56h-256q-80 0-136-56-56-56-56-136v-192h-128z m256 0v192q0 27 19 45 19 19 45 19h256q27 0 45-19 19-19 19-45v-192h-384z m640 1280v-448q0-27-19-45-19-19-45-19h-640q-27 0-45 19-19 19-19 45v448h768z m-1152-1152q0-106 75-181 75-75 181-75h817q106 0 181 75l207 208q75 75 75 181v816q0 106-75 181-75 75-181 75h-1024q-106 0-181-75-75-75-75-181v-1024z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M512 384q-53 0-90 37-37 37-38 91v1024q0 53 38 90 37 37 90 38v-448q0-80 56-136 56-56 136-56h640q80 0 136 56 56 56 56 136v448q53 0 91-38 37-37 37-90v-816q0-53-37-91l-208-208q-37-37-91-37h-48v192q0 80-56 136-56 56-136 56h-256q-80 0-136-56-56-56-56-136v-192h-128z m256 0v192q0 27 19 45 19 19 45 19h256q27 0 45-19 19-19 19-45v-192h-384z m640 1280v-448q0-27-19-45-19-19-45-19h-640q-27 0-45 19-19 19-19 45v448h768z m-1152-1152q0-106 75-181 75-75 181-75h817q106 0 181 75l207 208q75 75 75 181v816q0 106-75 181-75 75-181 75h-1024q-106 0-181-75-75-75-75-181v-1024z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___1jerrxy fz5stix fruq291 flk2ux3">Сохранить</span><span class="acui-hidden-content" id="fui-r1fv">представление листа</span>
+                                                                                          </button>
+                                                                                          <button type="button" id="NamedSheetViewCreate" aria-label="Создать представление листа" data-automation-type="RibbonButton" data-unique-id="Ribbon-NamedSheetViewCreate" aria-describedby="fui-r1g0  ktp-layer-id ktp-о-v-n" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___7g59l40 f17fgpbq f1jnq6q7 f2lugmd f6zblan f1khb0e9 fneth5b ft85np5 fy9rknc figsok6 fwrc4pm fazmxh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 frvgh55 f1pha7fy" data-ktp-target="ktp-о-v-n" data-ktp-execute-target="ktp-о-v-n" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___aloaro0 f1osuteh fod5ikn f1lzf7iy f1wk884o fbaiahx f1jkagg5 fi2ljxd f62i5r0 f1cghtph fn3zbbb f1i3iumi">
+                                                                                                <i data-icon-name="NewSheetView_16" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M254 721q37-131 134-238 95-105 227-165 136-62 281-62 203 0 377 115 172 113 245 291 76 19 145 54 3-15-1-29-45-160-162-290-113-126-271-196-161-73-333-73-172 0-333 73-157 71-271 196-117 129-162 290-7 26 6 48 13 23 39 31 26 7 48-6 23-13 31-39z m642-209q89 0 169 39 77 38 131 105-70 15-136 44-71-60-164-60-106 0-181 75-75 75-75 180 0 93 60 165-29 65-44 135-67-54-105-131-39-79-39-169 0-104 53-193 51-87 137-138 89-52 194-52z m1024 832q0 156-79 291-76 130-206 206-134 79-291 79-156 0-291-79-130-76-206-206-79-134-79-291 0-156 79-291 76-130 206-206 134-79 291-79 156 0 291 79 130 76 206 206 79 134 79 291z m-512-256q0-27-19-45-19-19-45-19-27 0-45 19-19 19-19 45v192h-192q-27 0-45 19-19 19-19 45 0 27 19 45 19 19 45 19h192v192q0 27 19 45 19 19 45 19 27 0 45-19 19-19 19-45v-192h192q27 0 45-19 19-19 19-45 0-27-19-45-19-19-45-19h-192v-192z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m27" d="M1344 1920q156 0 291-79 130-76 206-206 79-134 79-291 0-156-79-291-76-130-206-206-134-79-291-79-156 0-291 79-130 76-206 206-79 134-79 291 0 156 79 291 76 130 206 206 134 79 291 79z m0-896q27 0 45 19 19 19 19 45v192h192q27 0 45 19 19 19 19 45 0 27-19 45-19 19-45 19h-192v192q0 27-19 45-19 19-45 19-27 0-45-19-19-19-19-45v-192h-192q-27 0-45-19-19-19-19-45 0-27 19-45 19-19 45-19h192v-192q0-27 19-45 19-19 45-19z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M896 256q-146 0-281 62-132 60-227 165-97 107-134 238-7 26-31 39-23 13-48 6-26-7-39-31-13-23-6-48 45-160 162-290 113-126 271-196 161-73 333-73 172 0 333 73 157 71 271 196 117 129 162 290 4 15 1 29-70-35-145-54-73-178-245-291-174-114-377-115z m300 400q-54-67-131-105-80-39-169-39-104 0-194 52-87 51-137 138-52 89-53 193 0 89 39 169 38 77 105 131 15-70 44-135-60-71-60-165 0-106 75-180 75-75 181-75 93 0 164 60 65-29 136-44z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___1jerrxy fz5stix fruq291 flk2ux3">Создать</span><span class="acui-hidden-content" id="fui-r1g0">Новое представление листа </span>
+                                                                                          </button>
+                                                                                          <button type="button" id="NamedSheetViewOptions" aria-disabled="true" aria-label="﻿Параметры" data-automation-type="RibbonButton" data-unique-id="Ribbon-NamedSheetViewOptions" aria-describedby="fui-r1g1  ktp-layer-id ktp-о-v-o" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___k6lvm00 f17fgpbq f1jnq6q7 f2lugmd f6zblan f1khb0e9 fneth5b ft85np5 fy9rknc figsok6 fwrc4pm f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2aq7o fdrzuqr f15x8b5r fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb fvgxktp fphbwmw f19vpps7 fv5swzo f1al02dq fwiml72 f1h0usnq fs4ktlq f16h9ulv fx2bmrt fcvwxyo f8w4c43 f1ol4fw6 f1q1lw4e f1dwjv2g f4lkoma fg455y9 f1rvyvqg f1cwzwz f14g86mu f1dcs8yz fuigjrg fjwq6ea f1lr3nhc fn5gmvv f1mbxvi6 f1vmkb5g f53ppgq f1663y11 f18v5270 f80fkiy f1kc2mi9 f4dhi0o f1y0svfh fihuait fnxhupq fx507ft fyd6l6x fb3rf2x fequ9m0 fazmxh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f8gmj8i f1ap8nzx f1igan7k fjag8bx f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 frvgh55 f1aehjj5 f1pha7fy" data-ktp-target="ktp-о-v-o" data-ktp-execute-target="ktp-о-v-o" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___1slztlb f1osuteh fod5ikn f1lzf7iy f1wk884o fbaiahx f1jkagg5 fi2ljxd f62i5r0 f1cghtph fn3zbbb f24sm58 f9dbb4x f3qs60o fwd1oij f5u9ap2 f1atnns1 f1i3iumi">
+                                                                                                <i data-icon-name="SheetViewOptions_16" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M406 1520l-132-224q-27-46-14-96 14-51 60-76l78-44q33-18 33-56 0-37-33-56l63-111q63 36 87 103 23 64 0 128-24 67-87 103l-76 43 131 220q0 0 1 1 1 0 1 0 1 0 2 1 0 0 1-1l82-46q62-35 131-21 66 13 109 64 46 53 46 125v87h270l0-87q0-71 46-125 44-51 109-64 69-14 131 21l82 46 1 1 0 0q1 0 2-1 1 0 1 0 0 0 1-1l131-220-76-43q-63-36-87-103-23-64 0-128 24-67 87-103l76-43-131-220q0 0-1-1-1 0-1 0-1 0-2-1 0 0-1 1l-82 46q-62 35-131 21-66-13-109-64-46-53-46-125v-87l-270 0v87q0 71-46 125-44 51-109 64-69 14-131-21l-82-46q0 0-1-1-1 0-2 1-1 0-1 0 0 0-1 1l-131 220 76 43-63 111-78-44q-46-26-60-76-14-51 14-96l132-224q27-46 79-59 52-14 98 12l82 46q32 18 64-1 32-19 32-55v-87q0-53 37-91 37-37 91-37h270q53 0 91 37 37 37 37 91v87q0 37 32 56 32 19 64 0l82-46q46-26 98-12 52 14 79 59l132 224q27 46 14 96-14 51-60 76l-78 44q-33 18-33 56 0 37 33 56l78 44q46 26 60 76 14 51-14 96l-132 224q-27 46-79 59-52 14-98-12l-82-46q-32-18-64 0-32 19-32 56v87q0 53-37 91-37 37-91 37h-270q-53 0-91-37-37-37-37-91v-87q0-37-32-55-32-19-64-1l-82 46q-46 26-98 12-52-14-79-59z m874-496q0 106-75 181-75 75-181 75-106 0-181-75-75-75-75-181 0-106 75-181 75-75 181-75 106 0 181 75 75 75 75 181z m-384 0q0 53 37 91 37 37 91 37 53 0 91-37 37-37 37-91 0-53-37-91-37-37-91-37-53 0-91 37-37 37-37 91z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M274 1296l132 224q27 46 79 59 52 14 98-12l82-46q32-18 64 1 32 19 32 55v87q0 53 37 91 37 37 91 37h270q53 0 91-37 37-37 37-91v-87q0-37 32-56 32-19 64 0l82 46q46 26 98 12 52-14 79-59l132-224q27-46 14-96-14-51-60-76l-78-44q-33-18-33-56 0-37 33-56l78-44q46-26 60-76 14-51-14-96l-132-224q-27-46-79-59-52-14-98 12l-82 46q-32 18-64 0-32-19-32-56v-87q0-53-37-91-37-37-91-37h-270q-53 0-91 37-37 37-37 91v87q0 37-32 55-32 19-64 1l-82-46q-46-26-98-12-52 14-79 59l-132 224q-27 46-14 96 14 51 60 76l78 44q33 18 33 56 0 37-33 56l-78 44q-46 26-60 76-14 51 14 96z m111-482l131-220q0 0 1-1 1 0 1 0 1 0 2-1 0 0 1 1l82 46q62 35 131 21 66-13 109-64 46-53 46-125v-87l270 0v87q0 71 46 125 44 51 109 64 69 14 131-21l82-46q0 0 1-1 1 0 2 1 1 0 1 0 0 0 1 1l131 220-76 43q-63 36-87 103-23 64 0 128 24 67 87 103l76 43-131 220q0 0-1 1-1 0-1 0-1 0-2 1 0 0 0 0 0 0 0 0 0 0-1-1l-82-46q-62-35-131-21-66 13-109 64-46 53-46 125l0 87h-270v-87q0-71-46-125-44-51-109-64-69-14-131 21l-82 46q0 0-1 1-1 0-2-1-1 0-1 0 0 0-1-1l-131-220 76-43q63-36 87-103 23-64 0-128-24-67-87-103l-63 111 63-111-76-43z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M1024 1152q-53 0-91-37-37-37-37-91 0-53 37-91 37-37 91-37 53 0 91 37 37 37 37 91 0 53-37 91-37 37-91 37z m0 128q106 0 181-75 75-75 75-181 0-106-75-181-75-75-181-75-106 0-181 75-75 75-75 181 0 106 75 181 75 75 181 75z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___1jerrxy fz5stix fruq291 flk2ux3">﻿Параметры</span><span class="acui-hidden-content" id="fui-r1g1">Параметры представления листа</span>
+                                                                                          </button>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                    <div class="ms-Stack css-221">
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <button type="button" id="NamedSheetViewExit" aria-disabled="true" aria-label="Выйти из представления" data-automation-type="RibbonButton" data-unique-id="Ribbon-NamedSheetViewExit" aria-describedby="fui-r1g2  ktp-layer-id ktp-о-v-e" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___1b219ch f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2aq7o fdrzuqr f15x8b5r fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb fvgxktp fphbwmw f19vpps7 fv5swzo f1al02dq fwiml72 f1h0usnq fs4ktlq f16h9ulv fx2bmrt fcvwxyo f8w4c43 f1ol4fw6 f1q1lw4e f1dwjv2g f4lkoma fg455y9 f1rvyvqg f1cwzwz f14g86mu f1dcs8yz fuigjrg fjwq6ea f1lr3nhc fn5gmvv f1mbxvi6 f1vmkb5g f53ppgq f1663y11 f18v5270 f80fkiy f1kc2mi9 f4dhi0o f1y0svfh fihuait fnxhupq fx507ft fyd6l6x fb3rf2x fequ9m0 f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f8gmj8i f1ap8nzx f1igan7k fjag8bx f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751 f1aehjj5" data-ktp-target="ktp-о-v-e" data-ktp-execute-target="ktp-о-v-e" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___zafqmh0 f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f24sm58 f9dbb4x f3qs60o fwd1oij f5u9ap2 f1atnns1 f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                <i data-icon-name="ExitSheetView_32" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M1069 469q-216-11-404 70-185 79-313 235-130 158-180 368-4 17 5 32 9 15 27 20 17 4 32-6 15-9 19-26 45-191 162-333 115-140 282-212 170-73 365-62 231 12 407 127 174 114 265 312 66 32 122 81-84-270-292-430-209-161-497-176z m-45 299q100 0 184 54 82 53 124 140-41 12-80 32-32-63-92-102-62-39-136-39-106 0-181 75-75 75-75 181 0 87 53 157 52 68 135 90-11 42-15 85-113-28-185-120-74-93-73-212 0-93 46-172 45-77 123-122 80-47 172-47z m939 725q0 127-64 237-62 106-169 169-109 64-237 64-127 0-237-64-106-62-168-169-64-109-64-237 0-127 64-237 62-106 168-168 109-64 237-64 127 0 237 64 106 62 169 168 64 109 64 237z m-470-60l-140-141q-13-13-30-12-18 0-31 13-13 12-12 30 0 18 13 30l140 140-141 141q-13 12-12 30 0 18 13 30 12 12 30 13 18 0 30-13l140-140 141 140q12 12 30 13 18 0 30-13 12-12 13-30 0-18-13-30l-140-141 140-140q12-13 13-30 0-18-13-31-12-13-30-12-18 0-30 13l-141 140z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M172 1142q50-211 180-368 128-155 313-235 188-81 404-70 289 15 497 176 208 160 292 430-56-49-122-81-91-198-265-312-175-115-407-127-196-10-365 62-166 71-282 212-117 142-162 333-4 17-19 26-15 9-32 6-17-4-27-20-9-15-5-32z m1160-180q-42-88-124-140-84-54-184-54-93 0-172 47-77 45-123 122-47 80-46 172 0 119 73 212 72 91 185 120 4-43 15-85-82-23-135-90-53-69-53-157 0-106 75-181 75-75 181-75 74 0 136 39 60 38 92 102 39-19 80-32z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m213" d="M1493 1963q127 0 237-64 106-62 169-169 64-109 64-237 0-127-64-237-62-106-169-168-109-64-237-64-127 0-237 64-106 62-168 168-64 109-64 237 0 127 64 237 62 106 168 169 109 64 237 64z m-140-671l140 141 141-141q12-13 30-12 18 0 30 13 12 12 13 30 0 18-13 30l-140 140 140 141q12 12 13 30 0 18-13 30-12 12-30 13-18 0-30-13l-141-140-140 140q-13 12-30 13-18 0-31-13-13-12-12-30 0-18 13-30l140-141-141-140q-13-13-12-30 0-18 13-31 12-13 30-12 18 0 30 13z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___18sueub fz5stix fkl3uby fy9rknc fytdu2e fueg7zk flk2ux3 f1y8shg2">Выйти из<span class="css-93" aria-hidden="true"></span>представления</span><span class="acui-hidden-content" id="fui-r1g2">Выход из представления листа </span>
+                                                                                          </button>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                 </div>
+                                                                              </div>
+                                                                              <div class="groupLabelContainer-218"><label class="groupLabel-217" for="SheetView_MLR-group" id="SheetView_MLR-label">Представление листа </label></div>
+                                                                           </div>
+                                                                        </div>
+                                                                     </div>
+                                                                     <span class="ribbon-divider-wrapper wrapper-226"><span class="ribbon-bottom-bar-divider divider-227"></span></span>
+                                                                  </div>
+                                                                  <div class="groupContainer-204">
+                                                                     <div class="root-208">
+                                                                        <div class="root-215" data-unique-id="Open_MLR" id="Open_MLR-group" role="group" aria-labelledby="Open_MLR-label">
+                                                                           <div class="container-216">
+                                                                              <div class="layoutWrapper-219 layoutWrapper">
+                                                                                 <div class="ms-Stack css-220" style="justify-content: center;">
+                                                                                    <div class="ms-Stack css-221">
+                                                                                       <div class="ms-Stack css-222" style="flex-grow: 0.105263;">
+                                                                                          <button type="button" id="NewWindow" aria-label="Новое окно" data-automation-type="RibbonButton" data-unique-id="Ribbon-NewWindow" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___1co81e4 f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751" data-ktp-target="ktp-о-n" data-ktp-execute-target="ktp-о-n" aria-describedby="ktp-layer-id ktp-о-n" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___12cvz6i f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                <i data-icon-name="NewWindow_32" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M512 256q-106 0-181 75-75 75-75 181v1024q0 106 75 181 75 75 181 75h427v-85h-427q-71 0-121-50-50-50-50-121v-853h1366v256h85v-427q0-106-75-181-75-75-181-75h-1024z m-171 256q0-71 50-121 50-50 121-50h1024q71 0 121 50 50 50 50 121v85h-1366v-85z m854 512q-71 0-121 50-50 50-50 121v597q0 71 50 121 50 50 121 50h597q71 0 121-50 50-50 50-121v-597q0-71-50-121-50-50-121-50h-597z m12 695l439-439h-238q-18 0-30-12-12-12-13-31 0-18 13-30 12-12 30-12h341q9 0 17 3 8 3 13 9 6 6 10 14 3 7 3 14 0 1 0 2v342q0 18-12 30-12 12-31 12-18 0-30-12-12-12-12-30v-239l-440 440q-12 13-30 12-18 0-30-13-12-12-12-30 0-18 12-30z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M256 512q0-106 75-181 75-75 181-75h1024q106 0 181 75 75 75 75 181v427h-85v-256h-1366v853q0 71 50 121 50 50 121 50h427v85h-427q-106 0-181-75-75-75-75-181v-1024z m256-171q-71 0-121 50-50 50-50 121v85h1366v-85q0-71-50-121-50-50-121-50h-1024z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m27" d="M1024 1195q0-71 50-121 50-50 121-50h597q71 0 121 50 50 50 50 121v597q0 71-50 121-50 50-121 50h-597q-71 0-121-50-50-50-50-121v-597z m622 85l-439 439q-12 13-12 30 0 18 12 31 13 13 30 12 18 0 31-13l439-439v239q0 18 12 30 12 12 30 12 18 0 31-12 12-12 12-30v-342q0 0 0 0 0-1 0-2 0-7-3-14-3-8-10-14-6-6-13-9-8-3-17-3h-341q-18 0-30 12-12 12-13 30 0 18 13 31 12 12 30 12h238z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___18sueub fz5stix fkl3uby fy9rknc fytdu2e fueg7zk flk2ux3 f1y8shg2">Новое<span class="css-93" aria-hidden="true"></span>окно</span>
+                                                                                          </button>
+                                                                                          <button type="button" id="NavigationPane" aria-label="Навигация" data-automation-type="RibbonButton" data-unique-id="Ribbon-NavigationPane" class="fui-Button r1alrhcs ms-Button ms-ButtonNext ___1co81e4 f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751" data-ktp-target="ktp-о-k" data-ktp-execute-target="ktp-о-k" aria-describedby="ktp-layer-id ktp-о-k" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 ms-RibbonButton-icon ___12cvz6i f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                <i data-icon-name="RightNavigationPane_32" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M469 256q-88 0-151 62-62 62-62 151v557q41-26 85-45v-298h939v1024h-213q-19 45-45 85h557q88 0 151-62 62-62 62-151v-1110q0-88-62-151-62-62-151-62h-1110z m-128 213q0-53 38-90 37-37 90-38h1110q53 0 90 38 37 37 38 90v128h-1366v-128z m683 1024q0 127-64 237-62 106-168 169-109 64-237 64-127 0-237-64-106-62-169-169-64-109-64-237 0-127 64-237 62-106 169-168 109-64 237-64 127 0 237 64 106 62 168 168 64 109 64 237z m-354-201q-12-13-30-12-18 0-30 13-12 12-13 30 0 18 13 30l98 98h-191q-92 0-165 56-73 57-95 147-4 17 5 32 9 15 26 19 17 4 33-4 15-9 19-27 15-61 65-99 50-39 112-39h191l-98 98q-12 12-13 30 0 18 13 30 12 12 30 13 18 0 30-13l171-171q12-12 12-30 0-18-12-30l-171-171z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m26" d="M1323 640h426v939q0 71-50 120-50 50-120 50h-256v-1109z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m25" d="M1280 1749v-1109h85v1109h-85z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m24" d="M555 1963q127 0 237-64 106-62 168-169 64-109 64-237 0-127-64-237-62-106-168-168-109-64-237-64-127 0-237 64-106 62-169 168-64 109-64 237 0 127 64 237 62 106 169 169 109 64 237 64z m55-671q12-13 30-12 18 0 30 13l171 170q12 13 12 30 0 18-12 31l-171 170q-12 12-30 13-18 0-30-13-12-12-13-30 0-18 13-30l98-98h-191q-63 0-112 39-50 39-65 99-4 17-19 27-15 9-33 4-17-4-26-19-9-15-5-32 22-89 95-147 73-57 165-56h191l-98-98q-12-13-13-30 0-18 13-31z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M469 256q-88 0-151 62-62 62-62 151v557q41-26 85-45v-298h1366v896q0 53-38 90-37 37-90 38h-512q-19 45-45 85h557q88 0 151-62 62-62 62-151v-1110q0-88-62-151-62-62-151-62h-1110z m-128 213q0-53 38-90 37-37 90-38h1110q53 0 90 38 37 37 38 90v128h-1366v-128z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___18sueub fz5stix fkl3uby fy9rknc fytdu2e fueg7zk flk2ux3 f1y8shg2">Навигация</span>
+                                                                                          </button>
+                                                                                          <button type="button" id="ImmersiveReader" aria-disabled="true" aria-pressed="false" aria-label="Иммерсивное средство чтения" data-automation-type="RibbonToggleButton" data-unique-id="Ribbon-ImmersiveReader" class="fui-Button r1alrhcs fui-ToggleButton ms-Button ms-ButtonNext ___1b219ch f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1c21dwh f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2aq7o fdrzuqr f15x8b5r fjxutwb f1s2uweq fr80ssc f1ukrpxl fecsdlb fvgxktp fphbwmw f19vpps7 fv5swzo f1al02dq fwiml72 f1h0usnq fs4ktlq f16h9ulv fx2bmrt fcvwxyo f8w4c43 f1ol4fw6 f1q1lw4e f1dwjv2g f4lkoma fg455y9 f1rvyvqg f1cwzwz f14g86mu f1dcs8yz fuigjrg fjwq6ea f1lr3nhc fn5gmvv f1mbxvi6 f1vmkb5g f53ppgq f1663y11 f18v5270 f80fkiy f1kc2mi9 f4dhi0o f1y0svfh fihuait fnxhupq fx507ft fyd6l6x fb3rf2x fequ9m0 f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f8gmj8i f1ap8nzx f1igan7k fjag8bx f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751 f1aehjj5" data-ktp-target="ktp-о-ч" data-ktp-execute-target="ktp-о-ч" aria-describedby="ktp-layer-id ktp-о-ч" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 fui-ToggleButton__icon ms-RibbonButton-icon ___ei2f0i0 f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 fg4l7m0 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f24sm58 f9dbb4x f3qs60o fwd1oij f5u9ap2 f1atnns1 f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                <i data-icon-name="AudioReader_32" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M1792 946v-669q0-59-33-84-30-22-95-22h-555q-36 0-62 17-16 11-43 42-14 17-23 26-8-9-22-26 0 0 0 0-27-32-44-42-26-17-62-17h-576q-62 0-84 22-22 22-22 84v1152q0 107 149 107h533q50 0 86-37v-91q0-51 23-97 22-44 62-74v-896q0-44 21-64 21-21 64-21h577q9 0 15 6 6 6 7 15v774q8-62 61-94 11-7 23-11z m-1536 483v-1152q0-9 6-15 6-6 15-6h576q44 0 65 21 21 21 21 64v1024q0 44-21 65-21 20-65 20h-576q-9 0-15-6-6-6-6-15z m1557-399q15-9 32-5 17 4 26 20 124 207 125 448 0 242-125 449-9 15-26 19-17 4-32-4-15-9-20-27-4-17 5-32 112-187 112-405 0-218-112-404-9-15-5-33 4-17 20-26z m-83 255q16-8 33-3 17 6 25 22 45 90 44 189 0 100-44 190-8 16-25 21-17 6-33-2-16-8-21-25-6-17 2-32 36-72 36-152 0-80-36-151-8-16-2-33 6-17 21-24z m-109-218q0-29-26-40-26-11-47 10l-243 243h-153q-53 0-91 37-37 37-37 91v171q0 53 37 90 37 37 91 38h153l244 243q20 20 46 9 26-11 26-39v-853z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M1792 277v669q-12 4-23 11-54 32-61 94v-774q0-9-7-15-6-6-15-6h-577q-44 0-64 21-21 21-21 64v896q-40 30-62 74-23 45-23 97v91q-36 37-86 37h-533q-149 0-149-107v-1152q0-62 22-84 22-22 84-22h576q36 0 62 17 16 11 44 42 0 0 0 0 14 17 22 26 8-9 23-26 27-32 43-42 26-17 62-17h555q65 0 95 22 33 25 33 84z m-1536 0v1152q0 9 6 15 6 6 15 6h576q44 0 65-20 21-20 21-65v-1024q0-44-21-64-21-21-65-21h-576q-9 0-15 6-6 6-6 15z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m24" d="M1813 1030q15-9 32-5 17 4 26 20 124 207 125 448 0 242-125 449-9 15-26 19-17 4-32-4-15-9-20-27-4-17 5-32 112-187 112-405 0-218-112-404-9-15-5-33 4-17 20-26z m-83 255q16-8 33-3 17 6 25 22 45 90 44 189 0 100-44 190-8 16-25 21-17 6-33-2-16-8-21-25-6-17 2-32 36-72 36-152 0-80-36-151-8-16-2-33 6-17 21-24z m-135-258q26 11 26 40v853q0 29-26 39-26 11-47-9l-243-243h-153q-53 0-91-38-37-37-37-90v-171q0-53 37-91 37-37 91-37h153l244-244q20-20 46-9z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___18sueub fz5stix fkl3uby fy9rknc fytdu2e fueg7zk flk2ux3 f1y8shg2">Иммерсивное средство<span class="css-93" aria-hidden="true"></span>чтения</span>
+                                                                                          </button>
+                                                                                          <button type="button" id="ToggleFullScreenRibbon" aria-pressed="false" aria-label="Во весь экран" data-automation-type="RibbonToggleButton" data-unique-id="Ribbon-ToggleFullScreenRibbon" aria-describedby="fui-r1g6  ktp-layer-id ktp-о-s" class="fui-Button r1alrhcs fui-ToggleButton ms-Button ms-ButtonNext ___1co81e4 f12clzc2 f1brlhvm f10xn8zz f136y8j8 f1sl3k7w f4db1ww ft85np5 fod5ikn figsok6 faaz57k f1b6alqh fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f1shusfg f1vx9l62 fbhxue7 fu6ou0d f11q6fjs f1qdrhsn f3vqvi8 f1mr27x9 f8s0o f1lhv3j4 fwzt8cw fp0vk1e fkg6glo f1iw1751" data-ktp-target="ktp-о-s" data-ktp-execute-target="ktp-о-s" tabindex="-1">
+                                                                                             <span class="fui-Button__icon rywnvv2 fui-ToggleButton__icon ms-RibbonButton-icon ___9trzw00 f1osuteh fccw675 frvgh55 fq4mcun f1exjqw5 fg4l7m0 f10saiw2 fi2ljxd f62i5r0 f1rdywyb f14icqv f1rz8bjk f1ywm7hm fdw0yi8 f1tdddsa fk8j09s">
+                                                                                                <i data-icon-name="FullScreenMaximize_32" aria-hidden="true" class="root-89">
+                                                                                                   <svg height="100%" width="100%" viewBox="0,0,2048,2048" focusable="false">
+                                                                                                      <path type="path" class="OfficeIconColors_HighContrast" d="M1280 299q0-18 12-31 12-12 31-12h256q88 0 151 62 62 62 62 151v256q0 18-12 31-12 12-31 12-18 0-30-12-12-12-12-31v-256q0-53-38-90-37-37-90-38h-256q-18 0-31-12-12-12-12-30z m-1024 170q0-88 62-151 62-62 151-62h256q18 0 31 12 12 12 12 31 0 18-12 30-12 12-31 12h-256q-53 0-90 38-37 37-38 90v256q0 18-12 31-12 12-30 12-18 0-31-12-12-12-12-31v-256z m43 811q18 0 30 12 12 12 12 31v256q0 53 38 90 37 37 90 38h256q18 0 31 12 12 12 12 30 0 18-12 31-12 12-31 12h-256q-88 0-151-62-62-62-62-151v-256q0-18 12-31 12-12 31-12z m1450 0q18 0 31 12 12 12 12 31v256q0 88-62 151-62 62-151 62h-256q-18 0-31-12-12-12-12-31 0-18 12-30 12-12 31-12h256q53 0 90-38 37-37 38-90v-256q0-18 12-31 12-12 30-12z"></path>
+                                                                                                      <path type="path" class="OfficeIconColors_m22" d="M1280 299q0-18 12-31 12-12 31-12h256q88 0 151 62 62 62 62 151v256q0 18-12 31-12 12-31 12-18 0-30-12-12-12-12-31v-256q0-53-38-90-37-37-90-38h-256q-18 0-31-12-12-12-12-30z m-1024 170q0-88 62-151 62-62 151-62h256q18 0 31 12 12 12 12 31 0 18-12 30-12 12-31 12h-256q-53 0-90 38-37 37-38 90v256q0 18-12 31-12 12-30 12-18 0-31-12-12-12-12-31v-256z m43 811q18 0 30 12 12 12 12 31v256q0 53 38 90 37 37 90 38h256q18 0 31 12 12 12 12 30 0 18-12 31-12 12-31 12h-256q-88 0-151-62-62-62-62-151v-256q0-18 12-31 12-12 31-12z m1450 0q18 0 31 12 12 12 12 31v256q0 88-62 151-62 62-151 62h-256q-18 0-31-12-12-12-12-31 0-18 12-30 12-12 31-12h256q53 0 90-38 37-37 38-90v-256q0-18 12-31 12-12 30-12z"></path>
+                                                                                                   </svg>
+                                                                                                </i>
+                                                                                             </span>
+                                                                                             <span class="textContainer ___18sueub fz5stix fkl3uby fy9rknc fytdu2e fueg7zk flk2ux3 f1y8shg2">Во весь<span class="css-93" aria-hidden="true"></span>экран</span><span class="acui-hidden-content" id="fui-r1g6">Полноэкранный режим</span>
+                                                                                          </button>
+                                                                                       </div>
+                                                                                    </div>
+                                                                                 </div>
+                                                                              </div>
+                                                                              <div class="groupLabelContainer-218"><label class="groupLabel-217" for="Open_MLR-group" id="Open_MLR-label">Открыть</label></div>
+                                                                           </div>
+                                                                        </div>
+                                                                     </div>
+                                                                     <span class="ribbon-divider-wrapper wrapper-226"><span class="ribbon-bottom-bar-divider divider-227"></span></span>
+                                                                  </div>
+                                                               </div>
+                                                            </div>
+                                                         </div>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                                <div class="chevronContainer-205">
+                                                   <div>
+                                                      <button type="button" id="RibbonModeToggle" aria-expanded="false" class="fui-Button r1alrhcs fui-MenuButton ms-Button ms-ButtonNext ms-RibbonButton--ribbonMode ms-RibbonButton--ribbonMode ___ltcrfz0 f18ktai2 f11u7vat f44c6la fqrbt79 fepn2xe f1jkagg5 f1osuteh fi2ljxd f62i5r0 figsok6 f1p3nwhy f11589ue f1q5o8ev f1pdflbu f1s2uweq fr80ssc f1ukrpxl fecsdlb f8gmj8i f1ap8nzx f1igan7k fjag8bx f1h0usnq fs4ktlq f16h9ulv fx2bmrt f1r9enuy fdvt4n0 f1l34yyb f1grx941 fvu92y3 f1inhm4x f1dk6j8u foby26i fmut7hd fyp0hol f1o7mrt1 fcdmgxe fiwhxet f1aopgo3 fzbde9z f12na9cb f95gxuk f1n5876c fj41uil f1it5djm f1e0lx47 f64fuq3 f16gbxbe fjamq6b" aria-label="Параметры отображения ленты" data-automation-type="RibbonFlyoutAnchor" data-unique-id="MultilineRibbon-RibbonModeToggle" aria-haspopup="true" data-ktp-target="ktp-ю-з" data-ktp-execute-target="ktp-ю-з" aria-describedby="ktp-layer-id ktp-ю-з" tabindex="-1">
+                                                         <span class="fui-Button__icon rywnvv2 fui-MenuButton__icon ms-RibbonButton-icon ms-RibbonButton--ribbonMode ms-RibbonButton--ribbonMode ___ijky5n0 f1jkagg5 fibjyge fi2ljxd f62i5r0 f1rdywyb f14icqv fy9rknc fvblgha frx94fk fp4gqsa fhuob2q">
+                                                            <i data-icon-name="CommonControlChevronDownGlyph_12" aria-hidden="true" class="root-89">
+                                                               <svg height="100%" width="100%" viewBox="0 0 2048 2048" focusable="false">
+                                                                  <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_HighContrast"></path>
+                                                                  <path type="path" d="M939 1571 110 743l121-121 708 708 707-708 121 121" class="OfficeIconColors_m22 OfficeIconColors_DynamicColor"></path>
+                                                               </svg>
+                                                            </i>
+                                                         </span>
+                                                      </button>
+                                                      <span class="ms-layer"></span>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div>
+                                       <div class="fui-FluentProvider fui-FluentProviderr4j ___1wli6bv f19n0e5 f3rmtva f1o700av fk6fouc fkhj508 figsok6 f5lt7tx f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5">
+                                          <div class="___l53e2o0 f3rmtva f2q8o33 fwk23hs fcki024 fbrulcr f11ln2im fqnx5so f1wwj2d7 f1rpz4u5 body-149"><span class="ms-layer"></span></div>
+                                       </div>
+                                    </div>
+                                    <div aria-hidden="true" tabindex="0" data-is-visible="true" data-is-focus-trap-zone-bumper="true" style="pointer-events: none; position: fixed;" class="extracted-element-yad2klqxb"></div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <span class="ms-layer"></span>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div></body>
+</html>

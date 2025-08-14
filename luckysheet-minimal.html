@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Learning - Выполнение задания</title>
+    
+    <!-- jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    
+    <!-- Sheet CSS -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/pluginsCss.css' />
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/plugins.css' />
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/css/luckysheet.css' />
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/assets/iconfont/iconfont.css' />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+            overflow: hidden;
+            background-color: #f3f2f1;
+        }
+
+        .luckysheet-wa-editor {
+            display: none !important;
+        }
+        
+        .task-header {
+            position: fixed;
+            top: 185px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .task-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .timer {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .timer.warning {
+            background: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        #luckysheet {
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            width: 100%;
+            height: calc(100vh - 235px);
+            left: 0;
+            top: 235px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-content {
+            color: #dc3545;
+            max-width: 400px;
+        }
+        
+        .retry-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .retry-btn:hover {
+            background: #0056b3;
+        }
+
+        /* Ribbon Interface Styles */
+        .ribbon-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10001;
+            background: #f3f2f1;
+        }
+
+        /* Title Bar Styles */
+        .title-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, #107c41, #0e6c36);
+            height: 32px;
+            padding: 0 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .title-bar-left {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .app-title {
+            font-size: 14px;
+            font-weight: 400;
+            color: white;
+            margin-left: 8px;
+        }
+
+        .title-bar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            margin: 0 20px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .search-box {
+            width: 100%;
+            height: 22px;
+            padding: 0 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 13px;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .search-box:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .title-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .title-bar-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 13px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background-color 0.2s;
+        }
+
+        .title-bar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .window-controls {
+            display: flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+
+        .window-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .window-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .window-btn.close:hover {
+            background: #e81123;
+        }
+
+        /* Tab Navigation Styles */
+        .ribbon-tabs {
+            display: flex;
+            background: linear-gradient(to bottom, #107c41, #0e6c36);
+            border-bottom: 1px solid #0e6c36;
+            padding: 0 8px;
+            height: 32px;
+            align-items: center;
+            position: relative;
+        }
+
+        .ribbon-tab {
+            padding: 6px 16px;
+            border: none;
+            background: transparent;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            transform: scale(1);
+        }
+
+        .ribbon-tab:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        .ribbon-tab:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
+
+        .ribbon-tab.active {
+            background-color: #ffffff;
+            color: #323130;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transform: scale(1);
+        }
+
+        .ribbon-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #ffffff;
+        }
+
+        /* Content Area Styles */
+        .ribbon-content {
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            background-color: #ffffff;
+            border-bottom: 1px solid #d1d1d1;
+        }
+
+        .ribbon-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .ribbon-iframe.active {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Ribbon Interface -->
+    <div class="ribbon-container">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <span class="app-title">Книга1 - Excel</span>
+            </div>
+            <div class="title-bar-center">
+                <div class="search-container">
+                    <input type="text" class="search-box" placeholder="Что вы хотите сделать?">
+                </div>
+            </div>
+            <div class="title-bar-right">
+                <button class="title-bar-btn sign-in">Вход</button>
+                <button class="title-bar-btn share">Общий доступ</button>
+                <div class="window-controls">
+                    <button class="window-btn minimize">−</button>
+                    <button class="window-btn maximize">□</button>
+                    <button class="window-btn close">×</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="ribbon-tabs">
+            <button class="ribbon-tab" data-target="file">Файл</button>
+            <button class="ribbon-tab active" data-target="home">Главная</button>
+            <button class="ribbon-tab" data-target="insert">Вставка</button>
+            <button class="ribbon-tab" data-target="page-layout">Разметка страницы</button>
+            <button class="ribbon-tab" data-target="formulas">Формулы</button>
+            <button class="ribbon-tab" data-target="data">Данные</button>
+            <button class="ribbon-tab" data-target="review">Рецензирование</button>
+            <button class="ribbon-tab" data-target="view">Вид</button>
+        </div>
+        
+        <!-- Content Area with Iframes -->
+        <div class="ribbon-content">
+            <iframe id="file" src="Файл.html" class="ribbon-iframe"></iframe>
+            <iframe id="home" src="Главная.html" class="ribbon-iframe active"></iframe>
+            <iframe id="insert" src="Вставка.html" class="ribbon-iframe"></iframe>
+            <iframe id="page-layout" src="Разметка страницы.html" class="ribbon-iframe"></iframe>
+            <iframe id="formulas" src="Формулы.html" class="ribbon-iframe"></iframe>
+            <iframe id="data" src="Данные.html" class="ribbon-iframe"></iframe>
+            <iframe id="review" src="Рецензирование.html" class="ribbon-iframe"></iframe>
+            <iframe id="view" src="Вид.html" class="ribbon-iframe"></iframe>
+        </div>
+    </div>
+
+    <div class="task-header">
+        <div class="task-info">
+            <div class="task-title" id="task-title">Выполнение задания</div>
+            <div class="timer" id="timer">00:00</div>
+        </div>
+        <div class="task-actions">
+            <!-- Test Dropdown Buttons -->
+            <button class="btn" data-dropdown="test" style="background: #ff6b6b; color: white;">
+                🧪 Тест
+            </button>
+            <button class="btn" data-dropdown="settings" style="background: #17a2b8; color: white;">
+                ⚙️ Настройки
+            </button>
+            <button class="btn" data-dropdown="menu" style="background: #28a745; color: white;">
+                📋 Меню
+            </button>
+            <button class="btn" data-context="right-click" style="background: #6f42c1; color: white;">
+                🖱️ Контекст
+            </button>
+            
+            <button class="btn btn-success" id="complete-task-btn" style="display: none;">
+                ✅ Завершить задание
+            </button>
+            <button class="btn btn-danger" id="go-back-btn">
+                ← Назад
+            </button>
+        </div>
+    </div>
+
+    <div id="loading" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Загрузка таблицы...</h3>
+            <p>Пожалуйста, подождите, пока инициализируется редактор</p>
+        </div>
+    </div>
+    
+    <div id="luckysheet"></div>
+
+    <!-- Sheet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.umd.js"></script>
+    
+    <!-- Dropdown System -->
+    <script src="dropdown-system.js"></script>
+
+    <script>
+let currentTaskId = null;
+let currentExecutionId = null;
+let startTime = null;
+let timerInterval = null;
+let translationObserver = null;
+
+// Объект с переводами
+const translations = {
+    "Undo": "Отменить",
+        "Redo": "Повторить",
+        "Paint format": "Форматирование кистью",
+        "Format as currency": "Форматировать как валюту",
+        "Format as percent": "Форматировать как процент",
+        "Decrease decimal places": "Уменьшить десятичные знаки",
+        "Increase decimal places": "Увеличить десятичные знаки",
+        "More formats": "Дополнительные форматы",
+        "Font": "Шрифт",
+        "Font size": "Размер шрифта",
+        "Bold (Ctrl+B)": "Жирный (Ctrl+B)",
+        "Italic (Ctrl+I)": "Курсив (Ctrl+I)",
+        "Strikethrough (Alt+Shift+5)": "Зачеркнутый (Alt+Shift+5)",
+        "Underline": "Подчеркивание",
+        "Text color": "Цвет текста",
+        "Fill color": "Цвет заливки",
+        "Border": "Граница",
+        "Merge cells": "Объединить ячейки",
+        "Choose merge type...": "Выберите тип объединения...",
+        "Horizontal align": "Горизонтальное выравнивание",
+        "Vertical align": "Вертикальное выравнивание",
+        "Text wrap": "Перенос текста",
+        "Text rotate": "Поворот текста",
+        "Insert image": "Вставить изображение",
+        "Insert link": "Вставить ссылку",
+        "Chart": "Диаграмма",
+        "Comment": "Комментарий",
+        "Pivot Table": "Сводная таблица",
+        "Auto SUM": "Автосумма",
+        "More functions...": "Дополнительные функции...",
+        "Freeze top row": "Закрепить верхнюю строку",
+        "More options...": "Дополнительные опции...",
+        "Sort and filter": "Сортировка и фильтр",
+        "Conditional format": "Условное форматирование",
+        "Data verification": "Проверка данных",
+        "Split text": "Разделить текст",
+        "Screenshot": "Скриншот",
+        "Find and replace": "Найти и заменить",
+        "Protect the sheet": "Защитить лист",
+        "Print": "Печать",
+        "Copy": "Копировать",
+        "Copy as": "Копировать как",
+        "Paste": "Вставить",
+        "InsertRow": "Вставить строку",
+        "InsertColumn": "Вставить столбец",
+        "Delete selected Row": "Удалить выбранную строку",
+        "Delete selected Column": "Удалить выбранный столбец",
+        "Delete cell": "Удалить ячейку",
+        "Towards": "Направление",
+        "Left": "Влево",
+        "Right": "Вправо",
+        "Add": "Добавить",
+        "Column": "Столбец",
+        "Delete selected": "Удалить выбранное",
+        "Hide selected": "Скрыть выбранное",
+        "Show hidden": "Показать скрытое",
+        "Width": "Ширина",
+        "A-Z order": "По возрастанию (A-Z)",
+        "Z-A order": "По убыванию (Z-A)",
+        "Clear content": "Очистить содержимое",
+        "Matrix operation": "Матричные операции",
+        "Sort": "Сортировать",
+        "Filter": "Фильтр",
+        "Create chart": "Создать диаграмму",
+        "Json first line title": "JSON с заголовками",
+        "Json untitled": "JSON без заголовков",
+        "One-dimensional array": "Одномерный массив",
+        "Two-dimensional array": "Двумерный массив",
+        "Multidimensional Arrays": "Многомерные массивы",
+        "Row": "Строка",
+        "Diagonal": "Диагональ",
+        "Anti-diagonal": "Противодиагональ",
+        "Diagonal offset": "Смещение диагонали",
+        "Offset": "Смещение",
+        "Boolean": "Логические значения",
+        "Flip": "Перевернуть",
+        "Up and down": "Вверх и вниз",
+        "Left and right": "Влево и вправо",
+        "Clockwise": "По часовой стрелке",
+        "Counterclockwise": "Против часовой стрелки",
+        "Transpose": "Транспонировать",
+        "Matrix calculation": "Матричный расчет",
+        "Plus": "Плюс",
+        "Minus": "Минус",
+        "Multiply": "Умножить",
+        "Divided": "Делить",
+        "Power": "Степень",
+        "Root": "Корень",
+        "Log": "Логарифм",
+        "Delete 0 values at both ends": "Удалить нулевые значения по краям",
+        "By row": "По строкам",
+        "By column": "По столбцам",
+        "Remove duplicate values": "Удалить дубликаты",
+        "Check all": "Выделить все",
+        "Clear": "Очистить",
+        "Inverse": "Инвертировать",
+        "Confirm": "Подтвердить",
+        "Cancel": "Отмена",
+        "Clear filter": "Очистить фильтр",
+        "None": "Нет",
+        "Is empty": "Пусто",
+        "Is not empty": "Не пусто",
+        "Text contains": "Содержит текст",
+        "Text does not contain": "Не содержит текст",
+        "Text starts with": "Начинается с",
+        "Text ends with": "Заканчивается на",
+        "Text is exactly": "Точно соответствует",
+        "Date is": "Дата",
+        "Date is before": "Дата раньше",
+        "Date is after": "Дата позже",
+        "Greater than": "Больше чем",
+        "Greater than or equal to": "Больше или равно",
+        "Less than": "Меньше чем",
+        "Less than or equal to": "Меньше или равно",
+        "Is equal to": "Равно",
+        "Is not equal to": "Не равно",
+        "Is between": "Находится между",
+        "Is not between": "Не находится между",
+        "Delete": "Удалить",
+        "Copy": "Копировать",
+        "Rename": "Переименовать",
+        "Change color": "Изменить цвет",
+        "Reset color": "Сбросить цвет",
+        "Hide": "Скрыть",
+        "Unhide": "Показать",
+        "Move left": "Переместить влево",
+        "Move right": "Переместить вправо"
+};
+
+// Инициализация обработчиков событий для кнопок
+function initButtonHandlers() {
+    console.log('Инициализация обработчиков кнопок...');
+    
+    // Кнопка завершения задания
+    const completeBtn = document.getElementById('complete-task-btn');
+    if (completeBtn) {
+        completeBtn.removeEventListener('click', completeTask); // Удаляем старый обработчик
+        completeBtn.addEventListener('click', completeTask);
+        console.log('Обработчик кнопки "Завершить задание" установлен');
+    }
+    
+    // Кнопка "Назад"
+    const goBackBtn = document.getElementById('go-back-btn');
+    if (goBackBtn) {
+        goBackBtn.removeEventListener('click', goBack); // Удаляем старый обработчик
+        goBackBtn.addEventListener('click', goBack);
+        console.log('Обработчик кнопки "Назад" установлен');
+    }
+}
+
+// Получение параметров из URL
+function getUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentTaskId = urlParams.get('taskId');
+    currentExecutionId = urlParams.get('executionId');
+    
+    if (currentTaskId && currentExecutionId) {
+        console.log('Задание загружено:', { taskId: currentTaskId, executionId: currentExecutionId });
+        document.title = `Excel Learning - Задание ${currentTaskId}`;
+        document.getElementById('task-title').textContent = `Выполнение задания ${currentTaskId}`;
+        
+        // Показываем кнопку завершения задания
+        const completeBtn = document.getElementById('complete-task-btn');
+        if (completeBtn) {
+            completeBtn.style.display = 'block';
+        }
+        
+        // Запускаем таймер
+        startTimer();
+    }
+}
+
+// Запуск таймера
+function startTimer() {
+    startTime = new Date();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+// Обновление таймера
+function updateTimer() {
+    if (!startTime) return;
+    
+    const now = new Date();
+    const elapsed = Math.floor((now - startTime) / 1000);
+    
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    const timerEl = document.getElementById('timer');
+    timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Предупреждение после 10 минут
+    if (elapsed > 600) {
+        timerEl.classList.add('warning');
+    }
+}
+
+// Завершение задания
+function completeTask() {
+    console.log('Функция completeTask вызвана');
+    
+    if (!currentTaskId || !currentExecutionId) {
+        alert('Нет активного задания для завершения');
+        return;
+    }
+    
+    if (confirm('Вы уверены, что хотите завершить задание? Это действие нельзя отменить.')) {
+        try {
+            // Получаем текущие данные из Luckysheet
+            let workbookData = [];
+            try {
+                workbookData = luckysheet.getAllSheets();
+                console.log('Данные Luckysheet получены:', workbookData);
+            } catch (lsError) {
+                console.log('Ошибка получения данных Luckysheet:', lsError);
+                workbookData = []; // Используем пустой массив если Luckysheet не доступен
+            }
+            
+            // Отправляем запрос на завершение задания
+            fetch('/api/tasks/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    executionId: currentExecutionId,
+                    endpointId: 'luckysheet_complete',
+                    cellRange: null,
+                    sessionData: {
+                        workbookData: workbookData,
+                        completedAt: new Date().toISOString(),
+                        userAgent: navigator.userAgent
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(`Задание завершено!\n\nВремя выполнения: ${data.completionTime} сек.\nПродуктивность: ${data.productivityCoefficient}\nСтатус: ${data.status}`);
+                    
+                    // Останавливаем таймер
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                    }
+                    
+                    // Закрываем окно через 2 секунды
+                    setTimeout(() => {
+                        window.close();
+                    }, 2000);
+                } else {
+                    alert('Ошибка завершения задания: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка завершения задания:', error);
+                alert('Ошибка завершения задания. Проверьте подключение к серверу.');
+            });
+        } catch (error) {
+            console.error('Общая ошибка завершения задания:', error);
+            alert('Ошибка завершения задания');
+        }
+    }
+}
+
+// Возврат назад
+function goBack() {
+    console.log('Функция goBack вызвана');
+    
+    if (currentTaskId && currentExecutionId) {
+        if (confirm('У вас есть незавершенное задание. Вы уверены, что хотите покинуть страницу?')) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // Пробуем закрыть окно, если это не сработает - переходим на главную
+            try {
+                window.close();
+                // Если окно не закрылось, делаем редирект через 500ms
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 500);
+            } catch (error) {
+                console.log('Не удалось закрыть окно, делаем редирект');
+                window.location.href = '/';
+            }
+        }
+    } else {
+        if (confirm('Вы уверены, что хотите покинуть страницу? Несохраненные данные будут потеряны.')) {
+            try {
+                window.close();
+                // Если окно не закрылось, делаем редирект через 500ms
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 500);
+            } catch (error) {
+                console.log('Не удалось закрыть окно, делаем редирект');
+                window.location.href = '/';
+            }
+        }
+    }
+}
+
+function showError(message) {
+    document.getElementById('loading').innerHTML = `
+        <div class="loading-content error-content">
+            <h3>❌ Ошибка загрузки</h3>
+            <p>${message}</p>
+            <button class="retry-btn" onclick="location.reload()">
+                🔄 Перезагрузить страницу
+            </button>
+        </div>
+    `;
+}
+
+// Логирование действий пользователя
+function logUserAction(action, data) {
+    if (currentExecutionId) {
+        fetch('/api/tasks/log-action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                executionId: currentExecutionId,
+                actionType: action,
+                elementId: data.elementId || null,
+                cellAddress: data.cellAddress || null,
+                cellValue: data.cellValue || null,
+                sessionData: {
+                    action: action,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            })
+        }).catch(error => {
+            console.log('Ошибка логирования действия:', error);
+        });
+    }
+}
+
+// Улучшенная функция перевода
+function translateElement(element) {
+    if (!element) return;
+    
+    // Переводим текстовое содержимое
+    if (element.nodeType === Node.TEXT_NODE) {
+        const text = element.textContent.trim();
+        if (text && translations[text]) {
+            element.textContent = translations[text];
+        }
+        return;
+    }
+    
+    if (element.nodeType !== Node.ELEMENT_NODE) return;
+    
+    // Переводим атрибуты
+    const attributesToTranslate = ['title', 'data-tips', 'alt', 'placeholder'];
+    attributesToTranslate.forEach(attr => {
+        if (element.hasAttribute(attr)) {
+            const value = element.getAttribute(attr);
+            if (value && translations[value]) {
+                element.setAttribute(attr, translations[value]);
+            }
+        }
+    });
+    
+    // Переводим дочерние текстовые узлы
+    Array.from(element.childNodes).forEach(child => {
+        if (child.nodeType === Node.TEXT_NODE) {
+            const text = child.textContent.trim();
+            if (text && translations[text]) {
+                child.textContent = translations[text];
+            }
+        }
+    });
+}
+
+// Функция перевода всего интерфейса
+function translateInterface() {
+    // Переводим основные элементы интерфейса
+    const selectors = [
+        '.luckysheet-wa-editor',
+        '.luckysheet-sheettable',
+        '.luckysheet-toolbar',
+        '.luckysheet-info',
+        '.luckysheet-sheet-area',
+        '.luckysheet-rightclick-menu',
+        '.luckysheet-modal',
+        '.luckysheet-selection-copy',
+        '[data-tips]',
+        'button',
+        'span',
+        'div',
+        'td',
+        'th'
+    ];
+    
+    selectors.forEach(selector => {
+        try {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(translateElement);
+        } catch (e) {
+            // Игнорируем ошибки селекторов
+        }
+    });
+}
+
+// Наблюдатель за изменениями DOM
+function initTranslationObserver() {
+    if (translationObserver) {
+        translationObserver.disconnect();
+    }
+    
+    translationObserver = new MutationObserver((mutations) => {
+        let shouldTranslate = false;
+        
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        shouldTranslate = true;
+                    }
+                });
+            }
+        });
+        
+        if (shouldTranslate) {
+            // Небольшая задержка для полной отрисовки элементов
+            setTimeout(translateInterface, 100);
+        }
+    });
+    
+    // Наблюдаем за контейнером Luckysheet
+    const container = document.getElementById('luckysheet');
+    if (container) {
+        translationObserver.observe(container, {
+            childList: true,
+            subtree: true
+        });
+    }
+}
+
+// Простая инициализация Luckysheet
+function initLuckysheet() {
+    console.log('Начинаем инициализацию Luckysheet...');
+    
+    // Проверяем доступность библиотек
+    if (typeof $ === 'undefined') {
+        showError('jQuery не загружен. Проверьте подключение к интернету.');
+        return;
+    }
+    
+    if (typeof luckysheet === 'undefined') {
+        showError('Luckysheet не загружен. Проверьте подключение к интернету.');
+        return;
+    }
+    
+    try {
+        // Простая конфигурация без сложных проверок
+        const options = {
+            container: 'luckysheet',
+            title: 'Excel Learning',
+            
+            // Основные настройки
+            allowCopy: true,
+            allowEdit: true,
+            allowUpdate: true,
+            
+            // Интерфейс
+            showtoolbar: true,
+            showinfobar: false,
+            showsheetbar: true,
+            showstatisticBar: false,
+            
+            // Пустые данные
+            data: [{
+                name: "Лист1",
+                index: 0,
+                status: 1,
+                order: 0,
+                hide: 0,
+                row: 84,
+                column: 60,
+                defaultRowHeight: 19,
+                defaultColWidth: 73,
+                celldata: [],
+                config: {},
+                scrollLeft: 0,
+                scrollTop: 0,
+                luckysheet_select_save: [{
+                    row: [0, 0],
+                    column: [0, 0]
+                }],
+                calcChain: [],
+                isPivotTable: false,
+                pivotTable: {},
+                filter_select: {},
+                filter: null,
+                luckysheet_alternateformat_save: [],
+                luckysheet_alternateformat_save_modelCustom: [],
+                luckysheet_conditionformat_save: {},
+                frozen: {},
+                chart: [],
+                zoomRatio: 1,
+                image: [],
+                showGridLines: 1,
+                dataVerification: {}
+            }],
+            
+            // События
+            hook: {
+                workbookCreateAfter: function() {
+                    console.log('Luckysheet успешно инициализирован');
+                    document.getElementById('loading').style.display = 'none';
+                    getUrlParams();
+                    
+                    // Инициализируем перевод
+                    setTimeout(() => {
+                        translateInterface();
+                        initTranslationObserver();
+                        
+                        // Повторный перевод через некоторое время для элементов, загружающихся асинхронно
+                        setTimeout(translateInterface, 1000);
+                        setTimeout(translateInterface, 3000);
+                    }, 500);
+                },
+                
+                workbookCreateBefore: function() {
+                    console.log('Инициализация Luckysheet...');
+                },
+                
+                cellEditBefore: function(range) {
+                    logUserAction('cell_edit', range);
+                },
+                
+                cellUpdateAfter: function(r, c, oldValue, newValue, isRefresh) {
+                    logUserAction('cell_update', {r, c, oldValue, newValue});
+                    // Перевод после обновления ячейки (могут появиться новые элементы)
+                    setTimeout(translateInterface, 50);
+                },
+                
+                rangeSelect: function(sheet, range) {
+                    logUserAction('range_select', range);
+                }
+            }
+        };
+        
+        // Инициализация
+        luckysheet.create(options);
+        
+    } catch (error) {
+        console.error('Ошибка инициализации Luckysheet:', error);
+        showError(`Ошибка инициализации: ${error.message}`);
+    }
+}
+
+// Ждем полной загрузки всех ресурсов
+window.addEventListener('load', function() {
+    console.log('Страница полностью загружена');
+    
+    // Инициализируем обработчики кнопок сразу
+    initButtonHandlers();
+    
+    // Затем инициализируем Luckysheet
+    setTimeout(initLuckysheet, 1000);
+});
+
+// Дополнительная инициализация после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен');
+    initButtonHandlers();
+    initRibbonInterface();
+});
+
+// Обработка закрытия страницы
+window.addEventListener('beforeunload', function(e) {
+    if (currentTaskId && currentExecutionId) {
+        e.preventDefault();
+        e.returnValue = 'У вас есть незавершенное задание. Вы уверены, что хотите покинуть страницу?';
+    }
+});
+
+// Дополнительная обработка кликов для принудительного перевода контекстных меню
+document.addEventListener('click', function() {
+    setTimeout(translateInterface, 50);
+});
+
+// Обработка правого клика для перевода контекстных меню
+document.addEventListener('contextmenu', function() {
+    setTimeout(translateInterface, 50);
+});
+
+// Ribbon Interface JavaScript
+function initRibbonInterface() {
+    const tabs = document.querySelectorAll('.ribbon-tab');
+    const iframes = document.querySelectorAll('.ribbon-iframe');
+    
+    // Tab switching functionality
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const target = this.getAttribute('data-target');
+            
+            // Skip File button - do nothing when clicked
+            if (target === 'file') {
+                return;
+            }
+            
+            // Remove active class from all tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Hide all iframes
+            iframes.forEach(iframe => {
+                iframe.classList.remove('active');
+            });
+            
+            // Show target iframe
+            const targetIframe = document.getElementById(target);
+            if (targetIframe) {
+                targetIframe.classList.add('active');
+            }
+        });
+    });
+    
+    // Handle iframe loading states
+    iframes.forEach(iframe => {
+        iframe.addEventListener('load', function() {
+            this.classList.add('loaded');
+        });
+        
+        // Handle iframe load errors
+        iframe.addEventListener('error', function() {
+            console.warn('Failed to load:', this.src);
+            this.style.background = '#f3f2f1 url("data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" font-family=\\"Segoe UI\\" font-size=\\"12\\" fill=\\"%23666\\">Ошибка загрузки</text></svg>") center center no-repeat';
+        });
+    });
+    
+    // Keyboard navigation (Ctrl+1-8 for quick tab switching)
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key >= '1' && e.key <= '8') {
+            e.preventDefault();
+            const index = parseInt(e.key) - 1;
+            const tab = tabs[index];
+            if (tab) {
+                tab.click();
+            }
+        }
+    });
+}
+
+// Инициализация Dropdown системы
+document.addEventListener('DOMContentLoaded', function() {
+    // Настройка dropdown маппингов
+    addDropdown('data-dropdown', 'settings', 'settings-panel.html');
+    addDropdown('data-dropdown', 'menu', 'main-menu.html');
+    addDropdown('data-dropdown', 'context', 'context-menu.html');
+    addDropdown('data-dropdown', 'test', 'test-dropdown.html');
+    addDropdown('data-menu', 'main', 'main-menu.html');
+    addDropdown('data-context', 'right-click', 'context-menu.html');
+    addDropdown('data-action', 'settings', 'settings-panel.html');
+    
+    console.log('Dropdown система настроена и готова к использованию');
+});
+
+    </script>
+</body>
+</html>
