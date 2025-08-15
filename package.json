@@ -1,0 +1,36 @@
+{
+  "name": "yuyu-lolita-v2",
+  "version": "1.0.0",
+  "description": "YuYu Lolita Shopping website - modern stack migration",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter=@yuyu/api dev & bun --filter=@yuyu/web dev",
+    "build": "bun run build:api && bun run build:web",
+    "build:api": "bun --filter=@yuyu/api build",
+    "build:web": "bun --filter=@yuyu/web build",
+    "start": "bun --filter=@yuyu/api start & bun --filter=@yuyu/web start",
+    "db:generate": "bun --filter=@yuyu/db generate",
+    "db:migrate": "bun --filter=@yuyu/db migrate",
+    "db:seed": "bun --filter=@yuyu/db seed",
+    "lint": "eslint . --ext .ts,.svelte",
+    "format": "prettier --write .",
+    "type-check": "bun --filter=@yuyu/web check && bun --filter=@yuyu/api type-check"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-svelte": "^2.35.1",
+    "prettier": "^3.2.5",
+    "prettier-plugin-svelte": "^3.2.2",
+    "typescript": "^5.4.2"
+  },
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=18.0.0"
+  }
+}
