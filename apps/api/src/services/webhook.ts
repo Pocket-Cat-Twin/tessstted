@@ -1,35 +1,35 @@
-import crypto from 'crypto';
-import { db, webhookLogs, webhookSubscriptions, eq, and, sql } from '@yuyu/db';
+import crypto from "crypto";
+import { db, webhookLogs, webhookSubscriptions, eq, and, sql } from "@yuyu/db";
 
 // Webhook event types
 export enum WebhookEvent {
-  ORDER_CREATED = 'order.created',
-  ORDER_UPDATED = 'order.updated',
-  ORDER_STATUS_CHANGED = 'order.status_changed',
-  ORDER_PAID = 'order.paid',
-  ORDER_SHIPPED = 'order.shipped',
-  ORDER_DELIVERED = 'order.delivered',
-  ORDER_CANCELLED = 'order.cancelled',
-  
-  USER_CREATED = 'user.created',
-  USER_UPDATED = 'user.updated',
-  USER_BLOCKED = 'user.blocked',
-  USER_VERIFIED = 'user.verified',
-  
-  SUBSCRIPTION_CREATED = 'subscription.created',
-  SUBSCRIPTION_RENEWED = 'subscription.renewed',
-  SUBSCRIPTION_EXPIRED = 'subscription.expired',
-  SUBSCRIPTION_CANCELLED = 'subscription.cancelled',
-  
-  PAYMENT_RECEIVED = 'payment.received',
-  PAYMENT_FAILED = 'payment.failed',
-  PAYMENT_REFUNDED = 'payment.refunded',
-  
-  INVENTORY_LOW = 'inventory.low',
-  INVENTORY_OUT_OF_STOCK = 'inventory.out_of_stock',
-  
-  SYSTEM_MAINTENANCE = 'system.maintenance',
-  SYSTEM_ERROR = 'system.error',
+  ORDER_CREATED = "order.created",
+  ORDER_UPDATED = "order.updated",
+  ORDER_STATUS_CHANGED = "order.status_changed",
+  ORDER_PAID = "order.paid",
+  ORDER_SHIPPED = "order.shipped",
+  ORDER_DELIVERED = "order.delivered",
+  ORDER_CANCELLED = "order.cancelled",
+
+  USER_CREATED = "user.created",
+  USER_UPDATED = "user.updated",
+  USER_BLOCKED = "user.blocked",
+  USER_VERIFIED = "user.verified",
+
+  SUBSCRIPTION_CREATED = "subscription.created",
+  SUBSCRIPTION_RENEWED = "subscription.renewed",
+  SUBSCRIPTION_EXPIRED = "subscription.expired",
+  SUBSCRIPTION_CANCELLED = "subscription.cancelled",
+
+  PAYMENT_RECEIVED = "payment.received",
+  PAYMENT_FAILED = "payment.failed",
+  PAYMENT_REFUNDED = "payment.refunded",
+
+  INVENTORY_LOW = "inventory.low",
+  INVENTORY_OUT_OF_STOCK = "inventory.out_of_stock",
+
+  SYSTEM_MAINTENANCE = "system.maintenance",
+  SYSTEM_ERROR = "system.error",
 }
 
 // Webhook payload interface
@@ -67,72 +67,75 @@ export interface WebhookDeliveryResult {
 // Generate webhook signature
 function generateSignature(payload: string, secret: string): string {
   return crypto
-    .createHmac('sha256', secret)
-    .update(payload, 'utf8')
-    .digest('hex');
+    .createHmac("sha256", secret)
+    .update(payload, "utf8")
+    .digest("hex");
 }
 
 // Verify webhook signature
 export function verifyWebhookSignature(
   payload: string,
   signature: string,
-  secret: string
+  secret: string,
 ): boolean {
   const expectedSignature = generateSignature(payload, secret);
-  const providedSignature = signature.startsWith('sha256=') 
-    ? signature.slice(7) 
+  const providedSignature = signature.startsWith("sha256=")
+    ? signature.slice(7)
     : signature;
-  
+
   return crypto.timingSafeEqual(
-    Buffer.from(expectedSignature, 'hex'),
-    Buffer.from(providedSignature, 'hex')
+    Buffer.from(expectedSignature, "hex"),
+    Buffer.from(providedSignature, "hex"),
   );
 }
 
 // Create webhook payload
 function createWebhookPayload(
   event: WebhookEvent,
-  data: Record<string, any>
+  data: Record<string, any>,
 ): WebhookPayload {
   return {
     id: crypto.randomUUID(),
     event,
     timestamp: new Date().toISOString(),
     data,
-    version: '1.0',
+    version: "1.0",
   };
 }
 
 // Deliver webhook to a single endpoint
 async function deliverWebhook(
   subscription: WebhookSubscription,
-  payload: WebhookPayload
+  payload: WebhookPayload,
 ): Promise<WebhookDeliveryResult> {
   const payloadString = JSON.stringify(payload);
   const signature = generateSignature(payloadString, subscription.secret);
-  
+
   const headers = {
-    'Content-Type': 'application/json',
-    'User-Agent': 'YuYu-Lolita-Webhook/1.0',
-    'X-Webhook-Signature': `sha256=${signature}`,
-    'X-Webhook-Event': payload.event,
-    'X-Webhook-ID': payload.id,
-    'X-Webhook-Timestamp': payload.timestamp,
+    "Content-Type": "application/json",
+    "User-Agent": "YuYu-Lolita-Webhook/1.0",
+    "X-Webhook-Signature": `sha256=${signature}`,
+    "X-Webhook-Event": payload.event,
+    "X-Webhook-ID": payload.id,
+    "X-Webhook-Timestamp": payload.timestamp,
     ...subscription.headers,
   };
 
   let attempts = 0;
-  let lastError = '';
+  let lastError = "";
 
   while (attempts < subscription.maxRetries) {
     attempts++;
-    
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), subscription.timeoutMs);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        subscription.timeoutMs,
+      );
 
       const response = await fetch(subscription.url, {
-        method: 'POST',
+        method: "POST",
         headers,
         body: payloadString,
         signal: controller.signal,
@@ -151,7 +154,7 @@ async function deliverWebhook(
         };
       } else {
         lastError = `HTTP ${response.status}: ${response.statusText}`;
-        
+
         // Don't retry for 4xx errors (client errors)
         if (response.status >= 400 && response.status < 500) {
           break;
@@ -164,7 +167,7 @@ async function deliverWebhook(
     // Exponential backoff for retries
     if (attempts < subscription.maxRetries) {
       const delay = Math.min(1000 * Math.pow(2, attempts - 1), 30000);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -179,14 +182,14 @@ async function deliverWebhook(
 async function logWebhookDelivery(
   subscriptionId: string,
   payload: WebhookPayload,
-  result: WebhookDeliveryResult
+  result: WebhookDeliveryResult,
 ) {
   try {
     await db.insert(webhookLogs).values({
       subscriptionId,
       event: payload.event,
       payload: JSON.stringify(payload),
-      url: '', // Will be set by the subscription
+      url: "", // Will be set by the subscription
       statusCode: result.statusCode,
       response: result.response,
       error: result.error,
@@ -195,21 +198,21 @@ async function logWebhookDelivery(
       success: result.success,
     });
   } catch (error) {
-    console.error('Failed to log webhook delivery:', error);
+    console.error("Failed to log webhook delivery:", error);
   }
 }
 
 // Send webhook to all subscribers
 export async function sendWebhook(
   event: WebhookEvent,
-  data: Record<string, any>
+  data: Record<string, any>,
 ): Promise<void> {
   try {
     // Get active subscriptions for this event
     const subscriptions = await db.query.webhookSubscriptions.findMany({
       where: and(
         eq(webhookSubscriptions.isActive, true),
-        sql`${webhookSubscriptions.events} ? ${event}`
+        sql`${webhookSubscriptions.events} ? ${event}`,
       ),
     });
 
@@ -236,13 +239,14 @@ export async function sendWebhook(
       };
 
       const result = await deliverWebhook(subscriptionConfig, payload);
-      
+
       // Log the delivery result
       await logWebhookDelivery(subscription.id, payload, result);
-      
+
       // Update retry count if failed
       if (!result.success) {
-        await db.update(webhookSubscriptions)
+        await db
+          .update(webhookSubscriptions)
           .set({
             retryCount: sql`${webhookSubscriptions.retryCount} + 1`,
             lastError: result.error,
@@ -251,7 +255,8 @@ export async function sendWebhook(
           .where(eq(webhookSubscriptions.id, subscription.id));
       } else {
         // Reset retry count on success
-        await db.update(webhookSubscriptions)
+        await db
+          .update(webhookSubscriptions)
           .set({
             retryCount: 0,
             lastError: null,
@@ -265,15 +270,16 @@ export async function sendWebhook(
     });
 
     const results = await Promise.allSettled(deliveryPromises);
-    
+
     // Log summary
-    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const successful = results.filter((r) => r.status === "fulfilled").length;
     const failed = results.length - successful;
-    
-    console.log(`Webhook delivery summary for ${event}: ${successful} successful, ${failed} failed`);
-    
+
+    console.log(
+      `Webhook delivery summary for ${event}: ${successful} successful, ${failed} failed`,
+    );
   } catch (error) {
-    console.error('Failed to send webhook:', error);
+    console.error("Failed to send webhook:", error);
   }
 }
 
@@ -285,7 +291,11 @@ export async function sendOrderCreatedWebhook(orderData: any) {
   });
 }
 
-export async function sendOrderStatusChangedWebhook(orderData: any, oldStatus: string, newStatus: string) {
+export async function sendOrderStatusChangedWebhook(
+  orderData: any,
+  oldStatus: string,
+  newStatus: string,
+) {
   return sendWebhook(WebhookEvent.ORDER_STATUS_CHANGED, {
     order: orderData,
     oldStatus,
@@ -333,19 +343,22 @@ export async function createWebhookSubscription(
   secret?: string,
   headers?: Record<string, string>,
   maxRetries = 3,
-  timeoutMs = 30000
+  timeoutMs = 30000,
 ): Promise<string> {
-  const subscriptionSecret = secret || crypto.randomBytes(32).toString('hex');
-  
-  const [subscription] = await db.insert(webhookSubscriptions).values({
-    url,
-    events: JSON.stringify(events),
-    secret: subscriptionSecret,
-    headers: headers ? JSON.stringify(headers) : null,
-    maxRetries,
-    timeoutMs,
-    isActive: true,
-  }).returning();
+  const subscriptionSecret = secret || crypto.randomBytes(32).toString("hex");
+
+  const [subscription] = await db
+    .insert(webhookSubscriptions)
+    .values({
+      url,
+      events: JSON.stringify(events),
+      secret: subscriptionSecret,
+      headers: headers ? JSON.stringify(headers) : null,
+      maxRetries,
+      timeoutMs,
+      isActive: true,
+    })
+    .returning();
 
   return subscription.id;
 }
@@ -360,27 +373,32 @@ export async function updateWebhookSubscription(
     maxRetries: number;
     timeoutMs: number;
     isActive: boolean;
-  }>
+  }>,
 ): Promise<void> {
   const updateData: any = {};
-  
+
   if (updates.url) updateData.url = updates.url;
   if (updates.events) updateData.events = JSON.stringify(updates.events);
   if (updates.secret) updateData.secret = updates.secret;
   if (updates.headers) updateData.headers = JSON.stringify(updates.headers);
-  if (updates.maxRetries !== undefined) updateData.maxRetries = updates.maxRetries;
+  if (updates.maxRetries !== undefined)
+    updateData.maxRetries = updates.maxRetries;
   if (updates.timeoutMs !== undefined) updateData.timeoutMs = updates.timeoutMs;
   if (updates.isActive !== undefined) updateData.isActive = updates.isActive;
-  
+
   updateData.updatedAt = new Date();
 
-  await db.update(webhookSubscriptions)
+  await db
+    .update(webhookSubscriptions)
     .set(updateData)
     .where(eq(webhookSubscriptions.id, subscriptionId));
 }
 
-export async function deleteWebhookSubscription(subscriptionId: string): Promise<void> {
-  await db.delete(webhookSubscriptions)
+export async function deleteWebhookSubscription(
+  subscriptionId: string,
+): Promise<void> {
+  await db
+    .delete(webhookSubscriptions)
     .where(eq(webhookSubscriptions.id, subscriptionId));
 }
 
@@ -413,30 +431,30 @@ export async function getWebhookLogs(subscriptionId?: string, limit = 100) {
 export async function testWebhookEndpoint(
   url: string,
   secret: string,
-  timeoutMs = 10000
+  timeoutMs = 10000,
 ): Promise<{ success: boolean; error?: string; responseTime: number }> {
   const startTime = Date.now();
-  
+
   try {
-    const testPayload = createWebhookPayload(
-      WebhookEvent.SYSTEM_MAINTENANCE,
-      { test: true, message: 'Webhook endpoint test' }
-    );
-    
+    const testPayload = createWebhookPayload(WebhookEvent.SYSTEM_MAINTENANCE, {
+      test: true,
+      message: "Webhook endpoint test",
+    });
+
     const payloadString = JSON.stringify(testPayload);
     const signature = generateSignature(payloadString, secret);
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'X-Webhook-Signature': `sha256=${signature}`,
-        'X-Webhook-Event': testPayload.event,
-        'X-Webhook-ID': testPayload.id,
-        'X-Webhook-Test': 'true',
+        "Content-Type": "application/json",
+        "X-Webhook-Signature": `sha256=${signature}`,
+        "X-Webhook-Event": testPayload.event,
+        "X-Webhook-ID": testPayload.id,
+        "X-Webhook-Test": "true",
       },
       body: payloadString,
       signal: controller.signal,

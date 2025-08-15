@@ -1,14 +1,14 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Order status enum
 export enum OrderStatus {
-  CREATED = 'created',
-  PROCESSING = 'processing',
-  CHECKING = 'checking',
-  PAID = 'paid',
-  SHIPPED = 'shipped',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled'
+  CREATED = "created",
+  PROCESSING = "processing",
+  CHECKING = "checking",
+  PAID = "paid",
+  SHIPPED = "shipped",
+  DELIVERED = "delivered",
+  CANCELLED = "cancelled",
 }
 
 // Order good schema
@@ -32,21 +32,21 @@ export const orderSchema = z.object({
   id: z.string().uuid(),
   nomerok: z.string().min(1).max(50), // Order number
   userId: z.string().uuid(),
-  
+
   // Customer info
   customerName: z.string().min(1).max(100),
   customerPhone: z.string().min(1).max(50),
   customerEmail: z.string().email().optional(),
-  
+
   // Delivery info
   deliveryAddress: z.string().min(1).max(1000),
   deliveryMethod: z.string().min(1).max(100),
   deliveryCost: z.number().min(0).default(0),
-  
+
   // Payment info
   paymentMethod: z.string().min(1).max(100),
   paymentScreenshot: z.string().optional(),
-  
+
   // Order calculations
   subtotalYuan: z.number().positive(),
   totalCommission: z.number().min(0),
@@ -54,13 +54,13 @@ export const orderSchema = z.object({
   discount: z.number().min(0).default(0),
   totalYuan: z.number().positive(),
   totalRuble: z.number().positive(),
-  
+
   // Status and dates
   status: z.nativeEnum(OrderStatus).default(OrderStatus.CREATED),
   notes: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  
+
   // Relations
   goods: z.array(orderGoodSchema).optional(),
 });
@@ -73,12 +73,16 @@ export const orderCreateSchema = z.object({
   deliveryAddress: z.string().min(1).max(1000),
   deliveryMethod: z.string().min(1).max(100),
   paymentMethod: z.string().min(1).max(100),
-  goods: z.array(z.object({
-    name: z.string().min(1).max(500),
-    link: z.string().url().optional(),
-    quantity: z.number().int().positive(),
-    priceYuan: z.number().positive(),
-  })).min(1),
+  goods: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(500),
+        link: z.string().url().optional(),
+        quantity: z.number().int().positive(),
+        priceYuan: z.number().positive(),
+      }),
+    )
+    .min(1),
 });
 
 // Order update schema

@@ -1,13 +1,13 @@
 // Simplified API client for development
-import { env } from '$env/dynamic/public';
+import { env } from "$env/dynamic/public";
 
 // Use environment variable or default to localhost for development
-const API_BASE_URL = env.PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+const API_BASE_URL = env.PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
 // Debug logging for development
-console.log('🔧 API Client Configuration:');
-console.log('  PUBLIC_API_URL:', env.PUBLIC_API_URL);
-console.log('  API_BASE_URL:', API_BASE_URL);
+console.log("🔧 API Client Configuration:");
+console.log("  PUBLIC_API_URL:", env.PUBLIC_API_URL);
+console.log("  API_BASE_URL:", API_BASE_URL);
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -25,13 +25,13 @@ class ApiClient {
 
   private async request<T = any>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseUrl}${endpoint}`;
       const response = await fetch(url, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...options.headers,
         },
         ...options,
@@ -40,28 +40,28 @@ class ApiClient {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error("API request failed:", error);
       return {
         success: false,
-        error: 'NETWORK_ERROR',
-        message: 'Failed to connect to server',
+        error: "NETWORK_ERROR",
+        message: "Failed to connect to server",
       };
     }
   }
 
   // Config methods
   async getConfig() {
-    return this.request('/config');
+    return this.request("/config");
   }
 
   async getKurs() {
-    return this.request('/config/kurs');
+    return this.request("/config/kurs");
   }
 
   // Auth methods
   async login(email: string, password: string) {
-    return this.request('/auth/login', {
-      method: 'POST',
+    return this.request("/auth/login", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
     });
   }
@@ -72,8 +72,8 @@ class ApiClient {
     name: string;
     phone?: string;
   }) {
-    return this.request('/auth/register', {
-      method: 'POST',
+    return this.request("/auth/register", {
+      method: "POST",
       body: JSON.stringify(userData),
     });
   }
@@ -83,12 +83,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/auth/me', {
+    return this.request("/auth/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -102,8 +102,8 @@ class ApiClient {
 
   // Order methods
   async createOrder(orderData: any) {
-    return this.request('/orders', {
-      method: 'POST',
+    return this.request("/orders", {
+      method: "POST",
       body: JSON.stringify(orderData),
     });
   }
@@ -116,7 +116,7 @@ class ApiClient {
   async getStories(page: number = 1, limit: number = 10) {
     return this.request(`/stories`);
   }
-  
+
   async getStory(link: string) {
     return this.request(`/stories/${link}`);
   }
@@ -127,12 +127,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/admin/orders', {
+    return this.request("/admin/orders", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -144,13 +144,13 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN', 
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
     return this.request(`/admin/orders/${orderId}/status`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -160,7 +160,7 @@ class ApiClient {
 
   // Customer methods
   async getCustomers() {
-    return this.request('/customers');
+    return this.request("/customers");
   }
 
   async getCustomer(customerId: string) {
@@ -178,26 +178,29 @@ class ApiClient {
       country?: string;
     };
   }) {
-    return this.request('/customers', {
-      method: 'POST',
+    return this.request("/customers", {
+      method: "POST",
       body: JSON.stringify(customerData),
     });
   }
 
-  async updateCustomer(customerId: string, customerData: {
-    name: string;
-    email?: string;
-    phone?: string;
-  }) {
+  async updateCustomer(
+    customerId: string,
+    customerData: {
+      name: string;
+      email?: string;
+      phone?: string;
+    },
+  ) {
     return this.request(`/customers/${customerId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(customerData),
     });
   }
 
   async deleteCustomer(customerId: string) {
     return this.request(`/customers/${customerId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
@@ -205,16 +208,19 @@ class ApiClient {
     return this.request(`/customers/${customerId}/addresses`);
   }
 
-  async addCustomerAddress(customerId: string, addressData: {
-    addressType?: string;
-    fullAddress: string;
-    city?: string;
-    postalCode?: string;
-    country?: string;
-    isDefault?: boolean;
-  }) {
+  async addCustomerAddress(
+    customerId: string,
+    addressData: {
+      addressType?: string;
+      fullAddress: string;
+      city?: string;
+      postalCode?: string;
+      country?: string;
+      isDefault?: boolean;
+    },
+  ) {
     return this.request(`/customers/${customerId}/addresses`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(addressData),
     });
   }
@@ -225,12 +231,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/profile', {
+    return this.request("/profile", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -248,13 +254,13 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/profile', {
-      method: 'PUT',
+    return this.request("/profile", {
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -267,12 +273,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/profile/addresses', {
+    return this.request("/profile/addresses", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -291,13 +297,13 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/profile/addresses', {
-      method: 'POST',
+    return this.request("/profile/addresses", {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -305,25 +311,28 @@ class ApiClient {
     });
   }
 
-  async updateAddress(addressId: string, addressData: {
-    fullAddress?: string;
-    city?: string;
-    postalCode?: string;
-    country?: string;
-    addressComments?: string;
-    isDefault?: boolean;
-  }) {
+  async updateAddress(
+    addressId: string,
+    addressData: {
+      fullAddress?: string;
+      city?: string;
+      postalCode?: string;
+      country?: string;
+      addressComments?: string;
+      isDefault?: boolean;
+    },
+  ) {
     const token = this.getToken();
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
     return this.request(`/profile/addresses/${addressId}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -336,13 +345,13 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
     return this.request(`/profile/addresses/${addressId}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -354,12 +363,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/profile/subscription', {
+    return this.request("/profile/subscription", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -371,12 +380,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/profile/subscription/history', {
+    return this.request("/profile/subscription/history", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -385,7 +394,7 @@ class ApiClient {
 
   // Subscription tiers (public)
   async getSubscriptionTiers() {
-    return this.request('/subscriptions/tiers');
+    return this.request("/subscriptions/tiers");
   }
 
   async getSubscriptionStatus() {
@@ -393,12 +402,12 @@ class ApiClient {
     if (!token) {
       return {
         success: false,
-        error: 'NO_TOKEN',
-        message: 'No authentication token',
+        error: "NO_TOKEN",
+        message: "No authentication token",
       };
     }
 
-    return this.request('/subscriptions/status', {
+    return this.request("/subscriptions/status", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -407,21 +416,21 @@ class ApiClient {
 
   // Token management
   private getToken(): string | null {
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.getItem('auth_token');
+    if (typeof localStorage !== "undefined") {
+      return localStorage.getItem("auth_token");
     }
     return null;
   }
 
   private setToken(token: string) {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('auth_token', token);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("auth_token", token);
     }
   }
 
   private removeToken() {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('auth_token');
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("auth_token");
     }
   }
 }

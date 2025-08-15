@@ -1,6 +1,6 @@
-import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
-import { api } from '$lib/api/client-simple';
+import { writable } from "svelte/store";
+import { browser } from "$app/environment";
+import { api } from "$lib/api/client-simple";
 
 // Customer type definitions
 export interface Customer {
@@ -49,8 +49,8 @@ const initialState: CustomersState = {
   customers: [],
   selectedCustomer: null,
   loading: false,
-  searchTerm: '',
-  initialized: false
+  searchTerm: "",
+  initialized: false,
 };
 
 function createCustomersStore() {
@@ -58,60 +58,60 @@ function createCustomersStore() {
 
   return {
     subscribe,
-    
+
     // Initialize store
     init: async () => {
       if (!browser) return;
-      
-      update(state => ({ ...state, loading: true }));
-      
+
+      update((state) => ({ ...state, loading: true }));
+
       try {
         const response = await api.getCustomers();
         if (response.success && response.data) {
-          update(state => ({ 
-            ...state, 
-            customers: response.data, 
-            loading: false, 
-            initialized: true 
+          update((state) => ({
+            ...state,
+            customers: response.data,
+            loading: false,
+            initialized: true,
           }));
         } else {
-          update(state => ({ 
-            ...state, 
-            customers: [], 
-            loading: false, 
-            initialized: true 
+          update((state) => ({
+            ...state,
+            customers: [],
+            loading: false,
+            initialized: true,
           }));
         }
       } catch (error) {
-        console.error('Failed to load customers:', error);
-        update(state => ({ 
-          ...state, 
-          customers: [], 
-          loading: false, 
-          initialized: true 
+        console.error("Failed to load customers:", error);
+        update((state) => ({
+          ...state,
+          customers: [],
+          loading: false,
+          initialized: true,
         }));
       }
     },
 
     // Load all customers
     loadCustomers: async () => {
-      update(state => ({ ...state, loading: true }));
-      
+      update((state) => ({ ...state, loading: true }));
+
       try {
         const response = await api.getCustomers();
         if (response.success && response.data) {
-          update(state => ({ 
-            ...state, 
-            customers: response.data, 
-            loading: false 
+          update((state) => ({
+            ...state,
+            customers: response.data,
+            loading: false,
           }));
           return { success: true };
         } else {
-          update(state => ({ ...state, loading: false }));
+          update((state) => ({ ...state, loading: false }));
           return { success: false, message: response.message };
         }
       } catch (error: any) {
-        update(state => ({ ...state, loading: false }));
+        update((state) => ({ ...state, loading: false }));
         return { success: false, message: error.message };
       }
     },
@@ -132,99 +132,110 @@ function createCustomersStore() {
 
     // Create new customer
     createCustomer: async (customerData: NewCustomer) => {
-      update(state => ({ ...state, loading: true }));
-      
+      update((state) => ({ ...state, loading: true }));
+
       try {
         const response = await api.createCustomer(customerData);
         if (response.success && response.data) {
-          update(state => ({ 
-            ...state, 
-            customers: [...state.customers, response.data], 
-            loading: false 
+          update((state) => ({
+            ...state,
+            customers: [...state.customers, response.data],
+            loading: false,
           }));
           return { success: true, data: response.data };
         } else {
-          update(state => ({ ...state, loading: false }));
+          update((state) => ({ ...state, loading: false }));
           return { success: false, message: response.message };
         }
       } catch (error: any) {
-        update(state => ({ ...state, loading: false }));
+        update((state) => ({ ...state, loading: false }));
         return { success: false, message: error.message };
       }
     },
 
     // Update customer
-    updateCustomer: async (customerId: string, customerData: Partial<Customer>) => {
-      update(state => ({ ...state, loading: true }));
-      
+    updateCustomer: async (
+      customerId: string,
+      customerData: Partial<Customer>,
+    ) => {
+      update((state) => ({ ...state, loading: true }));
+
       try {
         const response = await api.updateCustomer(customerId, customerData);
         if (response.success && response.data) {
-          update(state => ({ 
-            ...state, 
-            customers: state.customers.map(c => 
-              c.id === customerId ? { ...c, ...response.data } : c
+          update((state) => ({
+            ...state,
+            customers: state.customers.map((c) =>
+              c.id === customerId ? { ...c, ...response.data } : c,
             ),
-            selectedCustomer: state.selectedCustomer?.id === customerId 
-              ? { ...state.selectedCustomer, ...response.data } 
-              : state.selectedCustomer,
-            loading: false 
+            selectedCustomer:
+              state.selectedCustomer?.id === customerId
+                ? { ...state.selectedCustomer, ...response.data }
+                : state.selectedCustomer,
+            loading: false,
           }));
           return { success: true, data: response.data };
         } else {
-          update(state => ({ ...state, loading: false }));
+          update((state) => ({ ...state, loading: false }));
           return { success: false, message: response.message };
         }
       } catch (error: any) {
-        update(state => ({ ...state, loading: false }));
+        update((state) => ({ ...state, loading: false }));
         return { success: false, message: error.message };
       }
     },
 
     // Delete customer
     deleteCustomer: async (customerId: string) => {
-      update(state => ({ ...state, loading: true }));
-      
+      update((state) => ({ ...state, loading: true }));
+
       try {
         const response = await api.deleteCustomer(customerId);
         if (response.success) {
-          update(state => ({ 
-            ...state, 
-            customers: state.customers.filter(c => c.id !== customerId),
-            selectedCustomer: state.selectedCustomer?.id === customerId 
-              ? null 
-              : state.selectedCustomer,
-            loading: false 
+          update((state) => ({
+            ...state,
+            customers: state.customers.filter((c) => c.id !== customerId),
+            selectedCustomer:
+              state.selectedCustomer?.id === customerId
+                ? null
+                : state.selectedCustomer,
+            loading: false,
           }));
           return { success: true };
         } else {
-          update(state => ({ ...state, loading: false }));
+          update((state) => ({ ...state, loading: false }));
           return { success: false, message: response.message };
         }
       } catch (error: any) {
-        update(state => ({ ...state, loading: false }));
+        update((state) => ({ ...state, loading: false }));
         return { success: false, message: error.message };
       }
     },
 
     // Select customer
     selectCustomer: (customer: Customer | null) => {
-      update(state => ({ ...state, selectedCustomer: customer }));
+      update((state) => ({ ...state, selectedCustomer: customer }));
     },
 
     // Search customers
     setSearchTerm: (searchTerm: string) => {
-      update(state => ({ ...state, searchTerm }));
+      update((state) => ({ ...state, searchTerm }));
     },
 
     // Get filtered customers based on search term
     getFilteredCustomers: () => {
       let filteredCustomers: Customer[] = [];
-      subscribe(state => {
-        filteredCustomers = state.customers.filter(customer =>
-          customer.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-          (customer.email && customer.email.toLowerCase().includes(state.searchTerm.toLowerCase())) ||
-          (customer.phone && customer.phone.includes(state.searchTerm))
+      subscribe((state) => {
+        filteredCustomers = state.customers.filter(
+          (customer) =>
+            customer.name
+              .toLowerCase()
+              .includes(state.searchTerm.toLowerCase()) ||
+            (customer.email &&
+              customer.email
+                .toLowerCase()
+                .includes(state.searchTerm.toLowerCase())) ||
+            (customer.phone && customer.phone.includes(state.searchTerm)),
         );
       })();
       return filteredCustomers;
@@ -233,7 +244,7 @@ function createCustomersStore() {
     // Clear state
     clear: () => {
       set(initialState);
-    }
+    },
   };
 }
 
@@ -250,5 +261,5 @@ export const customersActions = {
   selectCustomer: customersStore.selectCustomer,
   setSearchTerm: customersStore.setSearchTerm,
   getFilteredCustomers: customersStore.getFilteredCustomers,
-  clear: customersStore.clear
+  clear: customersStore.clear,
 };

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export interface SmsProvider {
   name: string;
@@ -15,38 +15,38 @@ export interface SmsResult {
 
 export interface SmsDeliveryStatus {
   messageId: string;
-  status: 'sent' | 'delivered' | 'failed' | 'pending';
+  status: "sent" | "delivered" | "failed" | "pending";
   timestamp?: Date;
   error?: string;
 }
 
 // Mock SMS provider for development/testing
 class MockSmsProvider implements SmsProvider {
-  name = 'mock';
+  name = "mock";
 
   async sendSms(phone: string, message: string): Promise<SmsResult> {
     console.log(`[MOCK SMS] Sending to ${phone}: ${message}`);
-    
+
     // Simulate different scenarios based on phone number
-    if (phone.includes('error')) {
+    if (phone.includes("error")) {
       return {
         success: false,
-        error: 'Mock SMS delivery failed',
+        error: "Mock SMS delivery failed",
       };
     }
-    
+
     // Simulate successful delivery
     return {
       success: true,
       messageId: `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      cost: '0.05',
+      cost: "0.05",
     };
   }
 
   async getDeliveryStatus(messageId: string): Promise<SmsDeliveryStatus> {
     return {
       messageId,
-      status: 'delivered',
+      status: "delivered",
       timestamp: new Date(),
     };
   }
@@ -54,7 +54,7 @@ class MockSmsProvider implements SmsProvider {
 
 // SMS.ru provider implementation (popular in Russia)
 class SmsRuProvider implements SmsProvider {
-  name = 'sms.ru';
+  name = "sms.ru";
   private apiId: string;
   private apiKey?: string;
   private from?: string;
@@ -71,28 +71,28 @@ class SmsRuProvider implements SmsProvider {
         api_id: this.apiId,
         to: this.normalizePhone(phone),
         msg: message,
-        json: '1',
+        json: "1",
       });
 
       if (this.from) {
-        params.append('from', this.from);
+        params.append("from", this.from);
       }
 
-      const response = await fetch('https://sms.ru/sms/send', {
-        method: 'POST',
+      const response = await fetch("https://sms.ru/sms/send", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: params.toString(),
       });
 
       const data = await response.json();
 
-      if (data.status === 'OK') {
+      if (data.status === "OK") {
         // Get the first phone number's result
         const phoneResult = Object.values(data.sms)[0] as any;
-        
-        if (phoneResult.status === 'OK') {
+
+        if (phoneResult.status === "OK") {
           return {
             success: true,
             messageId: phoneResult.sms_id,
@@ -120,16 +120,16 @@ class SmsRuProvider implements SmsProvider {
 
   private normalizePhone(phone: string): string {
     // Remove all non-digits
-    const digits = phone.replace(/\D/g, '');
-    
+    const digits = phone.replace(/\D/g, "");
+
     // Handle Russian phone numbers
-    if (digits.startsWith('8') && digits.length === 11) {
-      return '7' + digits.slice(1);
+    if (digits.startsWith("8") && digits.length === 11) {
+      return "7" + digits.slice(1);
     }
-    if (digits.startsWith('7') && digits.length === 11) {
+    if (digits.startsWith("7") && digits.length === 11) {
       return digits;
     }
-    
+
     // Return as-is if format is unknown
     return digits;
   }
@@ -144,23 +144,25 @@ class SmsService {
   }
 
   private createProvider(): SmsProvider {
-    const provider = process.env.SMS_PROVIDER || 'mock';
-    
+    const provider = process.env.SMS_PROVIDER || "mock";
+
     switch (provider) {
-      case 'sms.ru':
+      case "sms.ru":
         const apiId = process.env.SMS_RU_API_ID;
         if (!apiId) {
-          console.warn('SMS_RU_API_ID not found, falling back to mock provider');
+          console.warn(
+            "SMS_RU_API_ID not found, falling back to mock provider",
+          );
           return new MockSmsProvider();
         }
-        
+
         return new SmsRuProvider({
           apiId,
           apiKey: process.env.SMS_RU_API_KEY,
           from: process.env.SMS_RU_FROM,
         });
-        
-      case 'mock':
+
+      case "mock":
       default:
         return new MockSmsProvider();
     }
@@ -168,35 +170,44 @@ class SmsService {
 
   async sendVerificationSms(phone: string, code: string): Promise<SmsResult> {
     const message = `Ваш код подтверждения для YuYu Lolita: ${code}. Никому не сообщайте этот код.`;
-    
+
     console.log(`Sending verification SMS to ${phone}: ${code}`);
-    
+
     const result = await this.provider.sendSms(phone, message);
-    
+
     if (result.success) {
-      console.log(`SMS sent successfully to ${phone}, message ID: ${result.messageId}`);
+      console.log(
+        `SMS sent successfully to ${phone}, message ID: ${result.messageId}`,
+      );
     } else {
       console.error(`Failed to send SMS to ${phone}: ${result.error}`);
     }
-    
+
     return result;
   }
 
   async sendPasswordResetSms(phone: string, code: string): Promise<SmsResult> {
     const message = `Код для сброса пароля YuYu Lolita: ${code}. Если вы не запрашивали сброс пароля, игнорируйте это сообщение.`;
-    
+
     console.log(`Sending password reset SMS to ${phone}: ${code}`);
-    
+
     return await this.provider.sendSms(phone, message);
   }
 
-  async sendNotificationSms(phone: string, message: string): Promise<SmsResult> {
-    console.log(`Sending notification SMS to ${phone}: ${message.substring(0, 50)}...`);
-    
+  async sendNotificationSms(
+    phone: string,
+    message: string,
+  ): Promise<SmsResult> {
+    console.log(
+      `Sending notification SMS to ${phone}: ${message.substring(0, 50)}...`,
+    );
+
     return await this.provider.sendSms(phone, message);
   }
 
-  async getDeliveryStatus(messageId: string): Promise<SmsDeliveryStatus | null> {
+  async getDeliveryStatus(
+    messageId: string,
+  ): Promise<SmsDeliveryStatus | null> {
     if (this.provider.getDeliveryStatus) {
       return await this.provider.getDeliveryStatus(messageId);
     }
@@ -221,7 +232,7 @@ export const smsResultSchema = z.object({
 
 export const phoneNumberSchema = z
   .string()
-  .regex(/^\+?[\d\s\-\(\)]{10,15}$/, 'Invalid phone number format');
+  .regex(/^\+?[\d\s\-\(\)]{10,15}$/, "Invalid phone number format");
 
 // Utility function to generate verification codes
 export function generateVerificationCode(): string {

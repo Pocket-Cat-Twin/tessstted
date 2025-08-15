@@ -1,6 +1,25 @@
-import { db, users, userSubscriptions, subscriptionFeatures, customerAddresses, customers, eq, and, gte } from '@yuyu/db';
-import { getEffectiveTier, isSubscriptionActive, getDaysRemaining, SUBSCRIPTION_TIERS } from '@yuyu/shared';
-import { NotFoundError, ValidationError, UnauthorizedError } from '../middleware/error';
+import {
+  db,
+  users,
+  userSubscriptions,
+  subscriptionFeatures,
+  customerAddresses,
+  customers,
+  eq,
+  and,
+  gte,
+} from "@yuyu/db";
+import {
+  getEffectiveTier,
+  isSubscriptionActive,
+  getDaysRemaining,
+  SUBSCRIPTION_TIERS,
+} from "@yuyu/shared";
+import {
+  NotFoundError,
+  ValidationError,
+  UnauthorizedError,
+} from "../middleware/error";
 
 export interface UserProfile {
   id: string;
@@ -10,14 +29,14 @@ export interface UserProfile {
   fullName?: string;
   contactPhone?: string;
   contactEmail?: string;
-  registrationMethod: 'email' | 'phone';
-  role: 'user' | 'admin';
-  status: 'pending' | 'active' | 'blocked';
+  registrationMethod: "email" | "phone";
+  role: "user" | "admin";
+  status: "pending" | "active" | "blocked";
   emailVerified: boolean;
   phoneVerified: boolean;
   avatar?: string;
   subscription: {
-    currentTier: 'free' | 'group' | 'elite' | 'vip_temp';
+    currentTier: "free" | "group" | "elite" | "vip_temp";
     isActive: boolean;
     expiresAt?: Date;
     daysRemaining?: number;
@@ -57,7 +76,6 @@ export interface CreateAddressData {
 export interface UpdateAddressData extends Partial<CreateAddressData> {}
 
 class UserProfileService {
-
   /**
    * Get complete user profile with subscription and addresses
    */
@@ -68,21 +86,21 @@ class UserProfileService {
     });
 
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError("User not found");
     }
 
     // Get current active subscription
     const activeSubscription = await db.query.userSubscriptions.findFirst({
       where: and(
         eq(userSubscriptions.userId, userId),
-        eq(userSubscriptions.status, 'active'),
-        gte(userSubscriptions.endDate, new Date()) // Not expired
+        eq(userSubscriptions.status, "active"),
+        gte(userSubscriptions.endDate, new Date()), // Not expired
       ),
       orderBy: userSubscriptions.endDate, // Get the latest expiring one
     });
 
     // Determine effective subscription tier
-    let currentTier: 'free' | 'group' | 'elite' | 'vip_temp' = 'free';
+    let currentTier: "free" | "group" | "elite" | "vip_temp" = "free";
     let isActive = true;
     let expiresAt: Date | undefined;
     let autoRenew = false;
@@ -103,21 +121,21 @@ class UserProfileService {
     });
 
     // Get user addresses (find customer record first)
-    let addresses: UserProfile['addresses'] = [];
+    let addresses: UserProfile["addresses"] = [];
     const customer = await db.query.customers.findFirst({
-      where: eq(customers.email, user.email || ''),
+      where: eq(customers.email, user.email || ""),
       with: {
         addresses: true,
       },
     });
 
     if (customer?.addresses) {
-      addresses = customer.addresses.map(addr => ({
+      addresses = customer.addresses.map((addr) => ({
         id: addr.id,
         fullAddress: addr.fullAddress,
-        city: addr.city || '',
+        city: addr.city || "",
         postalCode: addr.postalCode || undefined,
-        country: addr.country || 'Россия',
+        country: addr.country || "Россия",
         addressComments: addr.addressComments || undefined,
         isDefault: addr.isDefault,
       }));
@@ -160,20 +178,25 @@ class UserProfileService {
     });
 
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError("User not found");
     }
 
     // Validate contact email if provided
     if (data.contactEmail && data.contactEmail === user.email) {
-      throw new ValidationError('Contact email cannot be the same as login email');
+      throw new ValidationError(
+        "Contact email cannot be the same as login email",
+      );
     }
 
     // Validate contact phone if provided
     if (data.contactPhone && data.contactPhone === user.phone) {
-      throw new ValidationError('Contact phone cannot be the same as login phone');
+      throw new ValidationError(
+        "Contact phone cannot be the same as login phone",
+      );
     }
 
-    await db.update(users)
+    await db
+      .update(users)
       .set({
         ...data,
         updatedAt: new Date(),
@@ -184,29 +207,37 @@ class UserProfileService {
   /**
    * Add new address for user
    */
-  async addAddress(userId: string, addressData: CreateAddressData): Promise<string> {
+  async addAddress(
+    userId: string,
+    addressData: CreateAddressData,
+  ): Promise<string> {
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
 
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError("User not found");
     }
 
     // Find or create customer record
     let customer = await db.query.customers.findFirst({
-      where: user.email ? eq(customers.email, user.email) : eq(customers.phone, user.phone!),
+      where: user.email
+        ? eq(customers.email, user.email)
+        : eq(customers.phone, user.phone!),
     });
 
     if (!customer) {
       // Create customer record
-      const [newCustomer] = await db.insert(customers).values({
-        name: user.name || user.fullName || 'Клиент',
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        contactPhone: user.contactPhone,
-      }).returning();
+      const [newCustomer] = await db
+        .insert(customers)
+        .values({
+          name: user.name || user.fullName || "Клиент",
+          fullName: user.fullName,
+          email: user.email,
+          phone: user.phone,
+          contactPhone: user.contactPhone,
+        })
+        .returning();
       customer = newCustomer;
     }
 
@@ -215,25 +246,30 @@ class UserProfileService {
       where: eq(customerAddresses.customerId, customer.id),
     });
 
-    const shouldBeDefault = addressData.isDefault || existingAddresses.length === 0;
+    const shouldBeDefault =
+      addressData.isDefault || existingAddresses.length === 0;
 
     // If setting as default, unmark other addresses
     if (shouldBeDefault) {
-      await db.update(customerAddresses)
+      await db
+        .update(customerAddresses)
         .set({ isDefault: false })
         .where(eq(customerAddresses.customerId, customer.id));
     }
 
     // Create address
-    const [newAddress] = await db.insert(customerAddresses).values({
-      customerId: customer.id,
-      fullAddress: addressData.fullAddress,
-      city: addressData.city,
-      postalCode: addressData.postalCode,
-      country: addressData.country || 'Россия',
-      addressComments: addressData.addressComments,
-      isDefault: shouldBeDefault,
-    }).returning();
+    const [newAddress] = await db
+      .insert(customerAddresses)
+      .values({
+        customerId: customer.id,
+        fullAddress: addressData.fullAddress,
+        city: addressData.city,
+        postalCode: addressData.postalCode,
+        country: addressData.country || "Россия",
+        addressComments: addressData.addressComments,
+        isDefault: shouldBeDefault,
+      })
+      .returning();
 
     return newAddress.id;
   }
@@ -241,21 +277,29 @@ class UserProfileService {
   /**
    * Update existing address
    */
-  async updateAddress(userId: string, addressId: string, data: UpdateAddressData): Promise<void> {
+  async updateAddress(
+    userId: string,
+    addressId: string,
+    data: UpdateAddressData,
+  ): Promise<void> {
     // Verify user owns this address
     const address = await this.getUserAddress(userId, addressId);
 
     // If setting as default, unmark other addresses
     if (data.isDefault) {
-      await db.update(customerAddresses)
+      await db
+        .update(customerAddresses)
         .set({ isDefault: false })
-        .where(and(
-          eq(customerAddresses.customerId, address.customerId),
-          // Don't update the current address yet
-        ));
+        .where(
+          and(
+            eq(customerAddresses.customerId, address.customerId),
+            // Don't update the current address yet
+          ),
+        );
     }
 
-    await db.update(customerAddresses)
+    await db
+      .update(customerAddresses)
       .set({
         ...data,
         updatedAt: new Date(),
@@ -276,11 +320,14 @@ class UserProfileService {
     });
 
     if (addressCount.length === 1) {
-      throw new ValidationError('Cannot delete the only address. Please add another address first.');
+      throw new ValidationError(
+        "Cannot delete the only address. Please add another address first.",
+      );
     }
 
     // Delete the address
-    await db.delete(customerAddresses)
+    await db
+      .delete(customerAddresses)
       .where(eq(customerAddresses.id, addressId));
 
     // If this was the default address, make another one default
@@ -291,7 +338,8 @@ class UserProfileService {
       });
 
       if (remainingAddresses.length > 0) {
-        await db.update(customerAddresses)
+        await db
+          .update(customerAddresses)
           .set({ isDefault: true })
           .where(eq(customerAddresses.id, remainingAddresses[0].id));
       }
@@ -307,26 +355,28 @@ class UserProfileService {
     });
 
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError("User not found");
     }
 
     const customer = await db.query.customers.findFirst({
-      where: user.email ? eq(customers.email, user.email) : eq(customers.phone, user.phone!),
+      where: user.email
+        ? eq(customers.email, user.email)
+        : eq(customers.phone, user.phone!),
     });
 
     if (!customer) {
-      throw new NotFoundError('Customer record not found');
+      throw new NotFoundError("Customer record not found");
     }
 
     const address = await db.query.customerAddresses.findFirst({
       where: and(
         eq(customerAddresses.id, addressId),
-        eq(customerAddresses.customerId, customer.id)
+        eq(customerAddresses.customerId, customer.id),
       ),
     });
 
     if (!address) {
-      throw new NotFoundError('Address not found or access denied');
+      throw new NotFoundError("Address not found or access denied");
     }
 
     return address;
@@ -335,22 +385,24 @@ class UserProfileService {
   /**
    * Get user's subscription history
    */
-  async getSubscriptionHistory(userId: string): Promise<Array<{
-    id: string;
-    tier: string;
-    status: string;
-    price: string;
-    startDate: Date;
-    endDate: Date;
-    autoRenew: boolean;
-    createdAt: Date;
-  }>> {
+  async getSubscriptionHistory(userId: string): Promise<
+    Array<{
+      id: string;
+      tier: string;
+      status: string;
+      price: string;
+      startDate: Date;
+      endDate: Date;
+      autoRenew: boolean;
+      createdAt: Date;
+    }>
+  > {
     const subscriptions = await db.query.userSubscriptions.findMany({
       where: eq(userSubscriptions.userId, userId),
       orderBy: userSubscriptions.createdAt,
     });
 
-    return subscriptions.map(sub => ({
+    return subscriptions.map((sub) => ({
       id: sub.id,
       tier: sub.tier,
       status: sub.status,
@@ -370,15 +422,15 @@ class UserProfileService {
     const features = profile.subscription.features;
 
     switch (action) {
-      case 'participate_in_promotions':
+      case "participate_in_promotions":
         return features.canParticipateInPromotions;
-      case 'combine_orders':
+      case "combine_orders":
         return features.canCombineOrders;
-      case 'priority_processing':
+      case "priority_processing":
         return features.hasPriorityProcessing;
-      case 'personal_support':
+      case "personal_support":
         return features.hasPersonalSupport;
-      case 'product_inspection':
+      case "product_inspection":
         return features.hasProductInspection;
       default:
         return false;

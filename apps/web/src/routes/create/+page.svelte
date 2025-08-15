@@ -3,7 +3,9 @@
   import { onMount } from 'svelte';
   import { ordersStore } from '$lib/stores/orders';
   import { configStore } from '$lib/stores/config';
+  import { authStore } from '$lib/stores/auth';
   import { customersStore, type Customer } from '$lib/stores/customers';
+  import { api } from '$lib/api/client-simple';
   import Button from '$components/ui/Button.svelte';
   import Input from '$components/ui/Input.svelte';
   import Modal from '$components/ui/Modal.svelte';
@@ -35,20 +37,90 @@
   let error = '';
   let showSuccessModal = false;
   let createdOrder: any = null;
+  let userSubscription: any = null;
+  let loadingSubscription = true;
 
   // Config
   $: config = $configStore.config;
   $: currentKurs = $configStore.kurs;
+  $: user = $authStore.user;
+  
+  // Subscription-aware commission rate
+  $: commissionRate = getCommissionRate(userSubscription);
+  $: storageTime = getStorageTime(userSubscription);
+  $: processingTime = getProcessingTime(userSubscription);
   
   // Calculations
-  $: totals = calculateOrderTotals(goods, currentKurs, 0.1); // 10% commission
+  $: totals = calculateOrderTotals(goods, currentKurs, commissionRate);
   $: isFormValid = customerName && customerPhone && deliveryAddress && goods.every(g => g.name && g.quantity > 0 && g.priceYuan > 0);
 
-  onMount(() => {
+  // Subscription-based features
+  function getCommissionRate(subscription: any): number {
+    if (!subscription || subscription.status !== 'active') {
+      return 0.10; // 10% for free tier
+    }
+    
+    switch (subscription.tier) {
+      case 'group': return 0.08; // 8% for group
+      case 'elite': return 0.05; // 5% for elite  
+      case 'vip_temp': return 0.03; // 3% for VIP temp
+      default: return 0.10; // 10% for free/unknown
+    }
+  }
+
+  function getStorageTime(subscription: any): string {
+    if (!subscription || subscription.status !== 'active') {
+      return 'до 14 дней';
+    }
+    
+    switch (subscription.tier) {
+      case 'group': return 'до 3 месяцев';
+      case 'elite': return 'без ограничений';
+      case 'vip_temp': return 'до 30 дней';
+      default: return 'до 14 дней';
+    }
+  }
+
+  function getProcessingTime(subscription: any): string {
+    if (!subscription || subscription.status !== 'active') {
+      return 'до 5 рабочих дней';
+    }
+    
+    switch (subscription.tier) {
+      case 'group': return '2–4 рабочих дня';
+      case 'elite': return 'до 12 часов';
+      case 'vip_temp': return 'экстренная обработка';
+      default: return 'до 5 рабочих дней';
+    }
+  }
+
+  // Load user subscription if authenticated
+  async function loadUserSubscription() {
+    if (!user) {
+      loadingSubscription = false;
+      return;
+    }
+
+    try {
+      const response = await api.getSubscription();
+      if (response.success) {
+        userSubscription = response.data.subscription;
+      }
+    } catch (error) {
+      console.error('Failed to load subscription:', error);
+    } finally {
+      loadingSubscription = false;
+    }
+  }
+
+  onMount(async () => {
     // Initialize config if not loaded
     if (!$configStore.initialized) {
       configStore.init();
     }
+    
+    // Load user subscription
+    await loadUserSubscription();
   });
 
   function addGood() {
@@ -519,7 +591,7 @@
                 </div>
                 
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Комиссия 10% (¥):</span>
+                  <span class="text-gray-600">Комиссия {(commissionRate * 100).toFixed(0)}% (¥):</span>
                   <span class="font-medium">¥{totals.totalCommission.toFixed(2)}</span>
                 </div>
                 
@@ -541,7 +613,48 @@
                 </div>
               </div>
               
-              <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+              <!-- Subscription Benefits -->
+              {#if user && userSubscription}
+                <div class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
+                  <div class="flex items-start space-x-2">
+                    <svg class="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    <div class="text-sm text-purple-700">
+                      <p class="font-medium mb-2">Ваши преимущества:</p>
+                      <ul class="space-y-1 text-xs">
+                        <li>• Комиссия: {(commissionRate * 100).toFixed(0)}%</li>
+                        <li>• Хранение: {storageTime}</li>
+                        <li>• Обработка: {processingTime}</li>
+                        {#if userSubscription.tier === 'elite'}
+                          <li>• Персональная поддержка</li>
+                        {/if}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              {:else if user}
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div class="flex items-start space-x-2">
+                    <svg class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <div class="text-sm text-yellow-700">
+                      <p class="font-medium mb-2">Базовый тариф:</p>
+                      <ul class="space-y-1 text-xs">
+                        <li>• Комиссия: 10%</li>
+                        <li>• Хранение: до 14 дней</li>
+                        <li>• Обработка: до 5 рабочих дней</li>
+                      </ul>
+                      <a href="/subscriptions" class="inline-block mt-2 text-purple-600 hover:text-purple-800 underline text-xs font-medium">
+                        Улучшить тариф →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              {/if}
+
+              <div class="mt-4 p-4 bg-blue-50 rounded-lg">
                 <div class="flex items-start space-x-2">
                   <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

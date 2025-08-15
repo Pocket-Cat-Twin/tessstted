@@ -1,9 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Utility function to validate data against a schema
  */
-export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): {
+export function validateData<T>(
+  schema: z.ZodSchema<T>,
+  data: unknown,
+): {
   success: boolean;
   data?: T;
   errors?: Record<string, string[]>;
@@ -14,21 +17,21 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string[]> = {};
-      
+
       error.errors.forEach((err) => {
-        const path = err.path.join('.');
+        const path = err.path.join(".");
         if (!errors[path]) {
           errors[path] = [];
         }
         errors[path].push(err.message);
       });
-      
+
       return { success: false, errors };
     }
-    
-    return { 
-      success: false, 
-      errors: { general: ['Validation failed'] } 
+
+    return {
+      success: false,
+      errors: { general: ["Validation failed"] },
     };
   }
 }
@@ -36,7 +39,10 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): {
 /**
  * Safely parse data with a schema, returning null on failure
  */
-export function safeParseData<T>(schema: z.ZodSchema<T>, data: unknown): T | null {
+export function safeParseData<T>(
+  schema: z.ZodSchema<T>,
+  data: unknown,
+): T | null {
   try {
     return schema.parse(data);
   } catch {
@@ -48,7 +54,7 @@ export function safeParseData<T>(schema: z.ZodSchema<T>, data: unknown): T | nul
  * Create a partial schema from an existing schema
  */
 export function createPartialSchema<T extends z.ZodRawShape>(
-  schema: z.ZodObject<T>
+  schema: z.ZodObject<T>,
 ): z.ZodObject<{ [K in keyof T]: z.ZodOptional<T[K]> }> {
   return schema.partial();
 }
@@ -84,10 +90,10 @@ export function validatePasswordStrength(password: string): {
     hasNumbers: /\d/.test(password),
     hasSpecialChars: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   };
-  
+
   const score = Object.values(requirements).filter(Boolean).length;
   const isValid = score >= 4 && requirements.minLength;
-  
+
   return { isValid, score, requirements };
 }
 
@@ -98,9 +104,9 @@ export function createSlug(text: string): string {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 /**
@@ -108,9 +114,9 @@ export function createSlug(text: string): string {
  */
 export function validateFileType(
   filename: string,
-  allowedTypes: string[]
+  allowedTypes: string[],
 ): boolean {
-  const extension = filename.split('.').pop()?.toLowerCase();
+  const extension = filename.split(".").pop()?.toLowerCase();
   return extension ? allowedTypes.includes(extension) : false;
 }
 
@@ -120,4 +126,3 @@ export function validateFileType(
 export function validateFileSize(size: number, maxSize: number): boolean {
   return size <= maxSize;
 }
-

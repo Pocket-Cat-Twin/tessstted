@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Config schema
 export const configSchema = z.object({
@@ -6,7 +6,7 @@ export const configSchema = z.object({
   key: z.string().min(1).max(100),
   value: z.string(),
   description: z.string().optional(),
-  type: z.enum(['string', 'number', 'boolean', 'json']).default('string'),
+  type: z.enum(["string", "number", "boolean", "json"]).default("string"),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Generic API response schema
 export const apiResponseSchema = z.object({
@@ -48,14 +48,14 @@ export const authTokenSchema = z.object({
 
 // Error codes enum
 export enum ErrorCode {
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
-  AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
-  NOT_FOUND_ERROR = 'NOT_FOUND_ERROR',
-  DUPLICATE_ERROR = 'DUPLICATE_ERROR',
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
-  RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
-  FILE_UPLOAD_ERROR = 'FILE_UPLOAD_ERROR',
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR",
+  AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
+  NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
+  DUPLICATE_ERROR = "DUPLICATE_ERROR",
+  INTERNAL_ERROR = "INTERNAL_ERROR",
+  RATE_LIMIT_ERROR = "RATE_LIMIT_ERROR",
+  FILE_UPLOAD_ERROR = "FILE_UPLOAD_ERROR",
 }
 
 // API error schema
@@ -72,12 +72,12 @@ export const searchSchema = z.object({
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(10),
   sortBy: z.string().optional(),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
 // Bulk operation schema
 export const bulkOperationSchema = z.object({
-  operation: z.enum(['delete', 'update', 'archive']),
+  operation: z.enum(["delete", "update", "archive"]),
   ids: z.array(z.string().uuid()),
   data: z.any().optional(),
 });
@@ -87,7 +87,9 @@ export type ApiResponse<T = any> = z.infer<typeof apiResponseSchema> & {
   data?: T;
 };
 
-export type PaginatedResponse<T = any> = z.infer<typeof paginatedResponseSchema> & {
+export type PaginatedResponse<T = any> = z.infer<
+  typeof paginatedResponseSchema
+> & {
   data: T[];
 };
 

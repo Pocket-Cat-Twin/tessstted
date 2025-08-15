@@ -1,16 +1,16 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // User role enum
 export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin'
+  USER = "user",
+  ADMIN = "admin",
 }
 
 // User status enum
 export enum UserStatus {
-  PENDING = 'pending',
-  ACTIVE = 'active',
-  BLOCKED = 'blocked'
+  PENDING = "pending",
+  ACTIVE = "active",
+  BLOCKED = "blocked",
 }
 
 // Base user schema

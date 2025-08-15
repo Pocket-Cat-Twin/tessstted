@@ -1,22 +1,27 @@
-import { Elysia } from 'elysia';
-import { logRateLimitViolation } from './logging';
+import { Elysia } from "elysia";
+import { logRateLimitViolation } from "./logging";
 
 // Simple in-memory rate limiter
 // In production, you'd want to use Redis or similar
 class RateLimiter {
-  private requests: Map<string, { count: number; resetTime: number }> = new Map();
+  private requests: Map<string, { count: number; resetTime: number }> =
+    new Map();
   private windowMs: number;
   private maxRequests: number;
 
   constructor(windowMs: number = 15 * 60 * 1000, maxRequests: number = 100) {
     this.windowMs = windowMs;
     this.maxRequests = maxRequests;
-    
+
     // Cleanup expired entries every minute
     setInterval(() => this.cleanup(), 60 * 1000);
   }
 
-  check(key: string): { allowed: boolean; remaining: number; resetTime: number } {
+  check(key: string): {
+    allowed: boolean;
+    remaining: number;
+    resetTime: number;
+  } {
     const now = Date.now();
     const resetTime = now + this.windowMs;
     const entry = this.requests.get(key);
@@ -73,71 +78,79 @@ const emailLimiter = new RateLimiter(60 * 60 * 1000, 10); // 10 email sends per 
 
 function getRateLimiter(path: string): RateLimiter {
   // Critical security endpoints - strictest limits
-  if (path.includes('/auth/reset-password') || path.includes('/auth/forgot-password')) {
+  if (
+    path.includes("/auth/reset-password") ||
+    path.includes("/auth/forgot-password")
+  ) {
     return passwordResetLimiter;
   }
-  
+
   // Authentication endpoints
-  if (path.includes('/auth/') || path.includes('/login') || path.includes('/register')) {
+  if (
+    path.includes("/auth/") ||
+    path.includes("/login") ||
+    path.includes("/register")
+  ) {
     return authLimiter;
   }
-  
+
   // Order creation endpoints
-  if (path.includes('/orders') && path.includes('POST')) {
+  if (path.includes("/orders") && path.includes("POST")) {
     return orderCreationLimiter;
   }
-  
+
   // Bulk operations
-  if (path.includes('/bulk/')) {
+  if (path.includes("/bulk/")) {
     return bulkOperationLimiter;
   }
-  
+
   // Email sending endpoints
-  if (path.includes('/notifications/send') || path.includes('/email/')) {
+  if (path.includes("/notifications/send") || path.includes("/email/")) {
     return emailLimiter;
   }
-  
+
   // Admin endpoints - higher limits but still controlled
-  if (path.includes('/admin/')) {
+  if (path.includes("/admin/")) {
     return adminLimiter;
   }
-  
+
   // File uploads
-  if (path.includes('/upload')) {
+  if (path.includes("/upload")) {
     return uploadLimiter;
   }
-  
+
   return generalLimiter;
 }
 
-export const rateLimiter = new Elysia({ name: 'rateLimiter' })
-  .onBeforeHandle(({ request, set, headers }) => {
+export const rateLimiter = new Elysia({ name: "rateLimiter" }).onBeforeHandle(
+  ({ request, set, headers }) => {
     // Skip rate limiting in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       return;
     }
 
-    const ip = headers['x-forwarded-for'] || headers['x-real-ip'] || 'unknown';
+    const ip = headers["x-forwarded-for"] || headers["x-real-ip"] || "unknown";
     const path = new URL(request.url).pathname;
     const limiter = getRateLimiter(path);
-    
+
     const result = limiter.check(ip as string);
-    
+
     // Add rate limit headers
-    set.headers['X-RateLimit-Limit'] = limiter['maxRequests'].toString();
-    set.headers['X-RateLimit-Remaining'] = result.remaining.toString();
-    set.headers['X-RateLimit-Reset'] = new Date(result.resetTime).toISOString();
+    set.headers["X-RateLimit-Limit"] = limiter["maxRequests"].toString();
+    set.headers["X-RateLimit-Remaining"] = result.remaining.toString();
+    set.headers["X-RateLimit-Reset"] = new Date(result.resetTime).toISOString();
 
     if (!result.allowed) {
       // Log rate limit violation
-      logRateLimitViolation(ip as string, path, limiter['maxRequests']);
-      
+      logRateLimitViolation(ip as string, path, limiter["maxRequests"]);
+
       set.status = 429;
       return {
         success: false,
-        error: 'RATE_LIMIT_ERROR',
-        message: 'Too many requests, please try again later',
+        error: "RATE_LIMIT_ERROR",
+        message: "Too many requests, please try again later",
         retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000),
       };
     }
-  });
+  },
+);

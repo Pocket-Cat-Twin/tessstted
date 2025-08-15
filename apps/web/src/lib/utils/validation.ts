@@ -13,62 +13,62 @@ export interface FieldValidation {
 
 // Email validation
 export function validateEmail(email: string): FieldValidation {
-  const result: FieldValidation = { field: 'email', isValid: true };
-  
-  if (!email || email.trim() === '') {
+  const result: FieldValidation = { field: "email", isValid: true };
+
+  if (!email || email.trim() === "") {
     result.isValid = false;
-    result.error = 'Email обязателен';
+    result.error = "Email обязателен";
     return result;
   }
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.trim())) {
     result.isValid = false;
-    result.error = 'Введите корректный email адрес';
+    result.error = "Введите корректный email адрес";
     return result;
   }
-  
+
   if (email.length > 254) {
     result.isValid = false;
-    result.error = 'Email слишком длинный';
+    result.error = "Email слишком длинный";
     return result;
   }
-  
+
   return result;
 }
 
 // Password validation
 export function validatePassword(password: string): FieldValidation {
-  const result: FieldValidation = { field: 'password', isValid: true };
-  
-  if (!password || password.trim() === '') {
+  const result: FieldValidation = { field: "password", isValid: true };
+
+  if (!password || password.trim() === "") {
     result.isValid = false;
-    result.error = 'Пароль обязателен';
+    result.error = "Пароль обязателен";
     return result;
   }
-  
+
   if (password.length < 8) {
     result.isValid = false;
-    result.error = 'Пароль должен содержать минимум 8 символов';
+    result.error = "Пароль должен содержать минимум 8 символов";
     return result;
   }
-  
+
   if (password.length > 128) {
     result.isValid = false;
-    result.error = 'Пароль слишком длинный';
+    result.error = "Пароль слишком длинный";
     return result;
   }
-  
+
   // Check for at least one number and one letter
   const hasNumber = /\d/.test(password);
   const hasLetter = /[a-zA-Zа-яА-Я]/.test(password);
-  
+
   if (!hasNumber || !hasLetter) {
     result.isValid = false;
-    result.error = 'Пароль должен содержать буквы и цифры';
+    result.error = "Пароль должен содержать буквы и цифры";
     return result;
   }
-  
+
   return result;
 }
 
@@ -78,119 +78,130 @@ export function getPasswordStrength(password: string): {
   label: string;
   color: string;
 } {
-  if (!password) return { score: 0, label: '', color: '' };
-  
+  if (!password) return { score: 0, label: "", color: "" };
+
   let score = 0;
-  
+
   // Length
   if (password.length >= 8) score += 1;
   if (password.length >= 12) score += 1;
-  
+
   // Character types
   if (/[a-z]/.test(password)) score += 1;
   if (/[A-Z]/.test(password)) score += 1;
   if (/[0-9]/.test(password)) score += 1;
   if (/[^a-zA-Z0-9]/.test(password)) score += 1;
-  
+
   // Variety
-  if (password.length >= 8 && /[a-zA-Z]/.test(password) && /[0-9]/.test(password)) score += 1;
-  
+  if (
+    password.length >= 8 &&
+    /[a-zA-Z]/.test(password) &&
+    /[0-9]/.test(password)
+  )
+    score += 1;
+
   if (score <= 2) {
-    return { score, label: 'Слабый', color: 'text-red-600' };
+    return { score, label: "Слабый", color: "text-red-600" };
   } else if (score <= 4) {
-    return { score, label: 'Средний', color: 'text-yellow-600' };
+    return { score, label: "Средний", color: "text-yellow-600" };
   } else {
-    return { score, label: 'Надежный', color: 'text-green-600' };
+    return { score, label: "Надежный", color: "text-green-600" };
   }
 }
 
 // Confirm password validation
-export function validateConfirmPassword(password: string, confirmPassword: string): FieldValidation {
-  const result: FieldValidation = { field: 'confirmPassword', isValid: true };
-  
-  if (!confirmPassword || confirmPassword.trim() === '') {
+export function validateConfirmPassword(
+  password: string,
+  confirmPassword: string,
+): FieldValidation {
+  const result: FieldValidation = { field: "confirmPassword", isValid: true };
+
+  if (!confirmPassword || confirmPassword.trim() === "") {
     result.isValid = false;
-    result.error = 'Подтверждение пароля обязательно';
+    result.error = "Подтверждение пароля обязательно";
     return result;
   }
-  
+
   if (password !== confirmPassword) {
     result.isValid = false;
-    result.error = 'Пароли не совпадают';
+    result.error = "Пароли не совпадают";
     return result;
   }
-  
+
   return result;
 }
 
 // Name validation
 export function validateName(name: string): FieldValidation {
-  const result: FieldValidation = { field: 'name', isValid: true };
-  
-  if (!name || name.trim() === '') {
+  const result: FieldValidation = { field: "name", isValid: true };
+
+  if (!name || name.trim() === "") {
     result.isValid = false;
-    result.error = 'Имя обязательно';
+    result.error = "Имя обязательно";
     return result;
   }
-  
+
   if (name.trim().length < 2) {
     result.isValid = false;
-    result.error = 'Имя должно содержать минимум 2 символа';
+    result.error = "Имя должно содержать минимум 2 символа";
     return result;
   }
-  
+
   if (name.trim().length > 100) {
     result.isValid = false;
-    result.error = 'Имя слишком длинное';
+    result.error = "Имя слишком длинное";
     return result;
   }
-  
+
   return result;
 }
 
 // Phone validation (optional)
 export function validatePhone(phone: string): FieldValidation {
-  const result: FieldValidation = { field: 'phone', isValid: true };
-  
-  if (!phone || phone.trim() === '') {
+  const result: FieldValidation = { field: "phone", isValid: true };
+
+  if (!phone || phone.trim() === "") {
     return result; // Phone is optional
   }
-  
+
   // Remove all non-digit characters
-  const digitsOnly = phone.replace(/\D/g, '');
-  
+  const digitsOnly = phone.replace(/\D/g, "");
+
   if (digitsOnly.length < 10) {
     result.isValid = false;
-    result.error = 'Номер телефона должен содержать минимум 10 цифр';
+    result.error = "Номер телефона должен содержать минимум 10 цифр";
     return result;
   }
-  
+
   if (digitsOnly.length > 15) {
     result.isValid = false;
-    result.error = 'Номер телефона слишком длинный';
+    result.error = "Номер телефона слишком длинный";
     return result;
   }
-  
+
   return result;
 }
 
 // Complete form validation
-export function validateLoginForm(email: string, password: string): ValidationResult {
+export function validateLoginForm(
+  email: string,
+  password: string,
+): ValidationResult {
   const errors: string[] = [];
-  
+
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid && emailValidation.error) {
     errors.push(emailValidation.error);
   }
-  
+
   const passwordValidation = validatePassword(password);
   if (!passwordValidation.isValid && passwordValidation.error) {
     errors.push(passwordValidation.error);
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -199,55 +210,62 @@ export function validateRegisterForm(
   password: string,
   confirmPassword: string,
   name: string,
-  phone?: string
+  phone?: string,
 ): ValidationResult {
   const errors: string[] = [];
-  
+
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid && emailValidation.error) {
     errors.push(emailValidation.error);
   }
-  
+
   const passwordValidation = validatePassword(password);
   if (!passwordValidation.isValid && passwordValidation.error) {
     errors.push(passwordValidation.error);
   }
-  
-  const confirmPasswordValidation = validateConfirmPassword(password, confirmPassword);
+
+  const confirmPasswordValidation = validateConfirmPassword(
+    password,
+    confirmPassword,
+  );
   if (!confirmPasswordValidation.isValid && confirmPasswordValidation.error) {
     errors.push(confirmPasswordValidation.error);
   }
-  
+
   const nameValidation = validateName(name);
   if (!nameValidation.isValid && nameValidation.error) {
     errors.push(nameValidation.error);
   }
-  
+
   if (phone) {
     const phoneValidation = validatePhone(phone);
     if (!phoneValidation.isValid && phoneValidation.error) {
       errors.push(phoneValidation.error);
     }
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
 // Real-time validation for individual fields
-export function validateField(field: string, value: string, additionalValue?: string): FieldValidation {
+export function validateField(
+  field: string,
+  value: string,
+  additionalValue?: string,
+): FieldValidation {
   switch (field) {
-    case 'email':
+    case "email":
       return validateEmail(value);
-    case 'password':
+    case "password":
       return validatePassword(value);
-    case 'confirmPassword':
-      return validateConfirmPassword(additionalValue || '', value);
-    case 'name':
+    case "confirmPassword":
+      return validateConfirmPassword(additionalValue || "", value);
+    case "name":
       return validateName(value);
-    case 'phone':
+    case "phone":
       return validatePhone(value);
     default:
       return { field, isValid: true };

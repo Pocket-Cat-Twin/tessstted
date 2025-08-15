@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Story status enum
 export enum StoryStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived'
+  DRAFT = "draft",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
 }
 
 // Story schema

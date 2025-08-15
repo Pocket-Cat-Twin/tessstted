@@ -1,16 +1,16 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* Custom styles */
 @layer base {
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
-    font-family: 'Bona Nova', serif;
-    background-image: url('/images/regular-background.webp');
+    font-family: "Bona Nova", serif;
+    background-image: url("/images/regular-background.webp");
     background-size: calc(100vw / 6) calc(100vw / 6);
     background-position: top left;
     background-repeat: repeat;
@@ -25,9 +25,9 @@
       background-attachment: scroll;
       background-size: calc(100vw / 6) calc(100vw / 6);
     }
-    
+
     .theme-coffee body {
-      background-image: url('/images/coffee-background.webp') !important;
+      background-image: url("/images/coffee-background.webp") !important;
       background-attachment: scroll !important;
       background-size: calc(100vw / 6) calc(100vw / 6) !important;
     }
@@ -39,9 +39,9 @@
       background-attachment: fixed;
       background-size: calc(100vw / 6) calc(100vw / 6);
     }
-    
+
     .theme-coffee body {
-      background-image: url('/images/coffee-background.webp') !important;
+      background-image: url("/images/coffee-background.webp") !important;
       background-attachment: fixed !important;
       background-size: calc(100vw / 6) calc(100vw / 6) !important;
     }
@@ -53,45 +53,45 @@
   .btn {
     @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
-  
+
   .btn-primary {
     @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
   }
-  
+
   .btn-secondary {
     @apply bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus:ring-secondary-500;
   }
-  
+
   .btn-outline {
     @apply border border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500;
   }
-  
+
   .btn-sm {
     @apply px-3 py-1.5 text-sm;
   }
-  
+
   .btn-lg {
     @apply px-6 py-3 text-lg;
   }
-  
+
   /* Form styles */
   .form-input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors;
   }
-  
+
   .form-label {
     @apply block text-sm font-medium text-gray-700 mb-1;
   }
-  
+
   .form-error {
     @apply text-red-600 text-sm mt-1;
   }
-  
+
   /* Card styles */
   .card {
     @apply bg-white/80 rounded-xl shadow-sm border border-gray-200;
   }
-  
+
   .card-hover {
     @apply hover:shadow-md hover:border-gray-300 transition-all duration-200;
   }
@@ -104,19 +104,25 @@
   }
 
   .card-kawaii::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -2px;
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(45deg, rgba(255, 214, 232, 0.8), rgba(230, 217, 245, 0.8), rgba(255, 214, 204, 0.8), rgba(212, 245, 232, 0.8));
+    background: linear-gradient(
+      45deg,
+      rgba(255, 214, 232, 0.8),
+      rgba(230, 217, 245, 0.8),
+      rgba(255, 214, 204, 0.8),
+      rgba(212, 245, 232, 0.8)
+    );
     border-radius: 24px;
     z-index: -1;
   }
 
   .card-kawaii::after {
-    content: '✿ ❀ ✿';
+    content: "✿ ❀ ✿";
     position: absolute;
     top: -8px;
     right: 16px;
@@ -141,7 +147,7 @@
   }
 
   .btn-kawaii::before {
-    content: '♡';
+    content: "♡";
     position: absolute;
     left: -8px;
     top: 50%;
@@ -170,24 +176,36 @@
   /* Coffee Theme */
   .theme-coffee {
     /* Coffee Color Palette - Based on Screenshot_7.png */
-    --color-coffee-50: #FAF7F4;
-    --color-coffee-100: #F5E6D3;
-    --color-coffee-200: #E8D5C4;
-    --color-coffee-300: #C4A59A;
-    --color-coffee-400: #A67C6A;
-    --color-coffee-500: #8B4A42;
-    --color-coffee-600: #6B3A33;
-    --color-coffee-700: #4A2B25;
-    --color-coffee-800: #3C251E;
-    --color-coffee-900: #2D1C16;
-    --color-coffee-950: #1E130E;
-    
+    --color-coffee-50: #faf7f4;
+    --color-coffee-100: #f5e6d3;
+    --color-coffee-200: #e8d5c4;
+    --color-coffee-300: #c4a59a;
+    --color-coffee-400: #a67c6a;
+    --color-coffee-500: #8b4a42;
+    --color-coffee-600: #6b3a33;
+    --color-coffee-700: #4a2b25;
+    --color-coffee-800: #3c251e;
+    --color-coffee-900: #2d1c16;
+    --color-coffee-950: #1e130e;
+
     /* Coffee Theme Gradients */
-    --gradient-coffee-primary: linear-gradient(135deg, #8B4A42 0%, #F5E6D3 100%);
-    --gradient-coffee-secondary: linear-gradient(135deg, #6B3A33 0%, #C4A59A 100%);
-    --gradient-coffee-tertiary: linear-gradient(135deg, #4A2B25 0%, #A67C6A 100%);
-    --gradient-coffee-subtle: linear-gradient(135deg, #FAF7F4 0%, #E8D5C4 100%);
-    
+    --gradient-coffee-primary: linear-gradient(
+      135deg,
+      #8b4a42 0%,
+      #f5e6d3 100%
+    );
+    --gradient-coffee-secondary: linear-gradient(
+      135deg,
+      #6b3a33 0%,
+      #c4a59a 100%
+    );
+    --gradient-coffee-tertiary: linear-gradient(
+      135deg,
+      #4a2b25 0%,
+      #a67c6a 100%
+    );
+    --gradient-coffee-subtle: linear-gradient(135deg, #faf7f4 0%, #e8d5c4 100%);
+
     /* Override primary colors with coffee theme */
     --color-primary-50: var(--color-coffee-50);
     --color-primary-100: var(--color-coffee-100);
@@ -232,29 +250,47 @@
 
   /* Coffee Theme Card Styles */
   .theme-coffee .card-kawaii {
-    background: linear-gradient(135deg, rgba(250, 247, 244, 0.95) 0%, rgba(245, 230, 211, 0.9) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(250, 247, 244, 0.95) 0%,
+      rgba(245, 230, 211, 0.9) 100%
+    );
     border: 2px solid rgba(139, 74, 66, 0.2);
   }
 
   .theme-coffee .card-kawaii::before {
-    background: linear-gradient(45deg, rgba(245, 230, 211, 0.8), rgba(232, 213, 196, 0.8), rgba(196, 165, 154, 0.6), rgba(139, 74, 66, 0.5));
+    background: linear-gradient(
+      45deg,
+      rgba(245, 230, 211, 0.8),
+      rgba(232, 213, 196, 0.8),
+      rgba(196, 165, 154, 0.6),
+      rgba(139, 74, 66, 0.5)
+    );
   }
 
   .theme-coffee .card-kawaii::after {
-    content: '☕ ♨ ☕';
+    content: "☕ ♨ ☕";
     color: var(--color-coffee-300);
   }
 
   /* Coffee Theme Text Styles */
   .theme-coffee .text-kawaii {
-    background: linear-gradient(135deg, var(--color-coffee-600) 0%, var(--color-coffee-800) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-coffee-600) 0%,
+      var(--color-coffee-800) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .theme-coffee .text-gradient {
-    background: linear-gradient(135deg, var(--color-coffee-600) 0%, var(--color-coffee-800) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-coffee-600) 0%,
+      var(--color-coffee-800) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -262,7 +298,7 @@
 
   /* Coffee Theme Body Background */
   .theme-coffee body {
-    background-image: url('/images/coffee-background.webp') !important;
+    background-image: url("/images/coffee-background.webp") !important;
     background-size: calc(100vw / 6) calc(100vw / 6) !important;
     background-position: top left !important;
     background-repeat: repeat !important;
@@ -273,7 +309,11 @@
 
   /* Coffee Theme Navigation & Headers */
   .theme-coffee header {
-    background: linear-gradient(135deg, rgba(250, 247, 244, 0.95) 0%, rgba(245, 230, 211, 0.9) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(250, 247, 244, 0.95) 0%,
+      rgba(245, 230, 211, 0.9) 100%
+    );
     border-bottom-color: var(--color-coffee-200);
   }
 
@@ -359,40 +399,40 @@
   .theme-coffee .theme-switch-btn:hover {
     box-shadow: 0 2px 8px rgba(139, 74, 66, 0.4);
   }
-  
+
   /* Loading spinner */
   .spinner {
     @apply animate-spin rounded-full border-2 border-gray-300 border-t-primary-600;
   }
-  
+
   /* Gradient backgrounds */
   .gradient-primary {
     background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
   }
-  
+
   .gradient-secondary {
     background: linear-gradient(135deg, #64748b 0%, #334155 100%);
   }
-  
+
   /* Glass effect */
   .glass {
     @apply bg-white/80 backdrop-blur-md border border-white/20;
   }
-  
+
   /* Section spacing */
   .section-py {
     @apply py-16 md:py-24;
   }
-  
+
   .section-px {
     @apply px-4 sm:px-6 lg:px-8;
   }
-  
+
   /* Container */
   .container-custom {
     @apply max-w-7xl mx-auto section-px;
   }
-  
+
   /* Typography */
   .text-gradient {
     @apply bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent;
@@ -407,7 +447,7 @@
   }
 
   .text-original-phrase {
-    font-family: 'Comfortaa', 'system-ui', sans-serif;
+    font-family: "Comfortaa", "system-ui", sans-serif;
   }
 
   /* Floral Background Elements */
@@ -416,17 +456,32 @@
   }
 
   .floral-bg::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 30%, rgba(255, 214, 232, 0.3) 2px, transparent 2px),
-      radial-gradient(circle at 80% 70%, rgba(230, 217, 245, 0.3) 1px, transparent 1px),
-      radial-gradient(circle at 40% 80%, rgba(255, 214, 204, 0.3) 1.5px, transparent 1.5px);
-    background-size: 60px 60px, 80px 80px, 40px 40px;
+    background-image:
+      radial-gradient(
+        circle at 20% 30%,
+        rgba(255, 214, 232, 0.3) 2px,
+        transparent 2px
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        rgba(230, 217, 245, 0.3) 1px,
+        transparent 1px
+      ),
+      radial-gradient(
+        circle at 40% 80%,
+        rgba(255, 214, 204, 0.3) 1.5px,
+        transparent 1.5px
+      );
+    background-size:
+      60px 60px,
+      80px 80px,
+      40px 40px;
     pointer-events: none;
     z-index: -1;
   }
@@ -436,7 +491,7 @@
   }
 
   .cherry-blossoms::after {
-    content: '🌸 ✿ 🌺 ❀ 🌸';
+    content: "🌸 ✿ 🌺 ❀ 🌸";
     position: absolute;
     top: 20px;
     left: 20px;
@@ -447,21 +502,21 @@
     pointer-events: none;
     z-index: -1;
   }
-  
+
   /* Animations */
   .fade-in {
     animation: fadeIn 0.6s ease-out forwards;
   }
-  
+
   .slide-up {
     animation: slideUp 0.6s ease-out forwards;
   }
-  
+
   /* Hover effects */
   .hover-lift {
     @apply transform transition-transform duration-200 hover:-translate-y-1;
   }
-  
+
   .hover-scale {
     @apply transform transition-transform duration-200 hover:scale-105;
   }
@@ -503,13 +558,19 @@
 }
 
 .hero-text-shadow::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -80px;
   left: -20px;
   right: -20px;
   bottom: -100px;
-  background: radial-gradient(ellipse at center, rgba(245, 230, 211, 0.8) 0%, rgba(245, 230, 211, 0.7) 40%, rgba(232, 213, 196, 0.5) 70%, transparent 100%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(245, 230, 211, 0.8) 0%,
+    rgba(245, 230, 211, 0.7) 40%,
+    rgba(232, 213, 196, 0.5) 70%,
+    transparent 100%
+  );
   border-radius: 20px;
   z-index: -1;
   filter: blur(8px);
@@ -517,7 +578,13 @@
 
 /* Coffee Theme Additional Elements */
 .theme-coffee .hero-text-shadow::before {
-  background: radial-gradient(ellipse at center, rgba(245, 230, 211, 0.9) 0%, rgba(245, 230, 211, 0.8) 40%, rgba(232, 213, 196, 0.6) 70%, transparent 100%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(245, 230, 211, 0.9) 0%,
+    rgba(245, 230, 211, 0.8) 40%,
+    rgba(232, 213, 196, 0.6) 70%,
+    transparent 100%
+  );
 }
 
 /* Coffee Theme Scrollbar */
@@ -608,11 +675,15 @@
 }
 
 .theme-coffee .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(74, 43, 37, 0.1), 0 4px 6px -2px rgba(74, 43, 37, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(74, 43, 37, 0.1),
+    0 4px 6px -2px rgba(74, 43, 37, 0.05);
 }
 
 .theme-coffee .shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(74, 43, 37, 0.1), 0 2px 4px -1px rgba(74, 43, 37, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(74, 43, 37, 0.1),
+    0 2px 4px -1px rgba(74, 43, 37, 0.06);
 }
 
 /* Coffee Theme Logo */
@@ -652,7 +723,7 @@
 
 /* Coffee Theme Green Elements */
 .theme-coffee .bg-green-500 {
-  background: #8B4A42 !important;
+  background: #8b4a42 !important;
 }
 
 .theme-coffee .text-green-600 {
@@ -666,7 +737,7 @@
 
 /* Hero Section Background - Default Theme */
 .hero-section {
-  background-image: url('/images/regular-background.webp');
+  background-image: url("/images/regular-background.webp");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -674,7 +745,7 @@
 
 /* Hero Section Background - Coffee Theme */
 .theme-coffee .hero-section {
-  background-image: url('/images/coffee-background.webp') !important;
+  background-image: url("/images/coffee-background.webp") !important;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

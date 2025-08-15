@@ -1,6 +1,6 @@
-import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
-import { api } from '$lib/api/client-simple';
+import { writable } from "svelte/store";
+import { browser } from "$app/environment";
+import { api } from "$lib/api/client-simple";
 
 interface ConfigState {
   config: Record<string, string>;
@@ -15,7 +15,7 @@ const initialState: ConfigState = {
   kurs: 13.5,
   faqs: [],
   loading: false,
-  initialized: false
+  initialized: false,
 };
 
 function createConfigStore() {
@@ -23,34 +23,34 @@ function createConfigStore() {
 
   return {
     subscribe,
-    
+
     // Initialize config
     init: async () => {
       if (!browser) return;
-      
-      update(state => ({ ...state, loading: true }));
-      
+
+      update((state) => ({ ...state, loading: true }));
+
       try {
         // Load public config, kurs, and FAQs in parallel
         const [configResponse, kursResponse] = await Promise.all([
           api.getConfig(),
-          api.getKurs()
+          api.getKurs(),
         ]);
-        
-        update(state => ({
+
+        update((state) => ({
           ...state,
           config: configResponse.success ? configResponse.data.config : {},
           kurs: kursResponse.success ? kursResponse.data.kurs : 13.5,
           faqs: [],
           loading: false,
-          initialized: true
+          initialized: true,
         }));
       } catch (error) {
-        console.error('Failed to load config:', error);
-        update(state => ({ 
-          ...state, 
-          loading: false, 
-          initialized: true 
+        console.error("Failed to load config:", error);
+        update((state) => ({
+          ...state,
+          loading: false,
+          initialized: true,
         }));
       }
     },
@@ -60,45 +60,49 @@ function createConfigStore() {
       try {
         const response = await api.getKurs();
         if (response.success) {
-          update(state => ({ 
-            ...state, 
-            kurs: response.data.kurs 
+          update((state) => ({
+            ...state,
+            kurs: response.data.kurs,
           }));
         }
       } catch (error) {
-        console.error('Failed to update kurs:', error);
+        console.error("Failed to update kurs:", error);
       }
     },
 
     // Get config value
-    get: (key: string, defaultValue: string = '') => {
+    get: (key: string, defaultValue: string = "") => {
       let currentConfig: Record<string, string> = {};
-      subscribe(state => { currentConfig = state.config; })();
+      subscribe((state) => {
+        currentConfig = state.config;
+      })();
       return currentConfig[key] || defaultValue;
     },
 
     // Refresh all config
     refresh: async () => {
-      update(state => ({ ...state, loading: true }));
-      
+      update((state) => ({ ...state, loading: true }));
+
       try {
         const [configResponse, kursResponse] = await Promise.all([
           api.getConfig(),
-          api.getKurs()
+          api.getKurs(),
         ]);
-        
-        update(state => ({
+
+        update((state) => ({
           ...state,
-          config: configResponse.success ? configResponse.data.config : state.config,
+          config: configResponse.success
+            ? configResponse.data.config
+            : state.config,
           kurs: kursResponse.success ? kursResponse.data.kurs : state.kurs,
           faqs: [],
-          loading: false
+          loading: false,
         }));
       } catch (error) {
-        console.error('Failed to refresh config:', error);
-        update(state => ({ ...state, loading: false }));
+        console.error("Failed to refresh config:", error);
+        update((state) => ({ ...state, loading: false }));
       }
-    }
+    },
   };
 }
 
@@ -109,5 +113,5 @@ export const configActions = {
   init: configStore.init,
   updateKurs: configStore.updateKurs,
   refresh: configStore.refresh,
-  get: configStore.get
+  get: configStore.get,
 };

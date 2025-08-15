@@ -17,9 +17,10 @@ export function convertRubleToYuan(ruble: number, kurs: number): number {
 }
 
 /**
- * Calculate commission based on amount and rate
+ * Calculate simple percentage-based commission
+ * For business-specific commission logic, use calculateCommission from services/commission
  */
-export function calculateCommission(amount: number, rate: number): number {
+export function calculateSimpleCommission(amount: number, rate: number): number {
   return Math.round(amount * rate * 100) / 100;
 }
 
@@ -28,9 +29,9 @@ export function calculateCommission(amount: number, rate: number): number {
  */
 export function calculateTotalWithCommission(
   amount: number,
-  commissionRate: number
+  commissionRate: number,
 ): number {
-  const commission = calculateCommission(amount, commissionRate);
+  const commission = calculateSimpleCommission(amount, commissionRate);
   return Math.round((amount + commission) * 100) / 100;
 }
 
@@ -45,7 +46,7 @@ export function calculateOrderTotals(
   kurs: number,
   commissionRate: number,
   deliveryCost: number = 0,
-  discount: number = 0
+  discount: number = 0,
 ): {
   subtotalYuan: number;
   totalCommission: number;
@@ -56,21 +57,21 @@ export function calculateOrderTotals(
   // Calculate subtotal in Yuan
   const subtotalYuan = goods.reduce(
     (sum, good) => sum + good.quantity * good.priceYuan,
-    0
+    0,
   );
-  
+
   // Calculate total commission
-  const totalCommission = calculateCommission(subtotalYuan, commissionRate);
-  
+  const totalCommission = calculateSimpleCommission(subtotalYuan, commissionRate);
+
   // Calculate total in Yuan (with commission)
   const totalYuan = subtotalYuan + totalCommission;
-  
+
   // Convert to Rubles
   const totalRuble = convertYuanToRuble(totalYuan, kurs);
-  
+
   // Calculate final total (with delivery and discount)
   const finalTotal = Math.max(0, totalRuble + deliveryCost - discount);
-  
+
   return {
     subtotalYuan: Math.round(subtotalYuan * 100) / 100,
     totalCommission: Math.round(totalCommission * 100) / 100,
@@ -85,16 +86,16 @@ export function calculateOrderTotals(
  */
 export function formatCurrency(
   amount: number,
-  currency: 'RUB' | 'CNY' = 'RUB',
-  locale: string = 'ru-RU'
+  currency: "RUB" | "CNY" = "RUB",
+  locale: string = "ru-RU",
 ): string {
   const currencySymbols = {
-    RUB: '₽',
-    CNY: '¥',
+    RUB: "₽",
+    CNY: "¥",
   };
-  
+
   return new Intl.NumberFormat(locale, {
-    style: 'currency',
+    style: "currency",
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -107,8 +108,8 @@ export function formatCurrency(
  * Parse currency string to number
  */
 export function parseCurrency(currencyString: string): number {
-  const cleaned = currencyString.replace(/[^\d.,]/g, '');
-  const normalized = cleaned.replace(',', '.');
+  const cleaned = currencyString.replace(/[^\d.,]/g, "");
+  const normalized = cleaned.replace(",", ".");
   return parseFloat(normalized) || 0;
 }
 

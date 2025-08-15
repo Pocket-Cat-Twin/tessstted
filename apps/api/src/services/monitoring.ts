@@ -1,5 +1,5 @@
-import { createMetricsLogger, createJobLogger } from './logger';
-import { db } from '@yuyu/db';
+import { createMetricsLogger, createJobLogger } from "./logger";
+import { db } from "@yuyu/db";
 
 // In-memory metrics storage (for production, use proper metrics store like Prometheus)
 interface MetricStore {
@@ -75,26 +75,32 @@ const metrics: MetricStore = {
 const metricsLogger = createMetricsLogger();
 
 // Request metrics
-export const recordRequest = (method: string, path: string, statusCode: number, duration: number) => {
+export const recordRequest = (
+  method: string,
+  path: string,
+  statusCode: number,
+  duration: number,
+) => {
   metrics.requests.total++;
-  
+
   // Update status code metrics
   const currentStatusCount = metrics.requests.byStatus.get(statusCode) || 0;
   metrics.requests.byStatus.set(statusCode, currentStatusCount + 1);
-  
+
   // Update path metrics
   const currentPathCount = metrics.requests.byPath.get(path) || 0;
   metrics.requests.byPath.set(path, currentPathCount + 1);
-  
+
   // Update method metrics
   const currentMethodCount = metrics.requests.byMethod.get(method) || 0;
   metrics.requests.byMethod.set(method, currentMethodCount + 1);
-  
+
   // Update performance metrics
   metrics.performance.totalRequestTime += duration;
   metrics.performance.requestCount++;
-  metrics.performance.averageResponseTime = metrics.performance.totalRequestTime / metrics.performance.requestCount;
-  
+  metrics.performance.averageResponseTime =
+    metrics.performance.totalRequestTime / metrics.performance.requestCount;
+
   if (duration > 1000) {
     metrics.performance.slowRequests++;
   }
@@ -103,17 +109,17 @@ export const recordRequest = (method: string, path: string, statusCode: number, 
 // Error metrics
 export const recordError = (errorType: string, path: string, error: string) => {
   metrics.errors.total++;
-  
+
   const currentErrorCount = metrics.errors.byType.get(errorType) || 0;
   metrics.errors.byType.set(errorType, currentErrorCount + 1);
-  
+
   // Keep only last 100 errors
   metrics.errors.recent.push({
     timestamp: new Date(),
     error,
     path,
   });
-  
+
   if (metrics.errors.recent.length > 100) {
     metrics.errors.recent.shift();
   }
@@ -122,8 +128,9 @@ export const recordError = (errorType: string, path: string, error: string) => {
 // Database metrics
 export const recordDatabaseQuery = (duration: number) => {
   metrics.database.queries++;
-  
-  if (duration > 100) { // Slow query threshold: 100ms
+
+  if (duration > 100) {
+    // Slow query threshold: 100ms
     metrics.database.slowQueries++;
   }
 };
@@ -164,32 +171,46 @@ export const getMetrics = () => {
     performance: {
       averageResponseTime: Math.round(metrics.performance.averageResponseTime),
       slowRequests: metrics.performance.slowRequests,
-      slowRequestPercentage: metrics.performance.requestCount > 0 
-        ? Math.round((metrics.performance.slowRequests / metrics.performance.requestCount) * 100)
-        : 0,
+      slowRequestPercentage:
+        metrics.performance.requestCount > 0
+          ? Math.round(
+              (metrics.performance.slowRequests /
+                metrics.performance.requestCount) *
+                100,
+            )
+          : 0,
     },
     errors: {
       total: metrics.errors.total,
       byType: Object.fromEntries(metrics.errors.byType),
-      errorRate: metrics.requests.total > 0 
-        ? Math.round((metrics.errors.total / metrics.requests.total) * 100)
-        : 0,
+      errorRate:
+        metrics.requests.total > 0
+          ? Math.round((metrics.errors.total / metrics.requests.total) * 100)
+          : 0,
       recent: metrics.errors.recent.slice(-10), // Last 10 errors
     },
     database: {
       queries: metrics.database.queries,
       slowQueries: metrics.database.slowQueries,
-      slowQueryPercentage: metrics.database.queries > 0
-        ? Math.round((metrics.database.slowQueries / metrics.database.queries) * 100)
-        : 0,
+      slowQueryPercentage:
+        metrics.database.queries > 0
+          ? Math.round(
+              (metrics.database.slowQueries / metrics.database.queries) * 100,
+            )
+          : 0,
     },
     auth: {
       logins: metrics.auth.logins,
       failures: metrics.auth.failures,
       registrations: metrics.auth.registrations,
-      failureRate: (metrics.auth.logins + metrics.auth.failures) > 0
-        ? Math.round((metrics.auth.failures / (metrics.auth.logins + metrics.auth.failures)) * 100)
-        : 0,
+      failureRate:
+        metrics.auth.logins + metrics.auth.failures > 0
+          ? Math.round(
+              (metrics.auth.failures /
+                (metrics.auth.logins + metrics.auth.failures)) *
+                100,
+            )
+          : 0,
     },
     business: {
       orders: metrics.business.orders,
@@ -202,24 +223,24 @@ export const getMetrics = () => {
 // Health check
 export const getHealthMetrics = async () => {
   const startTime = Date.now();
-  
+
   try {
     // Test database connection
     const dbHealth = await testDatabaseHealth();
     const dbResponseTime = Date.now() - startTime;
-    
+
     // Memory usage
     const memoryUsage = process.memoryUsage();
-    
+
     // Uptime
     const uptime = process.uptime();
-    
+
     return {
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
       uptime: Math.round(uptime),
       database: {
-        status: dbHealth ? 'connected' : 'disconnected',
+        status: dbHealth ? "connected" : "disconnected",
         responseTime: dbResponseTime,
       },
       memory: {
@@ -228,17 +249,20 @@ export const getHealthMetrics = async () => {
         external: Math.round(memoryUsage.external / 1024 / 1024), // MB
       },
       performance: {
-        averageResponseTime: Math.round(metrics.performance.averageResponseTime),
-        errorRate: metrics.requests.total > 0 
-          ? Math.round((metrics.errors.total / metrics.requests.total) * 100)
-          : 0,
+        averageResponseTime: Math.round(
+          metrics.performance.averageResponseTime,
+        ),
+        errorRate:
+          metrics.requests.total > 0
+            ? Math.round((metrics.errors.total / metrics.requests.total) * 100)
+            : 0,
       },
     };
   } catch (error) {
     return {
-      status: 'unhealthy',
+      status: "unhealthy",
       timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 };
@@ -250,7 +274,7 @@ const testDatabaseHealth = async (): Promise<boolean> => {
     await db.query.users.findFirst();
     return true;
   } catch (error) {
-    metricsLogger.error('Database health check failed', { error });
+    metricsLogger.error("Database health check failed", { error });
     return false;
   }
 };
@@ -258,46 +282,58 @@ const testDatabaseHealth = async (): Promise<boolean> => {
 // Periodic metrics logging
 const logMetricsSummary = () => {
   const currentMetrics = getMetrics();
-  
-  metricsLogger.info({
-    summary: {
-      requests: currentMetrics.requests.total,
-      errors: currentMetrics.errors.total,
-      averageResponseTime: currentMetrics.performance.averageResponseTime,
-      errorRate: currentMetrics.errors.errorRate,
-      slowRequestPercentage: currentMetrics.performance.slowRequestPercentage,
-    }
-  }, 'Metrics summary');
-  
+
+  metricsLogger.info(
+    {
+      summary: {
+        requests: currentMetrics.requests.total,
+        errors: currentMetrics.errors.total,
+        averageResponseTime: currentMetrics.performance.averageResponseTime,
+        errorRate: currentMetrics.errors.errorRate,
+        slowRequestPercentage: currentMetrics.performance.slowRequestPercentage,
+      },
+    },
+    "Metrics summary",
+  );
+
   // Alert on high error rates
   if (currentMetrics.errors.errorRate > 5) {
-    metricsLogger.warn({
-      errorRate: currentMetrics.errors.errorRate,
-      totalErrors: currentMetrics.errors.total,
-      totalRequests: currentMetrics.requests.total,
-    }, 'High error rate detected');
+    metricsLogger.warn(
+      {
+        errorRate: currentMetrics.errors.errorRate,
+        totalErrors: currentMetrics.errors.total,
+        totalRequests: currentMetrics.requests.total,
+      },
+      "High error rate detected",
+    );
   }
-  
+
   // Alert on slow response times
   if (currentMetrics.performance.averageResponseTime > 1000) {
-    metricsLogger.warn({
-      averageResponseTime: currentMetrics.performance.averageResponseTime,
-      slowRequestPercentage: currentMetrics.performance.slowRequestPercentage,
-    }, 'Slow response times detected');
+    metricsLogger.warn(
+      {
+        averageResponseTime: currentMetrics.performance.averageResponseTime,
+        slowRequestPercentage: currentMetrics.performance.slowRequestPercentage,
+      },
+      "Slow response times detected",
+    );
   }
 };
 
 // Start periodic monitoring
 export const startMetricsMonitoring = () => {
-  const jobLogger = createJobLogger('metrics-monitoring');
-  
-  jobLogger.info('Starting metrics monitoring');
-  
+  const jobLogger = createJobLogger("metrics-monitoring");
+
+  jobLogger.info("Starting metrics monitoring");
+
   // Log metrics every 5 minutes
-  setInterval(() => {
-    logMetricsSummary();
-  }, 5 * 60 * 1000);
-  
+  setInterval(
+    () => {
+      logMetricsSummary();
+    },
+    5 * 60 * 1000,
+  );
+
   // Reset daily metrics at midnight
   setInterval(() => {
     const now = new Date();
@@ -309,35 +345,35 @@ export const startMetricsMonitoring = () => {
 
 // Reset daily metrics
 const resetDailyMetrics = () => {
-  const jobLogger = createJobLogger('metrics-reset');
-  jobLogger.info('Resetting daily metrics');
-  
+  const jobLogger = createJobLogger("metrics-reset");
+  jobLogger.info("Resetting daily metrics");
+
   // Archive current metrics before reset
   const currentMetrics = getMetrics();
-  metricsLogger.info(currentMetrics, 'Daily metrics archive');
-  
+  metricsLogger.info(currentMetrics, "Daily metrics archive");
+
   // Reset counters
   metrics.requests.total = 0;
   metrics.requests.byStatus.clear();
   metrics.requests.byPath.clear();
   metrics.requests.byMethod.clear();
-  
+
   metrics.performance.averageResponseTime = 0;
   metrics.performance.slowRequests = 0;
   metrics.performance.totalRequestTime = 0;
   metrics.performance.requestCount = 0;
-  
+
   metrics.errors.total = 0;
   metrics.errors.byType.clear();
   metrics.errors.recent = [];
-  
+
   metrics.database.queries = 0;
   metrics.database.slowQueries = 0;
-  
+
   metrics.auth.logins = 0;
   metrics.auth.failures = 0;
   metrics.auth.registrations = 0;
-  
+
   // Keep business metrics as cumulative
 };
 

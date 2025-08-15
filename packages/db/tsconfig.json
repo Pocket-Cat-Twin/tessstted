@@ -15,7 +15,15 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "noEmitOnError": true,
-    "preserveWatchOutput": true
+    "preserveWatchOutput": true,
+    
+    // Additional strict checks to prevent export conflicts
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "migrations"]

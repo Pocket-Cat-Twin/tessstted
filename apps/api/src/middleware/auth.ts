@@ -1,8 +1,8 @@
-import { Elysia, Context } from 'elysia';
-import { jwt } from '@elysiajs/jwt';
-import { cookie } from '@elysiajs/cookie';
-import { db, users, eq } from '@yuyu/db';
-import { UserRole } from '@yuyu/shared';
+import { Elysia, Context } from "elysia";
+import { jwt } from "@elysiajs/jwt";
+import { cookie } from "@elysiajs/cookie";
+import { db, users, eq } from "@yuyu/db";
+import { UserRole } from "@yuyu/shared";
 
 // User type for auth context
 interface AuthUser {
@@ -16,17 +16,19 @@ interface AuthUser {
   createdAt: Date;
 }
 
-export const authMiddleware = new Elysia({ name: 'auth' })
-  .use(jwt({ 
-    name: 'jwt',
-    secret: process.env.JWT_SECRET || 'your-jwt-secret-key' 
-  }))
+export const authMiddleware = new Elysia({ name: "auth" })
+  .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET || "your-jwt-secret-key",
+    }),
+  )
   .use(cookie())
-  .state('user', null as AuthUser | null)
+  .state("user", null as AuthUser | null)
   .onBeforeHandle(async ({ jwt, cookie, headers, store }) => {
     // Try to get token from Authorization header or cookie
     const authHeader = headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') 
+    const token = authHeader?.startsWith("Bearer ")
       ? authHeader.slice(7)
       : cookie.token;
 
@@ -37,7 +39,7 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 
     try {
       const payload = await jwt.verify(token);
-      if (!payload || typeof payload !== 'object' || !('userId' in payload)) {
+      if (!payload || typeof payload !== "object" || !("userId" in payload)) {
         store.user = null;
         return;
       }
@@ -57,56 +59,58 @@ export const authMiddleware = new Elysia({ name: 'auth' })
         },
       });
 
-      if (!user || user.status === 'blocked') {
+      if (!user || user.status === "blocked") {
         store.user = null;
         return;
       }
 
       store.user = user as AuthUser;
     } catch (error) {
-      console.error('Auth middleware error:', error);
+      console.error("Auth middleware error:", error);
       store.user = null;
     }
   });
 
 // Require authentication
-export const requireAuth = new Elysia({ name: 'requireAuth' })
+export const requireAuth = new Elysia({ name: "requireAuth" })
   .use(authMiddleware)
   .onBeforeHandle(({ store, set }) => {
     if (!store.user) {
       set.status = 401;
       return {
         success: false,
-        error: 'AUTHENTICATION_ERROR',
-        message: 'Authentication required',
+        error: "AUTHENTICATION_ERROR",
+        message: "Authentication required",
       };
     }
   });
 
 // Require admin role
-export const requireAdmin = new Elysia({ name: 'requireAdmin' })
+export const requireAdmin = new Elysia({ name: "requireAdmin" })
   .use(requireAuth)
   .onBeforeHandle(({ store, set }) => {
     if (store.user?.role !== UserRole.ADMIN) {
       set.status = 403;
       return {
         success: false,
-        error: 'AUTHORIZATION_ERROR',
-        message: 'Admin access required',
+        error: "AUTHORIZATION_ERROR",
+        message: "Admin access required",
       };
     }
   });
 
 // Require email verification
-export const requireEmailVerification = new Elysia({ name: 'requireEmailVerification' })
+export const requireEmailVerification = new Elysia({
+  name: "requireEmailVerification",
+})
   .use(requireAuth)
   .onBeforeHandle(({ store, set }) => {
     if (!store.user?.emailVerified) {
       set.status = 403;
       return {
         success: false,
-        error: 'EMAIL_NOT_VERIFIED',
-        message: 'Email verification required',
+        error: "EMAIL_NOT_VERIFIED",
+        message: "Email verification required",
       };
     }
   });

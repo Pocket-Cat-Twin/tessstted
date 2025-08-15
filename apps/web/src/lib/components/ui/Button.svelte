@@ -79,4 +79,8 @@
   .btn-lg {
     @apply px-6 py-3 text-lg;
   }
+
+  .spinner {
+    @apply border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
 </style>
