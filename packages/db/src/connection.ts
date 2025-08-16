@@ -2,10 +2,14 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-// Create connection
-const connectionString =
-  process.env.DATABASE_URL ||
-  "postgresql://postgres:password@localhost:5432/yuyu_lolita";
+// Windows-specific database configuration
+const isWindows = process.platform === "win32";
+const defaultWindowsConnectionString = "postgresql://postgres:password@localhost:5432/yuyu_lolita";
+const defaultUnixConnectionString = "postgresql://postgres:password@localhost:5432/yuyu_lolita";
+
+// Create connection with Windows-specific handling
+const connectionString = process.env.DATABASE_URL || 
+  (isWindows ? defaultWindowsConnectionString : defaultUnixConnectionString);
 
 // For migrations
 export const migrationClient = postgres(connectionString, { max: 1 });

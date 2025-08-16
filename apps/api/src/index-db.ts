@@ -1,6 +1,9 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
+import { jwt } from "@elysiajs/jwt";
+import { cookie } from "@elysiajs/cookie";
+import bcrypt from "bcryptjs";
 import {
   db,
   config,
@@ -28,6 +31,14 @@ async function testDBConnection() {
 
 const app = new Elysia()
   .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET || "your-jwt-secret-key",
+      exp: "7d",
+    }),
+  )
+  .use(cookie())
+  .use(
     swagger({
       documentation: {
         info: {
@@ -40,17 +51,7 @@ const app = new Elysia()
   )
   .use(
     cors({
-      origin: [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-        "http://127.0.0.1:5175",
-        "https://verbose-goldfish-4j9w95vw447qfvjw-5173.app.github.dev",
-        "https://verbose-goldfish-4j9w95vw447qfvjw-5174.app.github.dev",
-        "https://verbose-goldfish-4j9w95vw447qfvjw-5175.app.github.dev",
-      ],
+      origin: true, // Allow all origins for public access
       credentials: true,
     }),
   )
@@ -353,34 +354,71 @@ const app = new Elysia()
     }
   })
 
-  // Auth endpoints (mock for now)
-  .post("/api/v1/auth/login", async ({ body }) => {
+  // Auth endpoints with real database authentication
+  .post("/api/v1/auth/login", async ({ body, jwt, cookie }) => {
     const { email, password } = body as { email: string; password: string };
+    
+    try {
+      // Find user in database
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
 
-    // Mock authentication - in real app, verify credentials against database
-    if (
-      (email === "admin@yuyulolita.com" && password === "admin123") ||
-      (email === "user@example.com" && password === "user123")
-    ) {
+      if (!user) {
+        return {
+          success: false,
+          message: "Неверный email или пароль",
+        };
+      }
+
+      // Check password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: "Неверный email или пароль",
+        };
+      }
+
+      // Generate JWT token
+      const token = await jwt.sign({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      // Set cookie
+      cookie.token.set({
+        value: token,
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        status: user.status,
+        emailVerified: user.emailVerified,
+        avatar: user.avatar,
+        createdAt: user.createdAt,
+      };
+
       return {
         success: true,
         data: {
-          token: "mock-jwt-token-" + Date.now(),
-          user: {
-            id: email === "admin@yuyulolita.com" ? "admin-id" : "user-id",
-            email: email,
-            name:
-              email === "admin@yuyulolita.com"
-                ? "Администратор"
-                : "Анна Петрова",
-            role: email === "admin@yuyulolita.com" ? "ADMIN" : "USER",
-          },
+          token,
+          user: userResponse,
         },
       };
-    } else {
+    } catch (error) {
+      console.error("Login error:", error);
       return {
         success: false,
-        message: "Неверный email или пароль",
+        message: "Ошибка сервера",
       };
     }
   })
@@ -616,17 +654,21 @@ const app = new Elysia()
     const dbConnected = await testDBConnection();
 
     if (dbConnected) {
-      // Auto-seed database with test data on startup
-      try {
-        console.log("🌱 Auto-seeding database with test data...");
-        const { seedDatabase } = await import("@yuyu/db/src/seed.ts");
-        await seedDatabase();
-        console.log("✅ Test data seeding completed");
-      } catch (error) {
-        console.log(
-          "ℹ️ Seeding skipped (data may already exist):",
-          error?.message || error,
-        );
+      // Auto-seed database with test data on startup (unless SKIP_SEED is set)
+      if (!process.env.SKIP_SEED) {
+        try {
+          console.log("🌱 Auto-seeding database with test data...");
+          const { seedDatabase } = await import("@yuyu/db/src/seed.ts");
+          await seedDatabase();
+          console.log("✅ Test data seeding completed");
+        } catch (error) {
+          console.log(
+            "ℹ️ Seeding skipped (data may already exist):",
+            error?.message || error,
+          );
+        }
+      } else {
+        console.log("⏭️ Seeding skipped due to SKIP_SEED environment variable");
       }
     }
   })

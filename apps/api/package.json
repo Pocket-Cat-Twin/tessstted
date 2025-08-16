@@ -5,16 +5,20 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "bun --hot src/index-db.ts",
+    "dev:windows": "set NODE_ENV=development && bun --hot src/index-db.ts",
     "dev-full": "bun --hot src/index.ts",
     "build": "bun build src/index.ts --outdir=dist --target=bun",
+    "build:windows": "bun build src/index.ts --outdir=dist --target=bun",
     "start": "bun dist/index.js",
+    "start:windows": "bun dist/index.js",
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "clean:windows": "if exist dist rmdir /s /q dist"
   },
   "dependencies": {
     "@elysiajs/cookie": "^0.8.0",

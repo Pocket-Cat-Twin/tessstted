@@ -4,9 +4,12 @@
   "description": "SvelteKit frontend for YuYu Lolita Shopping",
   "scripts": {
     "dev": "vite dev",
+    "dev:windows": "set NODE_ENV=development && vite dev --host localhost",
     "build": "vite build",
+    "build:windows": "vite build",
     "preview": "vite preview",
     "start": "node build",
+    "start:windows": "node build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",

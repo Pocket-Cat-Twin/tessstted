@@ -1,0 +1,78 @@
+{
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "defaultDatabase": "yuyu_lolita",
+    "adminDatabase": "postgres",
+    "windowsServiceName": "postgresql-x64-15",
+    "defaultUser": "postgres",
+    "connectionTimeout": 10000,
+    "retryAttempts": 5,
+    "retryDelay": 2000
+  },
+  "api": {
+    "host": "localhost",
+    "port": 3001,
+    "cors": "http://localhost:5173",
+    "environment": "development",
+    "logLevel": "info",
+    "maxRequestSize": "10mb",
+    "timeout": 30000
+  },
+  "web": {
+    "host": "localhost", 
+    "port": 5173,
+    "apiUrl": "http://localhost:3001",
+    "environment": "development"
+  },
+  "windows": {
+    "powershellExecutionPolicy": "RemoteSigned",
+    "requiredServices": [
+      "postgresql-x64-15",
+      "postgresql-x64-14",
+      "postgresql"
+    ],
+    "firewallPorts": [3001, 5173, 5432],
+    "recommendedExclusions": [
+      "node_modules",
+      "dist",
+      "build",
+      ".bun",
+      "logs"
+    ],
+    "paths": {
+      "logs": "logs",
+      "uploads": "uploads",
+      "temp": "%TEMP%\\yuyu-lolita",
+      "data": "%APPDATA%\\yuyu-lolita"
+    }
+  },
+  "security": {
+    "bcryptRounds": 12,
+    "jwtExpiresIn": "7d",
+    "rateLimiting": {
+      "windowMs": 900000,
+      "maxRequests": 100,
+      "authMaxRequests": 10
+    },
+    "cors": {
+      "credentials": true,
+      "optionsSuccessStatus": 200
+    }
+  },
+  "development": {
+    "hotReload": true,
+    "autoOpenBrowser": true,
+    "clearConsole": false,
+    "showErrorOverlay": true,
+    "sourceMaps": true
+  },
+  "production": {
+    "compress": true,
+    "minify": true,
+    "sourceMaps": false,
+    "logLevel": "warn",
+    "cluster": false,
+    "processTitle": "yuyu-lolita"
+  }
+}

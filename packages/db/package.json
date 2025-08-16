@@ -9,9 +9,13 @@
     "dev": "tsc --watch",
     "generate": "drizzle-kit generate:pg",
     "migrate": "bun run src/migrate.ts",
+    "migrate:windows": "bun run src/migrate.ts",
     "seed": "bun run src/seed.ts",
+    "seed:windows": "bun run src/seed.ts",
     "studio": "drizzle-kit studio",
-    "clean": "rm -rf dist"
+    "setup:windows": "bun run src/setup-windows.ts",
+    "clean": "rm -rf dist",
+    "clean:windows": "if exist dist rmdir /s /q dist"
   },
   "dependencies": {
     "drizzle-orm": "^0.29.3",

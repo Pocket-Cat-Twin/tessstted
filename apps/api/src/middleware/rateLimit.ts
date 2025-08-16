@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { logRateLimitViolation } from "./logging";
 
 // Simple in-memory rate limiter
-// In production, you'd want to use Redis or similar
+// Production-ready in-memory rate limiting
 class RateLimiter {
   private requests: Map<string, { count: number; resetTime: number }> =
     new Map();
