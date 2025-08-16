@@ -99,10 +99,11 @@ API_PORT=3001
 CORS_ORIGIN=http://localhost:5173
 
 # Web App Configuration
-PORT=5173             # Smart port detection
 WEB_PORT=5173
 HOST=0.0.0.0          # Network access
 PUBLIC_API_URL=http://localhost:3001
+
+# Note: Generic PORT removed to prevent conflicts
 
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
@@ -121,13 +122,37 @@ copy .env.windows .env
 
 ## Known Issues & Solutions
 
-### Port Conflict Issues (SOLVED!)
-**Problem**: Web app fails with port 3000 or 5173 busy
-**Solution**: Automatic port detection implemented!
-- ✅ Smart port finder automatically selects available ports
-- ✅ Fallback ports: 5173, 3000, 3001, 3002, 4000, 4173, 5000, 8000, 8080
-- ✅ Environment variables properly configured
-- ✅ Both development and production modes supported
+### Port Conflict Issues (COMPLETELY SOLVED!)
+**Problem**: API server incorrectly using web port 5173 instead of API port 3001
+**Root Cause**: Environment variable conflicts between generic `PORT` and specific `API_PORT`/`WEB_PORT`
+**Solution**: Comprehensive port management system implemented!
+
+✅ **API Server Fixes:**
+- Explicit port validation with fallback protection
+- Automatic rejection of web ports (5173, 3000, 4173, etc.)
+- Enhanced logging showing all environment variables
+- Failsafe defaults to port 3001 for API
+
+✅ **Web App Improvements:**
+- Smart port detection with API port avoidance
+- Fallback ports exclude API-reserved ports (3001, 3002, 3003)
+- Clear environment variable separation
+
+✅ **Environment Configuration:**
+- Removed generic `PORT` variable to prevent conflicts
+- API uses `API_PORT` exclusively (3001)
+- Web uses `WEB_PORT` exclusively (5173)
+- Updated all scripts and configurations
+
+✅ **Development & Production:**
+- PowerShell scripts updated with explicit port isolation
+- Environment variables properly scoped per application
+- Source maps added for better debugging and error traces
+
+✅ **Automatic Protection:**
+- API server rejects web ports automatically
+- Web app avoids API ports automatically
+- Clear error messages with suggested fixes
 
 ### Database Connection Issues
 **Problem**: Cannot connect to PostgreSQL

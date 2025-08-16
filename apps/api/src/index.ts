@@ -157,8 +157,48 @@ const app = new Elysia()
 
 // Start server only if not in test mode
 if (process.env.NODE_ENV !== "test") {
-  const port = process.env.API_PORT || 3001;
+  // Port configuration with explicit validation and fallbacks
+  const rawApiPort = process.env.API_PORT;
+  const rawPort = process.env.PORT;
+  
+  // Priority: API_PORT > 3001 (ignore generic PORT for API server)
+  let port = 3001; // Default API port
+  
+  if (rawApiPort) {
+    const parsedApiPort = parseInt(rawApiPort, 10);
+    if (!isNaN(parsedApiPort) && parsedApiPort > 0 && parsedApiPort <= 65535) {
+      port = parsedApiPort;
+    } else {
+      console.warn(`⚠️  Invalid API_PORT value: ${rawApiPort}, using default: 3001`);
+    }
+  }
+  
+  // Ensure we never use web ports (5173, 3000, 4173, etc.)
+  const webPorts = [5173, 3000, 4173, 5000, 8080];
+  if (webPorts.includes(port)) {
+    console.error(`❌ ERROR: API server cannot use web port ${port}. This port is reserved for web applications.`);
+    console.error(`   API_PORT environment variable: ${rawApiPort}`);
+    console.error(`   PORT environment variable: ${rawPort}`);
+    console.error(`   Using default API port: 3001 instead`);
+    port = 3001;
+  }
+
   const host = process.env.API_HOST || "0.0.0.0";
+
+  // Additional validation
+  if (typeof port !== 'number' || port < 1 || port > 65535) {
+    console.error(`❌ ERROR: Invalid port number: ${port}`);
+    console.error(`   Setting port to default: 3001`);
+    port = 3001;
+  }
+
+  console.log(`🔧 API Server Configuration:`);
+  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+  console.log(`   API_PORT env: ${rawApiPort || 'undefined'}`);
+  console.log(`   PORT env: ${rawPort || 'undefined'}`);
+  console.log(`   Selected port: ${port}`);
+  console.log(`   Host: ${host}`);
+  console.log('');
 
   app.listen(port, () => {
     console.log(

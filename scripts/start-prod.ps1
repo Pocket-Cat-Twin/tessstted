@@ -112,13 +112,13 @@ $envContent = $envContent -replace "NODE_ENV=development", "NODE_ENV=production"
 $envContent = $envContent -replace "PUBLIC_API_URL=.*", "PUBLIC_API_URL=http://localhost:3001"
 
 # Ensure proper port configuration
-if (-not ($envContent | Select-String "PORT=")) {
-    $envContent += "PORT=5173"
+if (-not ($envContent | Select-String "^API_PORT=")) {
+    $envContent += "API_PORT=3001"
 }
-if (-not ($envContent | Select-String "WEB_PORT=")) {
+if (-not ($envContent | Select-String "^WEB_PORT=")) {
     $envContent += "WEB_PORT=5173"
 }
-if (-not ($envContent | Select-String "HOST=")) {
+if (-not ($envContent | Select-String "^HOST=")) {
     $envContent += "HOST=0.0.0.0"
 }
 
@@ -126,9 +126,12 @@ $envContent | Set-Content ".env"
 
 # Set environment variables for this session
 $env:NODE_ENV = "production"
-$env:PORT = "5173"
+$env:API_PORT = "3001"
 $env:WEB_PORT = "5173"
 $env:HOST = "0.0.0.0"
+
+# Explicitly remove PORT to avoid conflicts
+$env:PORT = $null
 
 # Step 3: Run database migrations
 Write-Host ""
@@ -204,13 +207,13 @@ if ($Daemon) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Write-Host '[API] YuYu Lolita API Server - PRODUCTION' -ForegroundColor Red; bun --filter=@yuyu/api start"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] YuYu Lolita API Server - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: API_PORT=3001, API_HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@yuyu/api start"
     
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:PORT='5173'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Write-Host '[WEB] YuYu Lolita Web App - PRODUCTION' -ForegroundColor Red; bun --filter=@yuyu/web start:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] YuYu Lolita Web App - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: WEB_PORT=5173, HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@yuyu/web start:windows"
 }
 
 # Wait for services to start

@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Default configuration
 const DEFAULT_PORT = 5173;
 const DEFAULT_HOST = '0.0.0.0';
-const FALLBACK_PORTS = [5173, 3000, 3001, 3002, 4000, 4173, 5000, 8000, 8080];
+const FALLBACK_PORTS = [5173, 3000, 4173, 5000, 8000, 8080]; // Removed 3001 (reserved for API)
 
 // Load environment variables
 function loadEnv() {
@@ -72,8 +72,26 @@ async function startServer() {
   loadEnv();
   
   // Get configuration
-  const preferredPort = parseInt(process.env.PORT || process.env.WEB_PORT || DEFAULT_PORT, 10);
+  const rawPort = process.env.PORT;
+  const rawWebPort = process.env.WEB_PORT;
+  let preferredPort = parseInt(rawWebPort || rawPort || DEFAULT_PORT, 10);
+  
+  // Ensure web app never uses API ports
+  const apiPorts = [3001, 3002, 3003];
+  if (apiPorts.includes(preferredPort)) {
+    console.warn(`⚠️  WARNING: Web app cannot use API port ${preferredPort}. Using default: ${DEFAULT_PORT}`);
+    preferredPort = DEFAULT_PORT;
+  }
+  
   const host = process.env.HOST || DEFAULT_HOST;
+  
+  console.log(`🔧 Web App Configuration:`);
+  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'production'}`);
+  console.log(`   PORT env: ${rawPort || 'undefined'}`);
+  console.log(`   WEB_PORT env: ${rawWebPort || 'undefined'}`);
+  console.log(`   Preferred port: ${preferredPort}`);
+  console.log(`   Host: ${host}`);
+  console.log('');
   
   try {
     // Find available port
