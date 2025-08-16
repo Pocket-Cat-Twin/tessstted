@@ -53,3 +53,12 @@ export type Story = z.infer<typeof storySchema>;
 export type StoryCreate = z.infer<typeof storyCreateSchema>;
 export type StoryUpdate = z.infer<typeof storyUpdateSchema>;
 export type StoryQuery = z.infer<typeof storyQuerySchema>;
+
+// Story with author information (for API responses)
+export type StoryWithAuthor = Omit<Story, 'authorId'> & {
+  author: {
+    name: string;
+  };
+  metaTitle?: string;
+  metaDescription?: string;
+};

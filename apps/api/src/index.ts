@@ -73,7 +73,9 @@ const app = new Elysia()
   )
   .use(
     cors({
-      origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+      origin: process.env.CORS_ORIGIN 
+        ? process.env.CORS_ORIGIN.split(',').map(url => url.trim()) 
+        : ["http://localhost:5173", "https://yuyu.su", "http://yuyu.su"],
       credentials: true,
     }),
   )
@@ -156,7 +158,7 @@ const app = new Elysia()
 // Start server only if not in test mode
 if (process.env.NODE_ENV !== "test") {
   const port = process.env.API_PORT || 3001;
-  const host = process.env.API_HOST || "localhost";
+  const host = process.env.API_HOST || "0.0.0.0";
 
   app.listen(port, () => {
     console.log(

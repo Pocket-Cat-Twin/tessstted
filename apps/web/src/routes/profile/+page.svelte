@@ -215,13 +215,18 @@
   <Toast 
     message={toastMessage} 
     type={toastType} 
-    onClose={() => showToast = false}
+    on:dismiss={() => showToast = false}
   />
 {/if}
 
 <style>
   /* Custom styles for better visual hierarchy */
   :global(.profile-section) {
-    @apply transform transition-all duration-200 hover:scale-[1.02];
+    transform: scale(1);
+    transition: all 0.2s ease;
+  }
+  
+  :global(.profile-section:hover) {
+    transform: scale(1.02);
   }
 </style>

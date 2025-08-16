@@ -31,7 +31,7 @@
     goto(`/stories/${link}`);
   }
 
-  function getThumbnailUrl(thumbnail: string | null) {
+  function getThumbnailUrl(thumbnail: string | null | undefined) {
     if (!thumbnail) return '/images/story-default.jpg';
     return thumbnail.startsWith('http') ? thumbnail : `/uploads/${thumbnail}`;
   }

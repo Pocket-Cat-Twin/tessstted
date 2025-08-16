@@ -326,15 +326,17 @@
             {#if customerMode === 'existing'}
               <!-- Customer selector -->
               <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="block text-sm font-medium text-gray-700 mb-2" id="customer-selector-label">
                   Выберите клиента
-                </label>
-                <CustomerSelector
-                  {selectedCustomer}
-                  disabled={loading}
-                  on:select={handleCustomerSelect}
-                  on:clear={handleCustomerClear}
-                />
+                </div>
+                <div aria-labelledby="customer-selector-label">
+                  <CustomerSelector
+                    {selectedCustomer}
+                    disabled={loading}
+                    on:select={handleCustomerSelect}
+                    on:clear={handleCustomerClear}
+                  />
+                </div>
               </div>
             {/if}
             

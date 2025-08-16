@@ -2,6 +2,10 @@
   export let variant: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' = 'primary';
   export let size: 'sm' | 'md' | 'lg' = 'md';
   
+  // Accept custom class prop
+  let className = '';
+  export { className as class };
+  
   const variantClasses = {
     primary: 'bg-blue-100 text-blue-800',
     secondary: 'bg-gray-100 text-gray-800',
@@ -18,6 +22,6 @@
   };
 </script>
 
-<span class="inline-flex items-center rounded-full font-medium {variantClasses[variant]} {sizeClasses[size]}">
+<span class="inline-flex items-center rounded-full font-medium {variantClasses[variant]} {sizeClasses[size]} {className}">
   <slot />
 </span>

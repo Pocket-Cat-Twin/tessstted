@@ -1,9 +1,9 @@
 import { writable } from "svelte/store";
 import { api } from "$lib/api/client-simple";
-import type { Story } from "@yuyu/shared";
+import type { Story, StoryWithAuthor } from "@yuyu/shared";
 
 export interface StoriesStore {
-  stories: Story[];
+  stories: StoryWithAuthor[];
   loading: boolean;
   error: string | null;
   pagination: {
@@ -63,7 +63,7 @@ export const storiesActions = {
     }
   },
 
-  async loadStory(link: string): Promise<Story | null> {
+  async loadStory(link: string): Promise<StoryWithAuthor | null> {
     try {
       const response = await api.getStory(link);
 

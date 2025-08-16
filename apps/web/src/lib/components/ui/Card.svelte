@@ -5,6 +5,10 @@
   export let variant: 'default' | 'bordered' | 'shadow' = 'default';
   export let padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
   export let rounded: 'none' | 'sm' | 'md' | 'lg' | 'xl' = 'lg';
+  
+  // Accept custom class prop
+  let customClass = '';
+  export { customClass as class };
 
   const variants = {
     default: 'bg-white/80 border border-gray-200',
@@ -32,7 +36,8 @@
     variants[variant],
     paddings[padding],
     roundings[rounded],
-    className
+    className,
+    customClass
   );
 </script>
 

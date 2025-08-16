@@ -14,8 +14,8 @@
     "start:windows": "powershell -ExecutionPolicy Bypass -File scripts/start-prod.ps1",
     "build": "bun run build:api && bun run build:web",
     "build:api": "cd apps/api && bun run build",
-    "build:web": "cd apps/web && bun run build", 
-    "build:windows": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
+    "build:web": "cd apps/web && bun run build",
+    "build:windows": "bun run build:api && bun run build:web",
     "start": "(cd apps/api && bun run start) & (cd apps/web && bun run start)",
     "db:generate": "cd packages/db && bun run generate",
     "db:migrate": "cd packages/db && bun run migrate",
@@ -31,9 +31,11 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-svelte": "^2.35.1",
     "prettier": "^3.2.5",
     "prettier-plugin-svelte": "^3.2.2",
+    "svelte-eslint-parser": "^0.33.0",
     "typescript": "^5.4.2"
   },
   "engines": {

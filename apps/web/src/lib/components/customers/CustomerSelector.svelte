@@ -79,7 +79,7 @@
   }
 </script>
 
-<div class="relative" on:keydown={handleKeydown}>
+<div class="relative" on:keydown={handleKeydown} role="combobox" aria-expanded={showDropdown} aria-haspopup="listbox" aria-controls="customer-dropdown" tabindex="0">
   <div class="flex gap-2">
     <div class="flex-1 relative">
       <Input
@@ -94,7 +94,7 @@
       
       <!-- Dropdown with search results -->
       {#if showDropdown && !disabled}
-        <div class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div id="customer-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {#if loading}
             <div class="p-3 text-center text-gray-500">
               Загрузка клиентов...

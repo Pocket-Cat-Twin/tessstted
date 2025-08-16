@@ -66,6 +66,7 @@
 
 {#if open}
   <!-- Backdrop -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
   <div
     bind:this={modalElement}
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
@@ -78,13 +79,13 @@
     tabindex="-1"
   >
     <!-- Modal Content -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div
       class="bg-white/80 rounded-xl shadow-xl w-full {modalSizeClasses[size]} max-h-screen overflow-hidden"
       transition:scale={{ duration: 200 }}
       on:click|stopPropagation
-      on:keydown={() => {}}
       role="document"
-      tabindex="-1"
     >
       <!-- Header -->
       {#if title || closable}

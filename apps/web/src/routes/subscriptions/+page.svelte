@@ -55,7 +55,14 @@
 
   // Get tier details and styling
   function getTierInfo(tierId: string) {
-    const tierStyles = {
+    const tierStyles: Record<string, {
+      gradient: string;
+      buttonClass: string;
+      iconColor: string;
+      icon: string;
+      isPopular: boolean;
+      badge: string | null;
+    }> = {
       free: {
         gradient: 'from-gray-100 to-gray-200',
         buttonClass: 'bg-gray-600 hover:bg-gray-700',
@@ -184,7 +191,7 @@
             <!-- Popular badge -->
             {#if tierInfo.isPopular}
               <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                <Badge variant="primary" className="px-3 py-1">
+                <Badge variant="primary" class="px-3 py-1">
                   {tierInfo.badge}
                 </Badge>
               </div>
@@ -259,7 +266,7 @@
                   {#if isCurrentTier(tier.id)}
                     <Button 
                       variant="outline" 
-                      className="w-full"
+                      class="w-full"
                       disabled
                     >
                       Текущий тариф
@@ -267,13 +274,13 @@
                   {:else if tier.id === 'free'}
                     <Button 
                       variant="outline" 
-                      className="w-full"
+                      class="w-full"
                     >
                       Базовый тариф
                     </Button>
                   {:else}
                     <Button 
-                      className={`w-full text-white ${tierInfo.buttonClass}`}
+                      class={`w-full text-white ${tierInfo.buttonClass}`}
                       on:click={() => handleUpgrade(tier)}
                     >
                       {authState?.user ? 'Выбрать тариф' : 'Войти и выбрать'}
@@ -366,7 +373,7 @@
                 Зарегистрируйтесь сейчас и получите доступ к нашим services
               </p>
               <div class="flex justify-center space-x-4">
-                <Button href="/register" className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                <Button href="/register" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
                   Зарегистрироваться
                 </Button>
                 <Button variant="outline" href="/login">
@@ -386,6 +393,6 @@
   <Toast 
     message={toastMessage} 
     type={toastType} 
-    onClose={() => showToast = false}
+    on:dismiss={() => showToast = false}
   />
 {/if}

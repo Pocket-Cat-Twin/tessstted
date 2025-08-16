@@ -6,9 +6,9 @@
   import { formatDate } from '$lib/utils/date';
   import Button from '$lib/components/ui/Button.svelte';
   import Spinner from '$lib/components/ui/Spinner.svelte';
-  import type { Story } from '@yuyu/shared';
+  import type { StoryWithAuthor } from '@yuyu/shared';
 
-  let story: Story | null = null;
+  let story: StoryWithAuthor | null = null;
   let loading = true;
   let error = '';
 

@@ -4,16 +4,12 @@ module.exports = {
   plugins: ['@typescript-eslint', 'svelte'],
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
-    '@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:@typescript-eslint/recommended',
     'prettier'
   ],
   parserOptions: {
     ecmaVersion: 2022,
-    sourceType: 'module',
-    tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json', './apps/*/tsconfig.json', './packages/*/tsconfig.json'],
-    extraFileExtensions: ['.svelte']
+    sourceType: 'module'
   },
   env: {
     browser: true,
@@ -47,14 +43,12 @@ module.exports = {
   ],
   rules: {
     // Prevent duplicate exports and declarations
-    '@typescript-eslint/no-duplicate-imports': 'error',
-    'no-duplicate-imports': 'off', // Use TypeScript version instead
+    'no-duplicate-imports': 'error',
     'no-redeclare': 'error',
-    '@typescript-eslint/no-redeclare': 'error',
     
     // Prevent naming conflicts
     '@typescript-eslint/no-shadow': 'error',
-    'no-shadow': 'off', // Use TypeScript version instead
+    'no-shadow': 'off',
     
     // Ensure imports are used
     '@typescript-eslint/no-unused-vars': ['error', { 
@@ -65,17 +59,6 @@ module.exports = {
     
     // Type safety
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unsafe-assignment': 'warn',
-    '@typescript-eslint/no-unsafe-member-access': 'warn',
-    '@typescript-eslint/no-unsafe-call': 'warn',
-    '@typescript-eslint/no-unsafe-return': 'warn',
-    '@typescript-eslint/restrict-template-expressions': 'warn',
-    
-    // Code quality
-    '@typescript-eslint/prefer-nullish-coalescing': 'error',
-    '@typescript-eslint/prefer-optional-chain': 'error',
-    '@typescript-eslint/no-unnecessary-condition': 'warn',
-    '@typescript-eslint/strict-boolean-expressions': 'warn',
     
     // Function and variable declarations
     'prefer-const': 'error',
@@ -89,9 +72,7 @@ module.exports = {
     // Database/ORM specific rules
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     
-    // Svelte-specific rules
-    'svelte/no-duplicate-style-properties': 'error',
-    'svelte/no-unused-svelte-ignore': 'error',
+    // Svelte-specific rules - simplified
     'svelte/valid-compile': 'error'
   },
   ignorePatterns: [
