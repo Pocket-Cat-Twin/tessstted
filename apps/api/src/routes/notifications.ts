@@ -10,7 +10,7 @@ import {
   eq,
 } from "@yuyu/db";
 import { sendEmail } from "../services/email";
-import { sendSMS } from "../services/sms";
+import { smsService } from "../services/sms";
 import { NotFoundError } from "../middleware/error";
 
 export const notificationRoutes = new Elysia({ prefix: "/notifications" })
@@ -184,7 +184,7 @@ export const notificationRoutes = new Elysia({ prefix: "/notifications" })
 
       if (body.type === "sms" && user.phone) {
         try {
-          await sendSMS(user.phone, "YuYu: Тестовое SMS уведомление");
+          await smsService.sendNotificationSms(user.phone, "YuYu: Тестовое SMS уведомление");
 
           results.push({
             type: "sms",
@@ -343,7 +343,7 @@ export const notificationRoutes = new Elysia({ prefix: "/notifications" })
 
       if (body.channels.includes("sms") && user.phone) {
         try {
-          await sendSMS(user.phone, `YuYu: ${body.message}`);
+          await smsService.sendNotificationSms(user.phone, `YuYu: ${body.message}`);
 
           results.push({
             type: "sms",

@@ -15,7 +15,7 @@ import {
   sendSubscriptionExpiredEmail,
   sendSubscriptionRenewedEmail,
 } from "./email";
-import { sendSMS } from "./sms";
+import { smsService } from "./sms";
 
 export interface NotificationSchedule {
   subscriptionId: string;
@@ -217,7 +217,7 @@ class NotificationService {
         try {
           const smsMessage = `YuYu: Ваша подписка ${this.getTierDisplayName(schedule.tier)} истекает через ${schedule.daysRemaining} дн. Продлите на сайте.`;
 
-          await sendSMS(user.phone, smsMessage);
+          await smsService.sendNotificationSms(user.phone, smsMessage);
 
           results.push({
             success: true,
