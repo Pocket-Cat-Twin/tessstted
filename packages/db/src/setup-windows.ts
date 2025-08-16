@@ -1,4 +1,13 @@
 // Windows-specific database initialization script
+// Set UTF-8 encoding for proper Russian text display
+if (process.platform === "win32") {
+  try {
+    process.stdout.setDefaultEncoding('utf8');
+  } catch (e) {
+    // Ignore encoding errors
+  }
+}
+
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { migrationClient, db, testConnection } from "./connection";
 import postgres from "postgres";
@@ -11,14 +20,20 @@ const WINDOWS_PG_DEFAULTS = {
   port: 5432,
   user: "postgres",
   database: "postgres", // Connect to default database first
-  password: "password"
+  password: "postgres"
 };
 
 async function createDatabaseIfNotExists() {
   console.log("[DB] Checking if database exists...");
   
-  // Connect to default postgres database to create our database
-  const adminConnectionString = `postgresql://${WINDOWS_PG_DEFAULTS.user}:${WINDOWS_PG_DEFAULTS.password}@${WINDOWS_PG_DEFAULTS.host}:${WINDOWS_PG_DEFAULTS.port}/${WINDOWS_PG_DEFAULTS.database}`;
+  // Get DATABASE_URL from environment and replace database name with 'postgres' for admin connection
+  const currentConnectionString = process.env.DATABASE_URL || 
+    `postgresql://${WINDOWS_PG_DEFAULTS.user}:${WINDOWS_PG_DEFAULTS.password}@${WINDOWS_PG_DEFAULTS.host}:${WINDOWS_PG_DEFAULTS.port}/yuyu_lolita`;
+  
+  // Replace the database name with 'postgres' for administrative operations
+  const adminConnectionString = currentConnectionString.replace(/\/[^\/]*$/, '/postgres');
+  console.log("[DEBUG] Admin connection string:", adminConnectionString.replace(/:[^:]*@/, ':***@'));
+  
   const adminClient = postgres(adminConnectionString, { max: 1 });
   
   try {
@@ -37,6 +52,15 @@ async function createDatabaseIfNotExists() {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("[ERROR] Error checking/creating database:", errorMessage);
+    
+    // Show additional debug info for authentication errors
+    if (errorMessage.includes("28P01") || errorMessage.includes("authentication failed")) {
+      console.error("[DEBUG] Authentication failed for admin connection");
+      console.error("        This means the password for 'postgres' user is incorrect");
+      console.error("        Admin connection was:", adminConnectionString.replace(/:[^:]*@/, ':***@'));
+      console.error("        Please check your PostgreSQL installation and password");
+    }
+    
     throw error;
   } finally {
     await adminClient.end();
@@ -87,6 +111,11 @@ async function checkPostgreSQLService() {
 async function testDatabaseConnection() {
   console.log("[DB] Testing database connection...");
   
+  // Show connection details for debugging (mask password)
+  const connectionString = process.env.DATABASE_URL || 
+    `postgresql://${WINDOWS_PG_DEFAULTS.user}:${WINDOWS_PG_DEFAULTS.password}@${WINDOWS_PG_DEFAULTS.host}:${WINDOWS_PG_DEFAULTS.port}/yuyu_lolita`;
+  console.log("[DEBUG] Main connection string:", connectionString.replace(/:[^:]*@/, ':***@'));
+  
   const maxRetries = 3;
   let retries = 0;
   
@@ -107,7 +136,7 @@ async function testDatabaseConnection() {
       // Check for specific error codes
       if (errorMessage.includes("28P01")) {
         console.log("[INFO] Authentication failed - incorrect password");
-        console.log("       Please ensure PostgreSQL user 'postgres' has password 'password'");
+        console.log("       Please ensure PostgreSQL user 'postgres' has password 'postgres'");
         console.log("       Or update DATABASE_URL in .env with correct credentials");
         break; // Don't retry authentication errors
       } else if (errorMessage.includes("ECONNREFUSED")) {
@@ -127,7 +156,7 @@ async function testDatabaseConnection() {
   console.log("[HELP] Database connection troubleshooting:");
   console.log("       1. Ensure PostgreSQL is running: net start postgresql-x64-16");
   console.log("       2. Set PostgreSQL password:");
-  console.log("          psql -U postgres -c \"ALTER USER postgres PASSWORD 'password';\"");
+  console.log("          psql -U postgres -c \"ALTER USER postgres PASSWORD 'postgres';\"");
   console.log("       3. Or update DATABASE_URL in .env with your actual credentials");
   console.log("       4. Verify PostgreSQL is listening on localhost:5432");
   
@@ -170,7 +199,7 @@ async function setupWindows() {
       console.log("");
       console.log("📋 Database connection troubleshooting:");
       console.log("1. Verify PostgreSQL is installed and running");
-      console.log("2. Check that the password is 'password' or update DATABASE_URL in .env");
+      console.log("2. Check that the password is 'postgres' or update DATABASE_URL in .env");
       console.log("3. Ensure PostgreSQL is listening on localhost:5432");
       process.exit(1);
     }
