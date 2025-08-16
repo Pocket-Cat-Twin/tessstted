@@ -110,7 +110,25 @@ if (-not (Test-Path ".env")) {
 $envContent = Get-Content ".env"
 $envContent = $envContent -replace "NODE_ENV=development", "NODE_ENV=production"
 $envContent = $envContent -replace "PUBLIC_API_URL=.*", "PUBLIC_API_URL=http://localhost:3001"
+
+# Ensure proper port configuration
+if (-not ($envContent | Select-String "PORT=")) {
+    $envContent += "PORT=5173"
+}
+if (-not ($envContent | Select-String "WEB_PORT=")) {
+    $envContent += "WEB_PORT=5173"
+}
+if (-not ($envContent | Select-String "HOST=")) {
+    $envContent += "HOST=0.0.0.0"
+}
+
 $envContent | Set-Content ".env"
+
+# Set environment variables for this session
+$env:NODE_ENV = "production"
+$env:PORT = "5173"
+$env:WEB_PORT = "5173"
+$env:HOST = "0.0.0.0"
 
 # Step 3: Run database migrations
 Write-Host ""
@@ -186,13 +204,13 @@ if ($Daemon) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; Write-Host '[API] YuYu Lolita API Server - PRODUCTION' -ForegroundColor Red; bun --filter=@yuyu/api start"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Write-Host '[API] YuYu Lolita API Server - PRODUCTION' -ForegroundColor Red; bun --filter=@yuyu/api start"
     
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; Write-Host '[WEB] YuYu Lolita Web App - PRODUCTION' -ForegroundColor Red; bun --filter=@yuyu/web start"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:PORT='5173'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Write-Host '[WEB] YuYu Lolita Web App - PRODUCTION' -ForegroundColor Red; bun --filter=@yuyu/web start:windows"
 }
 
 # Wait for services to start

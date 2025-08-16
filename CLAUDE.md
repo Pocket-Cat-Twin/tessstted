@@ -19,7 +19,15 @@ cd apps/api && bun run dev:windows
 
 # Terminal 2 - Web App  
 cd apps/web && bun run dev:windows
+
+# Smart startup (Automatic port detection)
+cd apps/web && bun run start:windows
 ```
+
+**🚀 NEW: Smart Port Detection**
+- Automatically finds available ports if default ones are busy
+- Graceful fallback to alternative ports
+- Clear console output showing actual URLs
 
 ### Cross-Platform (Legacy)
 ```bash
@@ -87,7 +95,14 @@ bun run build
 ```bash
 # API Configuration (Windows)
 API_HOST=localhost    # Windows-optimized
+API_PORT=3001
 CORS_ORIGIN=http://localhost:5173
+
+# Web App Configuration
+PORT=5173             # Smart port detection
+WEB_PORT=5173
+HOST=0.0.0.0          # Network access
+PUBLIC_API_URL=http://localhost:3001
 
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
@@ -105,6 +120,14 @@ copy .env.windows .env
 ```
 
 ## Known Issues & Solutions
+
+### Port Conflict Issues (SOLVED!)
+**Problem**: Web app fails with port 3000 or 5173 busy
+**Solution**: Automatic port detection implemented!
+- ✅ Smart port finder automatically selects available ports
+- ✅ Fallback ports: 5173, 3000, 3001, 3002, 4000, 4173, 5000, 8000, 8080
+- ✅ Environment variables properly configured
+- ✅ Both development and production modes supported
 
 ### Database Connection Issues
 **Problem**: Cannot connect to PostgreSQL

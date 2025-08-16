@@ -111,6 +111,14 @@ if (-not (Test-Path ".env")) {
     }
 }
 
+# Set development environment variables
+$env:NODE_ENV = "development"
+$env:PORT = "5173"
+$env:WEB_PORT = "5173"
+$env:HOST = "localhost"
+$env:API_PORT = "3001"
+$env:API_HOST = "localhost"
+
 # Step 3: Run database migrations if needed
 Write-Host ""
 Write-Host "[DB] Checking database migrations..." -ForegroundColor Cyan
@@ -139,14 +147,14 @@ if ($NoNewWindows) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; Write-Host '[API] YuYu Lolita API Server' -ForegroundColor Green; bun run dev:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; `$env:NODE_ENV='development'; `$env:API_PORT='3001'; `$env:API_HOST='localhost'; Write-Host '[API] YuYu Lolita API Server' -ForegroundColor Green; bun run dev:windows"
     
     # Wait a moment for API to start
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; Write-Host '[WEB] YuYu Lolita Web App' -ForegroundColor Blue; bun run dev:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; `$env:NODE_ENV='development'; `$env:PORT='5173'; `$env:WEB_PORT='5173'; `$env:HOST='localhost'; Write-Host '[WEB] YuYu Lolita Web App' -ForegroundColor Blue; bun run dev:windows"
     
     # Wait for services to start
     Start-Sleep -Seconds 5
