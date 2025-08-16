@@ -90,7 +90,7 @@ API_HOST=localhost    # Windows-optimized
 CORS_ORIGIN=http://localhost:5173
 
 # Database
-DATABASE_URL=postgresql://postgres:password@localhost:5432/yuyu_lolita
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
 
 # Environment
 NODE_ENV=development

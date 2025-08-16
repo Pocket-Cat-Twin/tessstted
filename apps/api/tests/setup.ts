@@ -7,7 +7,7 @@ beforeAll(async () => {
   process.env.JWT_SECRET = "test-jwt-secret-key";
   process.env.DATABASE_URL =
     process.env.DATABASE_URL ||
-    "postgresql://postgres:password@localhost:5432/yuyu_lolita_test";
+    "postgresql://postgres:postgres@localhost:5432/yuyu_lolita_test";
 
   // Disable rate limiting in tests
   process.env.DISABLE_RATE_LIMITING = "true";

@@ -7,7 +7,7 @@ export default {
   dbCredentials: {
     connectionString:
       process.env.DATABASE_URL ||
-      "postgresql://postgres:password@localhost:5432/yuyu_lolita",
+      "postgresql://postgres:postgres@localhost:5432/yuyu_lolita",
   },
   verbose: true,
   strict: true,

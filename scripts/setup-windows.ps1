@@ -134,7 +134,7 @@ elseif (-not (Test-Path $envFile)) {
     # Create the environment file content as a string variable
     $envContent = @"
 # Database Configuration
-DATABASE_URL=postgresql://postgres:password@localhost:5432/yuyu_lolita
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production

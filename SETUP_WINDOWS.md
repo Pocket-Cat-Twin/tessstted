@@ -218,7 +218,7 @@ bun run type-check            # Type checking
 ### Environment Variables (.env)
 ```env
 # Database
-DATABASE_URL=postgresql://postgres:password@localhost:5432/yuyu_lolita
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
 
 # API
 API_HOST=localhost
