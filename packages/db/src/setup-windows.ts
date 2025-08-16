@@ -15,7 +15,7 @@ const WINDOWS_PG_DEFAULTS = {
 };
 
 async function createDatabaseIfNotExists() {
-  console.log("🗄️  Checking if database exists...");
+  console.log("[DB] Checking if database exists...");
   
   // Connect to default postgres database to create our database
   const adminConnectionString = `postgresql://${WINDOWS_PG_DEFAULTS.user}:${WINDOWS_PG_DEFAULTS.password}@${WINDOWS_PG_DEFAULTS.host}:${WINDOWS_PG_DEFAULTS.port}/${WINDOWS_PG_DEFAULTS.database}`;
@@ -28,14 +28,15 @@ async function createDatabaseIfNotExists() {
     `;
     
     if (result.length === 0) {
-      console.log("🔄 Creating yuyu_lolita database...");
+      console.log("[INFO] Creating yuyu_lolita database...");
       await adminClient`CREATE DATABASE yuyu_lolita`;
-      console.log("✅ Database yuyu_lolita created successfully");
+      console.log("[SUCCESS] Database yuyu_lolita created successfully");
     } else {
-      console.log("✅ Database yuyu_lolita already exists");
+      console.log("[SUCCESS] Database yuyu_lolita already exists");
     }
   } catch (error) {
-    console.error("❌ Error checking/creating database:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[ERROR] Error checking/creating database:", errorMessage);
     throw error;
   } finally {
     await adminClient.end();
@@ -44,11 +45,11 @@ async function createDatabaseIfNotExists() {
 
 async function checkPostgreSQLService() {
   if (!isWindows) {
-    console.log("ℹ️  Not running on Windows, skipping service check");
+    console.log("[INFO] Not running on Windows, skipping service check");
     return true;
   }
   
-  console.log("🔍 Checking PostgreSQL service on Windows...");
+  console.log("[SERVICE] Checking PostgreSQL service on Windows...");
   
   try {
     // Try to import child_process for Windows service check
@@ -60,72 +61,95 @@ async function checkPostgreSQLService() {
     const { stdout } = await execAsync('sc query postgresql*');
     
     if (stdout.includes("RUNNING")) {
-      console.log("✅ PostgreSQL service is running");
+      console.log("[SUCCESS] PostgreSQL service is running");
       return true;
     } else if (stdout.includes("STOPPED")) {
-      console.log("⚠️  PostgreSQL service is stopped, attempting to start...");
+      console.log("[WARNING] PostgreSQL service is stopped, attempting to start...");
       
       try {
         await execAsync('net start postgresql*');
-        console.log("✅ PostgreSQL service started");
+        console.log("[SUCCESS] PostgreSQL service started");
         return true;
       } catch (startError) {
-        console.log("❌ Failed to start PostgreSQL service automatically");
-        console.log("   Please start it manually: net start postgresql-x64-15");
+        console.log("[ERROR] Failed to start PostgreSQL service automatically");
+        console.log("        Please start it manually: net start postgresql-x64-16");
         return false;
       }
     }
   } catch (error) {
-    console.log("⚠️  Could not check PostgreSQL service status");
-    console.log("   This is normal if PostgreSQL was installed differently");
+    console.log("[WARNING] Could not check PostgreSQL service status");
+    console.log("          This is normal if PostgreSQL was installed differently");
   }
   
   return true;
 }
 
 async function testDatabaseConnection() {
-  console.log("🔌 Testing database connection...");
+  console.log("[DB] Testing database connection...");
   
-  const maxRetries = 5;
+  const maxRetries = 3;
   let retries = 0;
+  
+  let lastError: string | null = null;
   
   while (retries < maxRetries) {
     try {
       const isConnected = await testConnection();
       if (isConnected) {
-        console.log("✅ Database connection successful");
+        console.log("[SUCCESS] Database connection successful");
         return true;
       }
     } catch (error) {
-      console.log(`❌ Connection attempt ${retries + 1} failed:`, error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      lastError = errorMessage;
+      console.log(`[ERROR] Connection attempt ${retries + 1} failed: ${errorMessage}`);
+      
+      // Check for specific error codes
+      if (errorMessage.includes("28P01")) {
+        console.log("[INFO] Authentication failed - incorrect password");
+        console.log("       Please ensure PostgreSQL user 'postgres' has password 'password'");
+        console.log("       Or update DATABASE_URL in .env with correct credentials");
+        break; // Don't retry authentication errors
+      } else if (errorMessage.includes("ECONNREFUSED")) {
+        console.log("[INFO] PostgreSQL server is not running or not accessible");
+      }
     }
     
     retries++;
-    if (retries < maxRetries) {
-      console.log(`⏳ Retrying in 2 seconds... (${retries}/${maxRetries})`);
+    if (retries < maxRetries && !lastError?.includes("28P01")) {
+      console.log(`[INFO] Retrying in 2 seconds... (${retries}/${maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
   }
   
-  console.log("❌ Could not establish database connection after all retries");
+  console.log("[ERROR] Could not establish database connection after all retries");
+  console.log("");
+  console.log("[HELP] Database connection troubleshooting:");
+  console.log("       1. Ensure PostgreSQL is running: net start postgresql-x64-16");
+  console.log("       2. Set PostgreSQL password:");
+  console.log("          psql -U postgres -c \"ALTER USER postgres PASSWORD 'password';\"");
+  console.log("       3. Or update DATABASE_URL in .env with your actual credentials");
+  console.log("       4. Verify PostgreSQL is listening on localhost:5432");
+  
   return false;
 }
 
 async function runMigrations() {
-  console.log("🔄 Running database migrations...");
+  console.log("[DB] Running database migrations...");
   
   try {
     await migrate(db, { migrationsFolder: "./migrations" });
-    console.log("✅ Database migrations completed successfully");
+    console.log("[SUCCESS] Database migrations completed successfully");
     return true;
   } catch (error) {
-    console.error("❌ Migration failed:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[ERROR] Migration failed:", errorMessage);
     return false;
   }
 }
 
 async function setupWindows() {
-  console.log("🪟 Starting Windows database setup...");
+  console.log("[SETUP] Starting Windows database setup...");
   console.log("================================");
   
   try {

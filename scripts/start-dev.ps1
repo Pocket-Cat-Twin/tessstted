@@ -6,7 +6,7 @@ param(
     [switch]$SkipBrowser = $false
 )
 
-Write-Host "🚀 Starting YuYu Lolita Shopping - Development Mode" -ForegroundColor Green
+Write-Host "[DEV] Starting YuYu Lolita Shopping - Development Mode" -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Green
 
 # Get the project root directory
@@ -15,8 +15,21 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 # Function to check if PostgreSQL is running
 function Test-PostgreSQL {
     try {
-        $pgService = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
-        if ($pgService -and $pgService.Status -eq "Running") {
+        # Get all PostgreSQL services and prioritize v16
+        $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
+        $targetService = $null
+        
+        if ($pgServices) {
+            $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+            if (-not $targetService) {
+                $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
+            }
+            if (-not $targetService) {
+                $targetService = $pgServices | Select-Object -First 1
+            }
+        }
+        
+        if ($targetService -and $targetService.Status -eq "Running") {
             return $true
         }
         
@@ -36,83 +49,104 @@ function Test-PostgreSQL {
     }
 }
 
+# Function to get the target PostgreSQL service
+function Get-TargetPostgreSQLService {
+    $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
+    if ($pgServices) {
+        $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+        if (-not $targetService) {
+            $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
+        }
+        if (-not $targetService) {
+            $targetService = $pgServices | Select-Object -First 1
+        }
+        return $targetService
+    }
+    return $null
+}
+
 # Step 1: Check PostgreSQL
-Write-Host "🗄️  Checking PostgreSQL..." -ForegroundColor Cyan
+Write-Host "[DB] Checking PostgreSQL..." -ForegroundColor Cyan
 if (Test-PostgreSQL) {
-    Write-Host "✅ PostgreSQL is running" -ForegroundColor Green
+    Write-Host "[SUCCESS] PostgreSQL is running" -ForegroundColor Green
 }
 else {
-    Write-Host "⚠️  PostgreSQL is not running or not accessible" -ForegroundColor Yellow
-    Write-Host "   Attempting to start PostgreSQL service..." -ForegroundColor Yellow
+    Write-Host "[WARNING] PostgreSQL is not running or not accessible" -ForegroundColor Yellow
+    Write-Host "          Attempting to start PostgreSQL service..." -ForegroundColor Yellow
     
     try {
-        $pgService = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
-        if ($pgService) {
-            Start-Service $pgService.Name
+        $targetService = Get-TargetPostgreSQLService
+        if ($targetService) {
+            Write-Host "          Attempting to start: $($targetService.DisplayName)" -ForegroundColor White
+            Start-Service $targetService.Name -ErrorAction Stop
             Start-Sleep -Seconds 3
-            Write-Host "✅ PostgreSQL service started" -ForegroundColor Green
+            Write-Host "[SUCCESS] PostgreSQL service started" -ForegroundColor Green
         }
         else {
-            Write-Host "❌ PostgreSQL service not found. Please ensure PostgreSQL is installed." -ForegroundColor Red
-            Write-Host "   Install from: https://www.postgresql.org/download/windows/" -ForegroundColor White
+            Write-Host "[ERROR] PostgreSQL service not found. Please ensure PostgreSQL is installed." -ForegroundColor Red
+            Write-Host "        Install from: https://www.postgresql.org/download/windows/" -ForegroundColor White
         }
     }
     catch {
-        Write-Host "❌ Failed to start PostgreSQL service" -ForegroundColor Red
-        Write-Host "   Please start PostgreSQL manually or check installation" -ForegroundColor White
+        Write-Host "[WARNING] Failed to start PostgreSQL service: $_" -ForegroundColor Yellow
+        Write-Host "          Please start PostgreSQL manually or run as Administrator" -ForegroundColor White
+        Write-Host "          You can also try: net start postgresql-x64-16" -ForegroundColor White
     }
 }
 
 # Step 2: Setup environment
-Write-Host "`n⚙️  Checking environment..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "[ENV] Checking environment..." -ForegroundColor Cyan
 Set-Location $projectRoot
 
 if (-not (Test-Path ".env")) {
-    Write-Host "⚠️  .env file not found. Creating from template..." -ForegroundColor Yellow
+    Write-Host "[WARNING] .env file not found. Creating from template..." -ForegroundColor Yellow
     if (Test-Path ".env.windows") {
         Copy-Item ".env.windows" ".env"
-        Write-Host "✅ Environment file created" -ForegroundColor Green
+        Write-Host "[SUCCESS] Environment file created" -ForegroundColor Green
     }
     else {
-        Write-Host "❌ No environment template found. Please run setup-windows.ps1 first" -ForegroundColor Red
+        Write-Host "[ERROR] No environment template found. Please run setup-windows.ps1 first" -ForegroundColor Red
         exit 1
     }
 }
 
 # Step 3: Run database migrations if needed
-Write-Host "`n🗄️  Checking database migrations..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "[DB] Checking database migrations..." -ForegroundColor Cyan
 try {
     bun run db:migrate:windows
-    Write-Host "✅ Database migrations completed" -ForegroundColor Green
+    Write-Host "[SUCCESS] Database migrations completed" -ForegroundColor Green
 }
 catch {
-    Write-Host "⚠️  Database migrations failed or skipped" -ForegroundColor Yellow
+    Write-Host "[WARNING] Database migrations failed or skipped" -ForegroundColor Yellow
 }
 
 # Step 4: Start development servers
-Write-Host "`n🚀 Starting development servers..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "[SERVERS] Starting development servers..." -ForegroundColor Cyan
 
 if ($NoNewWindows) {
     # Start both in the same terminal (background API)
-    Write-Host "Starting API server in background..." -ForegroundColor Yellow
+    Write-Host "[INFO] Starting API server in background..." -ForegroundColor Yellow
     Start-Process bun -ArgumentList "--filter=@yuyu/api", "dev" -WorkingDirectory $projectRoot -WindowStyle Hidden
     
     Start-Sleep -Seconds 3
     
-    Write-Host "Starting Web app..." -ForegroundColor Yellow
+    Write-Host "[INFO] Starting Web app..." -ForegroundColor Yellow
     bun --filter=@yuyu/web dev
 }
 else {
     # Start API server in new window
-    Write-Host "🔌 Starting API server in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; Write-Host '🔌 YuYu Lolita API Server' -ForegroundColor Green; bun run dev:windows"
+    Write-Host "[API] Starting API server in new window..." -ForegroundColor Yellow
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; Write-Host '[API] YuYu Lolita API Server' -ForegroundColor Green; bun run dev:windows"
     
     # Wait a moment for API to start
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
-    Write-Host "🌐 Starting Web app in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; Write-Host '🌐 YuYu Lolita Web App' -ForegroundColor Blue; bun run dev:windows"
+    Write-Host "[WEB] Starting Web app in new window..." -ForegroundColor Yellow
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; Write-Host '[WEB] YuYu Lolita Web App' -ForegroundColor Blue; bun run dev:windows"
     
     # Wait for services to start
     Start-Sleep -Seconds 5
@@ -120,24 +154,26 @@ else {
 
 # Step 5: Open browser
 if (-not $SkipBrowser) {
-    Write-Host "`n🌐 Opening browser..." -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "[BROWSER] Opening browser..." -ForegroundColor Cyan
     Start-Sleep -Seconds 3
     Start-Process "http://localhost:5173"
 }
 
 # Display access information
-Write-Host "`n✅ Development servers started!" -ForegroundColor Green
+Write-Host ""
+Write-Host "[COMPLETE] Development servers started!" -ForegroundColor Green
 Write-Host "=============================" -ForegroundColor Green
 Write-Host ""
-Write-Host "🔗 Access URLs:" -ForegroundColor Cyan
-Write-Host "   📱 Web App: http://localhost:5173" -ForegroundColor White
-Write-Host "   🔌 API: http://localhost:3001" -ForegroundColor White
-Write-Host "   📚 API Docs: http://localhost:3001/swagger" -ForegroundColor White
+Write-Host "[ACCESS] Access URLs:" -ForegroundColor Cyan
+Write-Host "         Web App: http://localhost:5173" -ForegroundColor White
+Write-Host "         API: http://localhost:3001" -ForegroundColor White
+Write-Host "         API Docs: http://localhost:3001/swagger" -ForegroundColor White
 Write-Host ""
-Write-Host "🛑 To stop servers:" -ForegroundColor Yellow
-Write-Host "   Close the PowerShell windows or press Ctrl+C in each" -ForegroundColor White
+Write-Host "[STOP] To stop servers:" -ForegroundColor Yellow
+Write-Host "       Close the PowerShell windows or press Ctrl+C in each" -ForegroundColor White
 Write-Host ""
-Write-Host "🐛 Troubleshooting:" -ForegroundColor Cyan
-Write-Host "   - Check that PostgreSQL is running" -ForegroundColor White
-Write-Host "   - Verify .env configuration" -ForegroundColor White
-Write-Host "   - Check Windows Firewall settings for ports 3001, 5173" -ForegroundColor White
+Write-Host "[HELP] Troubleshooting:" -ForegroundColor Cyan
+Write-Host "       - Check that PostgreSQL is running" -ForegroundColor White
+Write-Host "       - Verify .env configuration" -ForegroundColor White
+Write-Host "       - Check Windows Firewall settings for ports 3001, 5173" -ForegroundColor White

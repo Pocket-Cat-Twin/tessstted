@@ -6,7 +6,6 @@ import {
   timestamp,
   integer,
   pgEnum,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { users } from "./users";

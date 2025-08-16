@@ -16,7 +16,7 @@ import {
   storyTags,
   storyTagRelations,
 } from "./schema";
-import { generateRandomString } from "@yuyu/shared";
+// Removed unused import: generateRandomString
 
 export async function seedDatabase() {
   console.log("🌱 Seeding database...");
@@ -44,6 +44,9 @@ export async function seedDatabase() {
         })
         .returning();
       adminUser = inserted[0];
+      if (!adminUser) {
+        throw new Error("Failed to create admin user");
+      }
       console.log("✅ Admin user created:", adminUser.email);
     } else {
       console.log("✅ Admin user already exists:", adminUser.email);
@@ -72,6 +75,9 @@ export async function seedDatabase() {
         })
         .returning();
       regularUser = inserted[0];
+      if (!regularUser) {
+        throw new Error("Failed to create regular user");
+      }
       console.log("✅ Regular user created:", regularUser.email);
     } else {
       console.log("✅ Regular user already exists:", regularUser.email);
@@ -100,6 +106,9 @@ export async function seedDatabase() {
         })
         .returning();
       phoneUser = inserted[0];
+      if (!phoneUser) {
+        throw new Error("Failed to create phone user");
+      }
       console.log("✅ Phone user created:", phoneUser.phone);
     } else {
       console.log("✅ Phone user already exists:", phoneUser.phone);
@@ -173,7 +182,7 @@ export async function seedDatabase() {
     // Create test subscriptions for users
     const existingSubscriptions = await db.query.userSubscriptions.findFirst();
 
-    if (!existingSubscriptions) {
+    if (!existingSubscriptions && regularUser && phoneUser) {
       const subscriptionsData = [
         {
           userId: regularUser.id,
@@ -238,40 +247,44 @@ export async function seedDatabase() {
         .insert(customers)
         .values(customersData)
         .returning();
+      
+      if (insertedCustomers.length < 5) {
+        throw new Error("Failed to create all customers");
+      }
       console.log("✅ Test customers created:", insertedCustomers.length);
 
       // Create addresses for each customer
       const addressesData = [
         {
-          customerId: insertedCustomers[0].id,
+          customerId: insertedCustomers[0]?.id || "",
           fullAddress: "г. Москва, ул. Ленина, д. 10, кв. 5",
           city: "Москва",
           postalCode: "101000",
           isDefault: true,
         },
         {
-          customerId: insertedCustomers[1].id,
+          customerId: insertedCustomers[1]?.id || "",
           fullAddress: "г. Санкт-Петербург, Невский пр., д. 25, кв. 12",
           city: "Санкт-Петербург",
           postalCode: "191011",
           isDefault: true,
         },
         {
-          customerId: insertedCustomers[2].id,
+          customerId: insertedCustomers[2]?.id || "",
           fullAddress: "г. Новосибирск, ул. Красный пр., д. 18, кв. 3",
           city: "Новосибирск",
           postalCode: "630007",
           isDefault: true,
         },
         {
-          customerId: insertedCustomers[3].id,
+          customerId: insertedCustomers[3]?.id || "",
           fullAddress: "г. Екатеринбург, ул. Малышева, д. 42, кв. 8",
           city: "Екатеринбург",
           postalCode: "620014",
           isDefault: true,
         },
         {
-          customerId: insertedCustomers[4].id,
+          customerId: insertedCustomers[4]?.id || "",
           fullAddress: "г. Казань, ул. Баумана, д. 7, кв. 15",
           city: "Казань",
           postalCode: "420012",
@@ -413,6 +426,7 @@ export async function seedDatabase() {
       const emailTemplatesData = [
         {
           name: "welcome",
+          displayName: "Приветственное письмо",
           subject: "Добро пожаловать в YuYu Lolita Shopping!",
           htmlContent: `
           <h1>Добро пожаловать, {{name}}!</h1>
@@ -422,10 +436,11 @@ export async function seedDatabase() {
         `,
           textContent:
             "Добро пожаловать, {{name}}! Для подтверждения email перейдите по ссылке: {{verificationUrl}}",
-          variables: "name, verificationUrl",
+          availableVariables: "name, verificationUrl",
         },
         {
           name: "password_reset",
+          displayName: "Сброс пароля",
           subject: "Сброс пароля - YuYu Lolita Shopping",
           htmlContent: `
           <h1>Сброс пароля</h1>
@@ -434,10 +449,11 @@ export async function seedDatabase() {
           <p>Если вы не запрашивали сброс пароля, проигнорируйте это письмо.</p>
         `,
           textContent: "Для сброса пароля перейдите по ссылке: {{resetUrl}}",
-          variables: "resetUrl",
+          availableVariables: "resetUrl",
         },
         {
           name: "order_created",
+          displayName: "Уведомление о создании заказа",
           subject: "Новый заказ #{{orderNumber}} создан",
           htmlContent: `
           <h1>Заказ #{{orderNumber}} создан</h1>
@@ -449,7 +465,7 @@ export async function seedDatabase() {
         `,
           textContent:
             "Заказ #{{orderNumber}} создан. Сумма: {{totalAmount}} ₽. Ссылка: {{orderUrl}}",
-          variables: "orderNumber, customerName, totalAmount, orderUrl",
+          availableVariables: "orderNumber, customerName, totalAmount, orderUrl",
         },
       ];
 
@@ -462,16 +478,21 @@ export async function seedDatabase() {
     // Check if orders already exist
     const existingOrders = await db.query.orders.findFirst();
 
-    if (!existingOrders) {
+    if (!existingOrders && regularUser) {
+      // Ensure we have enough customers for orders
+      if (testCustomers.length < 3) {
+        throw new Error("Not enough customers available for creating orders");
+      }
+      
       // Seed orders
       const orderData = [
         {
           nomerok: "YL123456",
           userId: regularUser.id,
-          customerId: testCustomers[0]?.id,
-          customerName: testCustomers[0]?.name || "Анна Петрова",
-          customerPhone: testCustomers[0]?.phone || "+7 (999) 123-45-67",
-          customerEmail: testCustomers[0]?.email || "anna@example.com",
+          customerId: testCustomers[0]?.id || "",
+          customerName: testCustomers[0]?.name || "Unknown Customer",
+          customerPhone: testCustomers[0]?.phone || "+7 (999) 000-00-00",
+          customerEmail: testCustomers[0]?.email || "unknown@example.com",
           deliveryAddress: "г. Москва, ул. Ленина, д. 10, кв. 5",
           deliveryMethod: "СДЭК",
           paymentMethod: "Банковская карта",
@@ -488,10 +509,10 @@ export async function seedDatabase() {
         {
           nomerok: "YL789012",
           userId: regularUser.id,
-          customerId: testCustomers[1]?.id,
-          customerName: testCustomers[1]?.name || "Мария Соколова",
-          customerPhone: testCustomers[1]?.phone || "+7 (999) 234-56-78",
-          customerEmail: testCustomers[1]?.email || "maria@example.com",
+          customerId: testCustomers[1]?.id || "",
+          customerName: testCustomers[1]?.name || "Unknown Customer",
+          customerPhone: testCustomers[1]?.phone || "+7 (999) 000-00-00",
+          customerEmail: testCustomers[1]?.email || "unknown@example.com",
           deliveryAddress: "г. Санкт-Петербург, Невский пр., д. 25, кв. 12",
           deliveryMethod: "Почта России",
           paymentMethod: "СБП",
@@ -509,10 +530,10 @@ export async function seedDatabase() {
         {
           nomerok: "YL345678",
           userId: regularUser.id,
-          customerId: testCustomers[2]?.id,
-          customerName: testCustomers[2]?.name || "Екатерина Волкова",
-          customerPhone: testCustomers[2]?.phone || "+7 (999) 345-67-89",
-          customerEmail: testCustomers[2]?.email || "kate@example.com",
+          customerId: testCustomers[2]?.id || "",
+          customerName: testCustomers[2]?.name || "Unknown Customer",
+          customerPhone: testCustomers[2]?.phone || "+7 (999) 000-00-00",
+          customerEmail: testCustomers[2]?.email || "unknown@example.com",
           deliveryAddress: "г. Новосибирск, ул. Красный пр., д. 18, кв. 3",
           deliveryMethod: "СДЭК",
           paymentMethod: "Банковская карта",
@@ -532,12 +553,16 @@ export async function seedDatabase() {
         .insert(orders)
         .values(orderData)
         .returning();
+      
+      if (insertedOrders.length < 3) {
+        throw new Error("Failed to create all orders");
+      }
       console.log("✅ Orders seeded");
 
       // Seed order goods
       const orderGoodsData = [
         {
-          orderId: insertedOrders[0].id,
+          orderId: insertedOrders[0]?.id || "",
           name: "Платье Sweet Lolita розовое",
           link: "https://example.com/dress1",
           quantity: 1,
@@ -547,7 +572,7 @@ export async function seedDatabase() {
           totalRuble: "2970.00",
         },
         {
-          orderId: insertedOrders[1].id,
+          orderId: insertedOrders[1]?.id || "",
           name: "Блузка Gothic Lolita чёрная",
           link: "https://example.com/blouse1",
           quantity: 1,
@@ -557,7 +582,7 @@ export async function seedDatabase() {
           totalRuble: "2227.50",
         },
         {
-          orderId: insertedOrders[2].id,
+          orderId: insertedOrders[2]?.id || "",
           name: "Юбка Classic Lolita синяя",
           link: "https://example.com/skirt1",
           quantity: 1,
@@ -567,7 +592,7 @@ export async function seedDatabase() {
           totalRuble: "2673.00",
         },
         {
-          orderId: insertedOrders[2].id,
+          orderId: insertedOrders[2]?.id || "",
           name: "Аксессуары для волос",
           link: "https://example.com/accessories1",
           quantity: 1,
@@ -587,7 +612,7 @@ export async function seedDatabase() {
     // Check if stories already exist
     const existingStories = await db.query.stories.findFirst();
 
-    if (!existingStories) {
+    if (!existingStories && regularUser && adminUser) {
       // Seed stories
       const storiesData = [
         {
@@ -647,6 +672,10 @@ export async function seedDatabase() {
         .insert(stories)
         .values(storiesData)
         .returning();
+      
+      if (insertedStories.length < 3) {
+        throw new Error("Failed to create all stories");
+      }
       console.log("✅ Stories seeded");
 
       // Create blog categories
@@ -696,6 +725,10 @@ export async function seedDatabase() {
           .insert(blogCategories)
           .values(categoriesData)
           .returning();
+        
+        if (insertedCategories.length < 4) {
+          throw new Error("Failed to create all blog categories");
+        }
         console.log("✅ Blog categories seeded");
 
         // Create tags
@@ -714,31 +747,35 @@ export async function seedDatabase() {
           .insert(storyTags)
           .values(tagsData)
           .returning();
+        
+        if (insertedTags.length < 8) {
+          throw new Error("Failed to create all story tags");
+        }
         console.log("✅ Story tags seeded");
 
         // Link stories with categories and tags
         const categoryRelationsData = [
           {
-            storyId: insertedStories[0].id,
-            categoryId: insertedCategories[0].id,
+            storyId: insertedStories[0]?.id || "",
+            categoryId: insertedCategories[0]?.id || "",
           }, // Товары
           {
-            storyId: insertedStories[1].id,
-            categoryId: insertedCategories[3].id,
+            storyId: insertedStories[1]?.id || "",
+            categoryId: insertedCategories[3]?.id || "",
           }, // Гайды
           {
-            storyId: insertedStories[2].id,
-            categoryId: insertedCategories[3].id,
+            storyId: insertedStories[2]?.id || "",
+            categoryId: insertedCategories[3]?.id || "",
           }, // Гайды
         ];
 
         const tagRelationsData = [
-          { storyId: insertedStories[0].id, tagId: insertedTags[0].id }, // Sweet Lolita
-          { storyId: insertedStories[0].id, tagId: insertedTags[3].id }, // Платья
-          { storyId: insertedStories[1].id, tagId: insertedTags[6].id }, // Новичкам
-          { storyId: insertedStories[1].id, tagId: insertedTags[7].id }, // Советы
-          { storyId: insertedStories[2].id, tagId: insertedTags[5].id }, // Уход
-          { storyId: insertedStories[2].id, tagId: insertedTags[7].id }, // Советы
+          { storyId: insertedStories[0]?.id || "", tagId: insertedTags[0]?.id || "" }, // Sweet Lolita
+          { storyId: insertedStories[0]?.id || "", tagId: insertedTags[3]?.id || "" }, // Платья
+          { storyId: insertedStories[1]?.id || "", tagId: insertedTags[6]?.id || "" }, // Новичкам
+          { storyId: insertedStories[1]?.id || "", tagId: insertedTags[7]?.id || "" }, // Советы
+          { storyId: insertedStories[2]?.id || "", tagId: insertedTags[5]?.id || "" }, // Уход
+          { storyId: insertedStories[2]?.id || "", tagId: insertedTags[7]?.id || "" }, // Советы
         ];
 
         await db.insert(storyCategoryRelations).values(categoryRelationsData);

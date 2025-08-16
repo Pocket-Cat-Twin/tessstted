@@ -28,7 +28,6 @@ import { verificationTokens } from "./verification";
 import {
   notificationHistory,
   notificationPreferences,
-  emailTemplates,
 } from "./notifications";
 import { webhookSubscriptions, webhookLogs } from "./webhooks";
 
