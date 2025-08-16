@@ -11,23 +11,23 @@
   let className = '';
   export { className as class };
 
-  // Base button styles
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+  // Gothic base button styles
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-300 focus:outline-none focus-visible position-relative overflow-hidden';
   
-  // Variant styles
+  // Gothic variant styles
   const variantClasses = {
-    primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-    secondary: 'bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus:ring-secondary-500',
-    outline: 'border border-primary-600 text-primary-600 bg-white hover:bg-primary-50 focus:ring-primary-500',
-    ghost: 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
+    primary: 'btn-gothic',
+    secondary: 'btn-white',
+    outline: 'glass border border-gothic-light text-gothic-white hover:border-gothic-accent hover:bg-gothic-accent-light rounded-lg',
+    ghost: 'text-gothic-secondary hover:text-gothic-white hover:bg-gothic-accent-light rounded-lg',
+    danger: 'glass border border-red-500 text-red-400 hover:border-red-400 hover:bg-red-500/10 rounded-lg'
   };
   
-  // Size styles
+  // Gothic size styles
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg'
   };
 
   $: buttonClasses = [

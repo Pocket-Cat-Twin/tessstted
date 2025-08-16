@@ -97,5 +97,61 @@ export default {
       },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [
+    require("@tailwindcss/typography"),
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.text-shadow-gothic': {
+          textShadow: '0 0 10px rgba(139, 90, 90, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8)',
+        },
+        '.text-outline': {
+          '-webkit-text-stroke': '1px rgba(255, 255, 255, 0.2)',
+        },
+        '.backdrop-blur-glass': {
+          'backdrop-filter': 'blur(12px)',
+          '-webkit-backdrop-filter': 'blur(12px)',
+        },
+        '.backdrop-blur-intense': {
+          'backdrop-filter': 'blur(20px)',
+          '-webkit-backdrop-filter': 'blur(20px)',
+        },
+        '.pattern-overlay-1': {
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url("/patterns/1.png")',
+            backgroundSize: '150px 150px',
+            backgroundRepeat: 'repeat',
+            opacity: '0.02',
+            zIndex: '1',
+            pointerEvents: 'none',
+          },
+        },
+        '.pattern-overlay-7': {
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url("/patterns/7.png")',
+            backgroundSize: '120px 120px',
+            backgroundRepeat: 'repeat',
+            opacity: '0.03',
+            zIndex: '1',
+            pointerEvents: 'none',
+          },
+        },
+      };
+      addUtilities(newUtilities);
+    }
+  ],
+  darkMode: 'class',
 };

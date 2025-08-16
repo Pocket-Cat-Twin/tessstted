@@ -1,9 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Button from '$components/ui/Button.svelte';
-  import KawaiiButton from '$components/ui/KawaiiButton.svelte';
-  import KawaiiCard from '$components/ui/KawaiiCard.svelte';
-  import FlowerDecoration from '$components/decorative/FlowerDecoration.svelte';
+  import GothicButton from '$components/ui/KawaiiButton.svelte';
+  import GothicCard from '$components/ui/KawaiiCard.svelte';
   import { configStore } from '$stores/config';
   import { fade, fly } from 'svelte/transition';
 
@@ -18,66 +17,63 @@
 </script>
 
 <svelte:head>
-  <title>YuYu Lolita Shopping - Заказы из Китая</title>
-  <meta name="description" content="YuYu Lolita Shopping - заказы товаров из Китая с доставкой в Россию. Быстро, надежно, выгодно." />
+  <title>YuYu Lolita Shopping - Professional Ordering from China</title>
+  <meta name="description" content="YuYu Lolita Shopping - premium ordering service from China to Russia. Professional, reliable, efficient." />
 </svelte:head>
 
 <!-- Hero Section -->
-<section class="relative overflow-hidden hero-section">
+<section class="relative overflow-hidden section-gothic-primary pattern-overlay-7">
   
-  <!-- Coffee background overlay -->
-  <div class="absolute inset-0 bg-gradient-to-br from-coffee-50/80 to-coffee-100/60"></div>
-
   <div class="relative container-custom section-py">
     <div class="text-center max-w-4xl mx-auto">
       <!-- Main heading -->
       {#if mounted}
         <h1 
-          class="text-4xl md:text-6xl font-bold text-gray-900 mb-6 hero-text-shadow"
+          class="text-4xl md:text-6xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
           in:fly={{ y: 30, duration: 600, delay: 100 }}
         >
-          <span class="text-original-phrase">🌸 Заказы из Китая 🌸</span>
-          <span class="text-original-phrase block">стали проще</span>
+          <span class="text-gothic block mb-4">Orders from China</span>
+          <span class="text-gradient block">Made Simple</span>
         </h1>
       {:else}
-        <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6 hero-text-shadow">
-          <span class="text-original-phrase">🌸 Заказы из Китая 🌸</span>
-          <span class="text-original-phrase block">стали проще</span>
+        <h1 class="text-4xl md:text-6xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
+          <span class="text-gothic block mb-4">Orders from China</span>
+          <span class="text-gradient block">Made Simple</span>
         </h1>
       {/if}
 
       <!-- Subtitle -->
       {#if mounted}
         <p 
-          class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed"
+          class="text-xl text-gothic-secondary mb-12 max-w-2xl mx-auto leading-relaxed"
           in:fly={{ y: 30, duration: 600, delay: 200 }}
         >
-          Профессиональная помощь в заказе товаров с китайских площадок. 
-          Прозрачные цены, быстрая доставка, полное сопровождение.
+          Professional assistance in ordering products from Chinese platforms. 
+          Transparent pricing, fast delivery, complete support.
         </p>
       {:else}
-        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-          Профессиональная помощь в заказе товаров с китайских площадок. 
-          Прозрачные цены, быстрая доставка, полное сопровождение.
+        <p class="text-xl text-gothic-secondary mb-12 max-w-2xl mx-auto leading-relaxed">
+          Professional assistance in ordering products from Chinese platforms. 
+          Transparent pricing, fast delivery, complete support.
         </p>
       {/if}
 
       <!-- Currency rate -->
       {#if mounted}
         <div 
-          class="inline-flex items-center bg-white/80 backdrop-blur-sm border border-primary-200 rounded-full px-6 py-3 mb-8"
+          class="inline-flex items-center glass rounded-lg px-6 py-4 mb-12 hover-glow"
           in:fly={{ y: 30, duration: 600, delay: 300 }}
         >
-          <div class="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></div>
-          <span class="text-gray-700 font-medium">
-            Актуальный курс: <span class="text-primary-600 font-bold">{currentKurs} ₽/¥</span>
+          <div class="w-3 h-3 bg-gothic-accent rounded-full mr-4 animate-pulse"></div>
+          <span class="text-gothic-white font-medium">
+            Current Rate: <span class="text-gothic-accent font-bold">{currentKurs} ₽/¥</span>
           </span>
         </div>
       {:else}
-        <div class="inline-flex items-center bg-white/80 backdrop-blur-sm border border-primary-200 rounded-full px-6 py-3 mb-8">
-          <div class="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></div>
-          <span class="text-gray-700 font-medium">
-            Актуальный курс: <span class="text-primary-600 font-bold">{currentKurs} ₽/¥</span>
+        <div class="inline-flex items-center glass rounded-lg px-6 py-4 mb-12 hover-glow">
+          <div class="w-3 h-3 bg-gothic-accent rounded-full mr-4 animate-pulse"></div>
+          <span class="text-gothic-white font-medium">
+            Current Rate: <span class="text-gothic-accent font-bold">{currentKurs} ₽/¥</span>
           </span>
         </div>
       {/if}
@@ -85,26 +81,26 @@
       <!-- CTA Buttons -->
       {#if mounted}
         <div 
-          class="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          class="flex flex-col sm:flex-row gap-6 justify-center items-center"
           in:fly={{ y: 30, duration: 600, delay: 400 }}
         >
-          <KawaiiButton href="/create">
-            ✨ Создать заказ ✨
-          </KawaiiButton>
+          <a href="/create" class="btn-gothic hover-lift">
+            Create Order
+          </a>
           
-          <KawaiiButton href="/track" variant="white">
-            🔍 Отследить заказ
-          </KawaiiButton>
+          <a href="/track" class="btn-white hover-lift">
+            Track Order
+          </a>
         </div>
       {:else}
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <KawaiiButton href="/create">
-            ✨ Создать заказ ✨
-          </KawaiiButton>
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <a href="/create" class="btn-gothic hover-lift">
+            Create Order
+          </a>
           
-          <KawaiiButton href="/track" variant="white">
-            🔍 Отследить заказ
-          </KawaiiButton>
+          <a href="/track" class="btn-white hover-lift">
+            Track Order
+          </a>
         </div>
       {/if}
     </div>
@@ -112,14 +108,14 @@
 </section>
 
 <!-- Features Section -->
-<section class="section-py bg-white/80">
+<section class="section-py section-gothic-secondary">
   <div class="container-custom">
-    <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-kawaii font-bold text-gray-900 mb-4">
-        🌟 Почему выбирают нас 🌟
+    <div class="text-center mb-20">
+      <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
+        Why Choose Us
       </h2>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto font-body">
-        Мы делаем процесс заказа из Китая максимально простым и безопасным
+      <p class="text-xl text-gothic-secondary max-w-2xl mx-auto">
+        We make ordering from China as simple and secure as possible
       </p>
     </div>
 
@@ -127,123 +123,135 @@
       <!-- Feature 1 -->
       {#if mounted}
         <div in:fly={{ y: 30, duration: 600, delay: 100 }}>
-          <KawaiiCard variant="sky" className="text-center hover-lift">
-            <div class="text-6xl mb-4">🛡️</div>
-            <h3 class="text-xl font-kawaii font-bold text-gray-900 mb-4">Надежность</h3>
-            <p class="text-gray-600 leading-relaxed">
-              Работаем с проверенными поставщиками. Гарантируем получение заказа или возврат средств.
+          <div class="card-gothic p-8 text-center hover-lift hover-glow">
+            <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
+              <div class="w-8 h-8 bg-gothic-accent rounded-full"></div>
+            </div>
+            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Reliability</h3>
+            <p class="text-gothic-secondary leading-relaxed">
+              We work with verified suppliers. We guarantee order delivery or full refund.
             </p>
-          </KawaiiCard>
+          </div>
         </div>
       {:else}
-        <KawaiiCard variant="sky" className="text-center hover-lift">
-          <div class="text-6xl mb-4">🛡️</div>
-          <h3 class="text-xl font-kawaii font-bold text-gray-900 mb-4">Надежность</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Работаем с проверенными поставщиками. Гарантируем получение заказа или возврат средств.
+        <div class="card-gothic p-8 text-center hover-lift hover-glow">
+          <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
+            <div class="w-8 h-8 bg-gothic-accent rounded-full"></div>
+          </div>
+          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Reliability</h3>
+          <p class="text-gothic-secondary leading-relaxed">
+            We work with verified suppliers. We guarantee order delivery or full refund.
           </p>
-        </KawaiiCard>
+        </div>
       {/if}
 
       <!-- Feature 2 -->
       {#if mounted}
         <div in:fly={{ y: 30, duration: 600, delay: 200 }}>
-          <KawaiiCard variant="pink" className="text-center hover-lift">
-            <div class="text-6xl mb-4">💰</div>
-            <h3 class="text-xl font-kawaii font-bold text-gray-900 mb-4">Выгодные цены</h3>
-            <p class="text-gray-600 leading-relaxed">
-              Честная комиссия 10%, актуальный курс валют, никаких скрытых платежей.
+          <div class="card-gothic p-8 text-center hover-lift hover-glow">
+            <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
+              <div class="w-8 h-8 border-2 border-gothic-accent rounded-full"></div>
+            </div>
+            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Competitive Prices</h3>
+            <p class="text-gothic-secondary leading-relaxed">
+              Fair 10% commission, current exchange rates, no hidden fees.
             </p>
-          </KawaiiCard>
+          </div>
         </div>
       {:else}
-        <KawaiiCard variant="pink" className="text-center hover-lift">
-          <div class="text-6xl mb-4">💰</div>
-          <h3 class="text-xl font-kawaii font-bold text-gray-900 mb-4">Выгодные цены</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Честная комиссия 10%, актуальный курс валют, никаких скрытых платежей.
+        <div class="card-gothic p-8 text-center hover-lift hover-glow">
+          <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
+            <div class="w-8 h-8 border-2 border-gothic-accent rounded-full"></div>
+          </div>
+          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Competitive Prices</h3>
+          <p class="text-gothic-secondary leading-relaxed">
+            Fair 10% commission, current exchange rates, no hidden fees.
           </p>
-        </KawaiiCard>
+        </div>
       {/if}
 
       <!-- Feature 3 -->
       {#if mounted}
         <div in:fly={{ y: 30, duration: 600, delay: 300 }}>
-          <KawaiiCard variant="mint" className="text-center hover-lift">
-            <div class="text-6xl mb-4">🚀</div>
-            <h3 class="text-xl font-kawaii font-bold text-gray-900 mb-4">Быстрая доставка</h3>
-            <p class="text-gray-600 leading-relaxed">
-              Доставка от 2 недель. Отслеживание на каждом этапе от заказа до получения.
+          <div class="card-gothic p-8 text-center hover-lift hover-glow">
+            <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
+              <div class="w-8 h-8 bg-gradient-to-br from-gothic-accent to-gothic-charcoal rounded-full"></div>
+            </div>
+            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Fast Delivery</h3>
+            <p class="text-gothic-secondary leading-relaxed">
+              Delivery from 2 weeks. Tracking at every stage from order to receipt.
             </p>
-          </KawaiiCard>
+          </div>
         </div>
       {:else}
-        <KawaiiCard variant="mint" className="text-center hover-lift">
-          <div class="text-6xl mb-4">🚀</div>
-          <h3 class="text-xl font-kawaii font-bold text-gray-900 mb-4">Быстрая доставка</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Доставка от 2 недель. Отслеживание на каждом этапе от заказа до получения.
+        <div class="card-gothic p-8 text-center hover-lift hover-glow">
+          <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
+            <div class="w-8 h-8 bg-gradient-to-br from-gothic-accent to-gothic-charcoal rounded-full"></div>
+          </div>
+          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Fast Delivery</h3>
+          <p class="text-gothic-secondary leading-relaxed">
+            Delivery from 2 weeks. Tracking at every stage from order to receipt.
           </p>
-        </KawaiiCard>
+        </div>
       {/if}
     </div>
   </div>
 </section>
 
 <!-- How it works -->
-<section class="section-py bg-gray-50/80">
+<section class="section-py section-gothic-primary">
   <div class="container-custom">
-    <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-kawaii font-bold text-gray-900 mb-4">
-        ⭐ Как это работает ⭐
+    <div class="text-center mb-20">
+      <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
+        How It Works
       </h2>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto font-body">
-        Простой процесс в 4 шага
+      <p class="text-xl text-gothic-secondary max-w-2xl mx-auto">
+        Simple 4-step process
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
       <!-- Step 1 -->
-      <div class="text-center">
-        <div class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+      <div class="text-center group">
+        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
           1
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Создайте заказ</h3>
-        <p class="text-gray-600 text-sm">
-          Укажите ссылки на товары и контактную информацию
+        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Create Order</h3>
+        <p class="text-gothic-secondary text-sm leading-relaxed">
+          Specify product links and contact information
         </p>
       </div>
 
       <!-- Step 2 -->
-      <div class="text-center">
-        <div class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+      <div class="text-center group">
+        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
           2
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Получите расчет</h3>
-        <p class="text-gray-600 text-sm">
-          Мы рассчитаем стоимость с учетом комиссии и доставки
+        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Get Quote</h3>
+        <p class="text-gothic-secondary text-sm leading-relaxed">
+          We calculate the cost including commission and delivery
         </p>
       </div>
 
       <!-- Step 3 -->
-      <div class="text-center">
-        <div class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+      <div class="text-center group">
+        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
           3
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Произведите оплату</h3>
-        <p class="text-gray-600 text-sm">
-          Оплатите заказ удобным способом
+        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Make Payment</h3>
+        <p class="text-gothic-secondary text-sm leading-relaxed">
+          Pay for the order using your preferred method
         </p>
       </div>
 
       <!-- Step 4 -->
-      <div class="text-center">
-        <div class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+      <div class="text-center group">
+        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
           4
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Получите товар</h3>
-        <p class="text-gray-600 text-sm">
-          Отслеживайте доставку и получайте посылку
+        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Receive Products</h3>
+        <p class="text-gothic-secondary text-sm leading-relaxed">
+          Track delivery and receive your package
         </p>
       </div>
     </div>
@@ -251,24 +259,24 @@
 </section>
 
 <!-- CTA Section -->
-<section class="section-py relative overflow-hidden" style="background: linear-gradient(135deg, rgba(239, 176, 182, 0.8) 0%, rgba(230, 217, 245, 0.8) 100%);">
+<section class="section-py relative overflow-hidden section-gothic-secondary pattern-overlay-7">
   
   <div class="container-custom text-center relative z-10">
-    <h2 class="text-3xl md:text-4xl font-kawaii font-bold text-gray-800 mb-4">
-      💖 Готовы сделать заказ? 💖
+    <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
+      Ready to Place an Order?
     </h2>
-    <p class="text-xl text-gray-700 mb-8 max-w-2xl mx-auto font-body">
-      Присоединяйтесь к тысячам довольных клиентов
+    <p class="text-xl text-gothic-secondary mb-12 max-w-2xl mx-auto">
+      Join thousands of satisfied customers
     </p>
     
-    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-      <KawaiiButton href="/create" className="bg-white text-primary-600 hover:bg-gray-50">
-        ✨ Создать заказ сейчас ✨
-      </KawaiiButton>
+    <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+      <a href="/create" class="btn-gothic hover-lift shadow-gothic-glow">
+        Create Order Now
+      </a>
       
-      <KawaiiButton href="/stories" variant="white">
-        📚 Истории клиентов
-      </KawaiiButton>
+      <a href="/stories" class="btn-white hover-lift">
+        Customer Stories
+      </a>
     </div>
   </div>
 </section>

@@ -11,30 +11,11 @@
   $: config = $configStore.config;
   $: currentKurs = $configStore.kurs;
 
-  // Theme switching logic
-  let currentTheme = 'kawaii';
+  // Gothic theme management - simplified
+  let mounted = false;
 
-  function toggleTheme() {
-    currentTheme = currentTheme === 'kawaii' ? 'coffee' : 'kawaii';
-    applyTheme(currentTheme);
-    localStorage.setItem('theme', currentTheme);
-  }
-
-  function applyTheme(theme: string) {
-    if (theme === 'coffee') {
-      document.documentElement.classList.add('theme-coffee');
-    } else {
-      document.documentElement.classList.remove('theme-coffee');
-    }
-  }
-
-  // Initialize theme on component mount
   onMount(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'coffee') {
-      currentTheme = 'coffee';
-    }
-    applyTheme(currentTheme);
+    mounted = true;
   });
 
   function toggleUserMenu() {
@@ -47,77 +28,68 @@
   }
 </script>
 
-<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+<header class="glass-intense sticky top-0 z-40 border-b border-gothic-light">
   <nav class="container-custom">
     <div class="flex items-center justify-between h-16">
       <!-- Left side: Logo and navigation -->
       <div class="flex items-center space-x-8">
         <!-- Logo -->
-        <a href="/" class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-lg">Y</span>
+        <a href="/" class="flex items-center space-x-3 hover-lift">
+          <div class="w-10 h-10 glass-intense rounded-lg flex items-center justify-center border border-gothic-accent">
+            <span class="text-gothic-white font-elegant text-lg">Y</span>
           </div>
-          <span class="text-xl font-bold text-gray-900 hidden sm:block">
+          <span class="text-xl font-elegant text-gothic-white hidden sm:block">
             YuYu Lolita
           </span>
         </a>
 
         <!-- Navigation Links -->
-        <div class="hidden md:flex items-center space-x-6">
+        <div class="hidden md:flex items-center space-x-8">
           <a 
             href="/" 
-            class="text-gray-600 hover:text-gray-900 transition-colors"
-            class:text-primary-600={$page.url.pathname === '/'}
+            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
+            class:text-gothic-accent={$page.url.pathname === '/'}
           >
-            Главная
+            Home
           </a>
           <a 
             href="/stories" 
-            class="text-gray-600 hover:text-gray-900 transition-colors"
-            class:text-primary-600={$page.url.pathname.startsWith('/stories')}
+            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
+            class:text-gothic-accent={$page.url.pathname.startsWith('/stories')}
           >
-            Истории
+            Stories
           </a>
           <a 
             href="/faq" 
-            class="text-gray-600 hover:text-gray-900 transition-colors"
-            class:text-primary-600={$page.url.pathname === '/faq'}
+            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
+            class:text-gothic-accent={$page.url.pathname === '/faq'}
           >
             FAQ
           </a>
           <a 
             href="/track" 
-            class="text-gray-600 hover:text-gray-900 transition-colors"
-            class:text-primary-600={$page.url.pathname === '/track'}
+            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
+            class:text-gothic-accent={$page.url.pathname === '/track'}
           >
-            Отследить заказ
+            Track Order
           </a>
         </div>
       </div>
 
       <!-- Center: Currency rate -->
-      <div class="hidden lg:flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">
-        <span class="text-sm text-gray-600">Курс:</span>
-        <span class="text-sm font-semibold text-gray-900 ml-1">
+      <div class="hidden lg:flex items-center glass px-4 py-2 rounded-lg">
+        <span class="text-sm text-gothic-secondary">Rate:</span>
+        <span class="text-sm font-semibold text-gothic-accent ml-2">
           {currentKurs} ₽/¥
         </span>
       </div>
 
       <!-- Right side: Contact links and user menu -->
       <div class="flex items-center space-x-4">
-        <!-- Theme Toggle Button -->
-        <button
-          type="button"
-          on:click={toggleTheme}
-          class="theme-switch-btn"
-          title={currentTheme === 'kawaii' ? 'Переключить на кофейную тему' : 'Переключить на kawaii тему'}
-        >
-          {#if currentTheme === 'kawaii'}
-            ☕
-          {:else}
-            🌸
-          {/if}
-        </button>
+        <!-- Gothic Accent -->
+        <div class="w-8 h-8 glass rounded-full flex items-center justify-center">
+          <div class="w-3 h-3 bg-gothic-accent rounded-full animate-pulse"></div>
+        </div>
 
         <!-- Contact Links -->
         <div class="hidden sm:flex items-center space-x-3">
@@ -126,7 +98,7 @@
               href={config.telegram_link} 
               target="_blank"
               rel="noopener noreferrer"
-              class="text-gray-500 hover:text-primary-600 transition-colors"
+              class="text-gothic-secondary hover:text-gothic-accent transition-colors"
               title="Telegram"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -140,7 +112,7 @@
               href={config.vk_link} 
               target="_blank"
               rel="noopener noreferrer"
-              class="text-gray-500 hover:text-primary-600 transition-colors"
+              class="text-gothic-secondary hover:text-gothic-accent transition-colors"
               title="VK"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -156,10 +128,10 @@
             <button
               type="button"
               on:click={toggleUserMenu}
-              class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
+              class="flex items-center space-x-2 text-gothic-secondary hover:text-gothic-white focus:outline-none focus-visible rounded-md p-1 transition-all duration-300"
             >
-              <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                <span class="text-primary-700 font-medium text-sm">
+              <div class="w-8 h-8 glass-intense rounded-full flex items-center justify-center border border-gothic-accent">
+                <span class="text-gothic-white font-medium text-sm">
                   {user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -170,57 +142,57 @@
             </button>
 
             {#if showUserMenu}
-              <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+              <div class="absolute right-0 mt-2 w-48 glass-intense rounded-lg shadow-gothic-lg border border-gothic-light py-2 z-50">
                 <a 
                   href="/profile" 
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  class="block px-4 py-2 text-sm text-gothic-secondary hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
                   on:click={() => showUserMenu = false}
                 >
-                  Профиль
+                  Profile
                 </a>
                 <a 
                   href="/orders" 
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  class="block px-4 py-2 text-sm text-gothic-secondary hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
                   on:click={() => showUserMenu = false}
                 >
-                  Мои заказы
+                  My Orders
                 </a>
                 {#if user.role === 'ADMIN'}
                   <hr class="my-1" />
                   <a 
                     href="/admin" 
-                    class="block px-4 py-2 text-sm text-primary-600 hover:bg-primary-50"
+                    class="block px-4 py-2 text-sm text-gothic-accent hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
                     on:click={() => showUserMenu = false}
                   >
-                    Админ панель
+                    Admin Panel
                   </a>
                 {/if}
                 <hr class="my-1" />
                 <button
                   type="button"
                   on:click={handleLogout}
-                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  class="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gothic-accent-light transition-all duration-200"
                 >
-                  Выйти
+                  Logout
                 </button>
               </div>
             {/if}
           </div>
         {:else}
           <div class="flex items-center space-x-3">
-            <Button variant="ghost" href="/login" size="sm">
-              Войти
-            </Button>
-            <Button variant="primary" href="/register" size="sm">
-              Регистрация
-            </Button>
+            <a href="/login" class="btn-white btn-sm hover-lift">
+              Login
+            </a>
+            <a href="/register" class="btn-gothic btn-sm hover-lift">
+              Register
+            </a>
           </div>
         {/if}
 
         <!-- Mobile menu button -->
         <button
           type="button"
-          class="md:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md"
+          class="md:hidden p-2 text-gothic-secondary hover:text-gothic-white focus:outline-none focus-visible rounded-md transition-all duration-300"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />

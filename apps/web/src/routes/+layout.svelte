@@ -13,10 +13,10 @@
   });
 </script>
 
-<div class="min-h-screen flex flex-col floral-bg">
+<div class="min-h-screen flex flex-col gothic-bg">
   <Header />
   
-  <main class="flex-1 relative">
+  <main class="flex-1 relative pattern-overlay-1">
     <slot />
   </main>
   
