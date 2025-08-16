@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "bun --filter=@yuyu/api dev & bun --filter=@yuyu/web dev",
-    "dev:windows": "start \"API Server\" cmd /k \"cd apps/api && bun run dev:windows\" && start \"Web App\" cmd /k \"cd apps/web && bun run dev:windows\"",
+    "dev:windows": "bun --filter=@yuyu/api dev:windows & bun --filter=@yuyu/web dev:windows",
     "setup:windows": "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1",
     "start:windows": "powershell -ExecutionPolicy Bypass -File scripts/start-prod.ps1",
     "build": "bun run build:api && bun run build:web",
