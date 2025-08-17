@@ -50,35 +50,35 @@
             class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
             class:text-gothic-accent={$page.url.pathname === '/'}
           >
-            Home
+            Главная
           </a>
           <a 
             href="/stories" 
             class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
             class:text-gothic-accent={$page.url.pathname.startsWith('/stories')}
           >
-            Stories
+            Истории
           </a>
           <a 
             href="/faq" 
             class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
             class:text-gothic-accent={$page.url.pathname === '/faq'}
           >
-            FAQ
+            Вопросы
           </a>
           <a 
             href="/track" 
             class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
             class:text-gothic-accent={$page.url.pathname === '/track'}
           >
-            Track Order
+            Отследить
           </a>
         </div>
       </div>
 
       <!-- Center: Currency rate -->
       <div class="hidden lg:flex items-center glass px-4 py-2 rounded-lg">
-        <span class="text-sm text-gothic-secondary">Rate:</span>
+        <span class="text-sm text-gothic-secondary">Курс:</span>
         <span class="text-sm font-semibold text-gothic-accent ml-2">
           {currentKurs} ₽/¥
         </span>
@@ -148,14 +148,14 @@
                   class="block px-4 py-2 text-sm text-gothic-secondary hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
                   on:click={() => showUserMenu = false}
                 >
-                  Profile
+                  Профиль
                 </a>
                 <a 
                   href="/orders" 
                   class="block px-4 py-2 text-sm text-gothic-secondary hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
                   on:click={() => showUserMenu = false}
                 >
-                  My Orders
+                  Мои заказы
                 </a>
                 {#if user.role === 'ADMIN'}
                   <hr class="my-1" />
@@ -164,7 +164,7 @@
                     class="block px-4 py-2 text-sm text-gothic-accent hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
                     on:click={() => showUserMenu = false}
                   >
-                    Admin Panel
+                    Админ панель
                   </a>
                 {/if}
                 <hr class="my-1" />
@@ -173,7 +173,7 @@
                   on:click={handleLogout}
                   class="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gothic-accent-light transition-all duration-200"
                 >
-                  Logout
+                  Выйти
                 </button>
               </div>
             {/if}
@@ -181,10 +181,10 @@
         {:else}
           <div class="flex items-center space-x-3">
             <a href="/login" class="btn-white btn-sm hover-lift">
-              Login
+              Войти
             </a>
             <a href="/register" class="btn-gothic btn-sm hover-lift">
-              Register
+              Регистрация
             </a>
           </div>
         {/if}

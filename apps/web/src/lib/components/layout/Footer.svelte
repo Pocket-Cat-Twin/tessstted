@@ -19,35 +19,35 @@
             <span class="text-xl font-elegant text-gothic-white">YuYu Lolita</span>
           </div>
           <p class="text-gothic-secondary text-sm leading-relaxed">
-            {config.site_description || 'Professional ordering service from China to Russia. Fast, reliable, efficient.'}
+            {config.site_description || 'Профессиональный сервис заказов из Китая в Россию. Быстро, надёжно, эффективно.'}
           </p>
         </div>
 
         <!-- Quick Links -->
         <div class="space-y-6">
-          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Quick Links</h3>
+          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Быстрые ссылки</h3>
           <nav class="space-y-3">
             <a href="/" class="block text-gothic-secondary hover:text-gothic-accent transition-all duration-300 text-sm font-medium">
-              Home
+              Главная
             </a>
             <a href="/create" class="block text-gothic-secondary hover:text-gothic-accent transition-all duration-300 text-sm font-medium">
-              Create Order
+              Создать заказ
             </a>
             <a href="/track" class="block text-gothic-secondary hover:text-gothic-accent transition-all duration-300 text-sm font-medium">
-              Track Order
+              Отследить заказ
             </a>
             <a href="/stories" class="block text-gothic-secondary hover:text-gothic-accent transition-all duration-300 text-sm font-medium">
-              Stories
+              Истории
             </a>
             <a href="/faq" class="block text-gothic-secondary hover:text-gothic-accent transition-all duration-300 text-sm font-medium">
-              FAQ
+              Вопросы
             </a>
           </nav>
         </div>
 
         <!-- Support -->
         <div class="space-y-6">
-          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Support</h3>
+          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Поддержка</h3>
           <div class="space-y-3">
             {#if config.contact_email}
               <a 
@@ -81,7 +81,7 @@
 
         <!-- Social Media -->
         <div class="space-y-6">
-          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Connect With Us</h3>
+          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Связаться с нами</h3>
           <div class="flex space-x-4">
             {#if config.telegram_link}
               <a 
@@ -119,15 +119,15 @@
     <div class="border-t border-gothic-charcoal py-8">
       <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
         <div class="text-gothic-secondary text-sm font-medium">
-          © {currentYear} {config.site_name || 'YuYu Lolita Shopping'}. All rights reserved.
+          © {currentYear} {config.site_name || 'LolitaFashion.su'}. Все права защищены.
         </div>
         
         <div class="flex items-center space-x-8 text-sm">
           <a href="/privacy" class="text-gothic-secondary hover:text-gothic-accent transition-all duration-300 font-medium">
-            Privacy Policy
+            Политика конфиденциальности
           </a>
           <a href="/terms" class="text-gothic-secondary hover:text-gothic-accent transition-all duration-300 font-medium">
-            Terms of Service
+            Условия использования
           </a>
         </div>
       </div>
