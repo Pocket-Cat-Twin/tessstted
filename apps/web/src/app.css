@@ -62,7 +62,7 @@
     background-image: url('/patterns/7.png');
     background-size: 150px 150px;
     background-repeat: repeat;
-    opacity: 0.02;
+    opacity: 0.05;
     z-index: 1;
     pointer-events: none;
   }
@@ -217,7 +217,7 @@
     background-image: url('/patterns/7.png');
     background-size: 100px 100px;
     background-repeat: repeat;
-    opacity: 0.02;
+    opacity: 0.05;
     z-index: 1;
   }
 
@@ -500,6 +500,66 @@
     }
   }
 
+  /* Gothic Lolita Decorative Dividers */
+  .gothic-divider {
+    position: relative;
+    margin: 2rem 0;
+    text-align: center;
+  }
+  
+  .gothic-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gothic-white), transparent);
+    opacity: 0.3;
+  }
+  
+  .gothic-divider::after {
+    content: "❋";
+    background: var(--gothic-pure-black);
+    color: var(--gothic-white);
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* Gothic Lolita Lace Border */
+  .lace-border {
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+  }
+  
+  .lace-border::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: 
+      radial-gradient(circle at 10px 10px, var(--gothic-white) 1px, transparent 1px),
+      radial-gradient(circle at 30px 30px, var(--gothic-white) 0.5px, transparent 0.5px);
+    background-size: 20px 20px, 40px 40px;
+    border-radius: 14px;
+    opacity: 0.15;
+    z-index: -1;
+  }
+
+  /* Victorian Ornament */
+  .victorian-ornament {
+    display: inline-block;
+    font-family: "Crimson Pro", serif;
+    color: var(--gothic-white);
+    font-size: 1.5rem;
+    margin: 0 1rem;
+    opacity: 0.6;
+  }
+
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     :root {
@@ -702,7 +762,7 @@
   background-image: url('/patterns/1.png');
   background-size: 150px 150px;
   background-repeat: repeat;
-  opacity: 0.02;
+  opacity: 0.05;
   z-index: 1;
   pointer-events: none;
 }
@@ -721,7 +781,7 @@
   background-image: url('/patterns/7.png');
   background-size: 120px 120px;
   background-repeat: repeat;
-  opacity: 0.03;
+  opacity: 0.08;
   z-index: 1;
   pointer-events: none;
 }
