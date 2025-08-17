@@ -5,7 +5,7 @@
   $: currentYear = new Date().getFullYear();
 </script>
 
-<footer class="section-gothic-primary pattern-overlay-7">
+<footer style="background: #ffffff;">
   <div class="container-custom">
     <!-- Main footer content -->
     <div class="py-16">

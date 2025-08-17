@@ -13,10 +13,10 @@
   });
 </script>
 
-<div class="min-h-screen flex flex-col gothic-bg">
+<div class="min-h-screen flex flex-col gothic-pattern-overlay" style="background: #ffffff;">
   <Header />
   
-  <main class="flex-1 relative pattern-overlay-1">
+  <main class="flex-1 relative" style="background: #ffffff;">
     <slot />
   </main>
   

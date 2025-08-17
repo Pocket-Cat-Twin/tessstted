@@ -28,7 +28,7 @@
   }
 </script>
 
-<header class="glass-intense sticky top-0 z-40 border-b border-gothic-light">
+<header class="glass-intense sticky top-0 z-40 border-b border-gothic-light" style="background: #ffffff;">
   <nav class="container-custom">
     <div class="flex items-center justify-between h-16">
       <!-- Left side: Logo and navigation -->
@@ -47,29 +47,29 @@
         <div class="hidden md:flex items-center space-x-8">
           <a 
             href="/" 
-            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
-            class:text-gothic-accent={$page.url.pathname === '/'}
+            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+            class:nav-link-active={$page.url.pathname === '/'}
           >
             Главная
           </a>
           <a 
             href="/stories" 
-            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
-            class:text-gothic-accent={$page.url.pathname.startsWith('/stories')}
+            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+            class:nav-link-active={$page.url.pathname.startsWith('/stories')}
           >
             Истории
           </a>
           <a 
             href="/faq" 
-            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
-            class:text-gothic-accent={$page.url.pathname === '/faq'}
+            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+            class:nav-link-active={$page.url.pathname === '/faq'}
           >
             Вопросы
           </a>
           <a 
             href="/track" 
-            class="text-gothic-secondary hover:text-gothic-white transition-all duration-300 font-medium"
-            class:text-gothic-accent={$page.url.pathname === '/track'}
+            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+            class:nav-link-active={$page.url.pathname === '/track'}
           >
             Отследить
           </a>
@@ -78,8 +78,8 @@
 
       <!-- Center: Currency rate -->
       <div class="hidden lg:flex items-center glass px-4 py-2 rounded-lg">
-        <span class="text-sm text-gothic-secondary">Курс:</span>
-        <span class="text-sm font-semibold text-gothic-accent ml-2">
+        <span class="text-sm text-gothic-dark font-medium">Актуальный курс:</span>
+        <span class="text-sm font-bold text-gothic-pure-black ml-2">
           {currentKurs} ₽/¥
         </span>
       </div>
