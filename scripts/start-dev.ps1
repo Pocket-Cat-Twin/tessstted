@@ -149,14 +149,14 @@ if ($NoNewWindows) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; `$env:NODE_ENV='development'; `$env:API_PORT='3001'; `$env:API_HOST='localhost'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] YuYu Lolita API Server' -ForegroundColor Green; Write-Host 'Environment: API_PORT=3001, API_HOST=localhost' -ForegroundColor Cyan; bun run dev:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; `$env:NODE_ENV='development'; `$env:API_PORT='3001'; `$env:API_HOST='localhost'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] YuYu Lolita API Server' -ForegroundColor Green; Write-Host 'Environment: API_PORT=3001, API_HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; bun --hot src/index-db.ts"
     
     # Wait a moment for API to start
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; `$env:NODE_ENV='development'; `$env:WEB_PORT='5173'; `$env:HOST='localhost'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] YuYu Lolita Web App' -ForegroundColor Blue; Write-Host 'Environment: WEB_PORT=5173, HOST=localhost' -ForegroundColor Cyan; bun run dev:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; `$env:NODE_ENV='development'; `$env:WEB_PORT='5173'; `$env:HOST='localhost'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] YuYu Lolita Web App' -ForegroundColor Blue; Write-Host 'Environment: WEB_PORT=5173, HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; vite dev --host localhost"
     
     # Wait for services to start
     Start-Sleep -Seconds 5

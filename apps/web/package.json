@@ -4,7 +4,7 @@
   "description": "SvelteKit frontend for YuYu Lolita Shopping",
   "scripts": {
     "dev": "vite dev",
-    "dev:windows": "set NODE_ENV=development && vite dev --host localhost",
+    "dev:windows": "$env:NODE_ENV='development'; vite dev --host localhost",
     "build": "vite build",
     "build:windows": "vite build",
     "preview": "vite preview",

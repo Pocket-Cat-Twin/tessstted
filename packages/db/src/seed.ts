@@ -20,7 +20,6 @@ import {
 
 export async function seedDatabase() {
   console.log("🌱 Seeding database...");
-
   try {
     // Get or create admin user
     let adminUser = await db.query.users.findFirst({

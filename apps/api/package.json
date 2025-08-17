@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "bun --hot src/index-db.ts",
-    "dev:windows": "set NODE_ENV=development && bun --hot src/index-db.ts",
+    "dev:windows": "$env:NODE_ENV='development'; bun --hot src/index-db.ts",
     "dev-full": "bun --hot src/index.ts",
     "build": "bun build src/index.ts --outdir=dist --target=bun --sourcemap=linked",
     "build:windows": "bun build src/index.ts --outdir=dist --target=bun --sourcemap=linked",
