@@ -107,8 +107,8 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
-            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
-            <p class="text-gothic-secondary leading-relaxed text-base">
+            <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
+            <p class="text-gothic-secondary leading-relaxed text-lg">
               Честная комиссия, актуальный курс валют, никаких скрытых платежей.
             </p>
           </div>
@@ -118,8 +118,8 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
-          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
-          <p class="text-gothic-secondary leading-relaxed text-base">
+          <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
+          <p class="text-gothic-secondary leading-relaxed text-lg">
             Честная комиссия, актуальный курс валют, никаких скрытых платежей.
           </p>
         </div>
@@ -132,8 +132,8 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
-            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
-            <p class="text-gothic-secondary leading-relaxed text-base">
+            <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
+            <p class="text-gothic-secondary leading-relaxed text-lg">
               Работаем с проверенными поставщиками. Гарантируем получение заказа или возврат средств.
             </p>
           </div>
@@ -143,8 +143,8 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
-          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
-          <p class="text-gothic-secondary leading-relaxed text-base">
+          <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
+          <p class="text-gothic-secondary leading-relaxed text-lg">
             Работаем с проверенными поставщиками. Гарантируем получение заказа или возврат средств.
           </p>
         </div>
@@ -157,8 +157,8 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
-            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
-            <p class="text-gothic-secondary leading-relaxed text-base">
+            <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
+            <p class="text-gothic-secondary leading-relaxed text-lg">
               Мы на связи на всём пути заказа и всегда готовы помочь с любыми вопросами.
             </p>
           </div>
@@ -168,8 +168,8 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
-          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
-          <p class="text-gothic-secondary leading-relaxed text-base">
+          <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
+          <p class="text-gothic-secondary leading-relaxed text-lg">
             Мы на связи на всём пути заказа и всегда готовы помочь с любыми вопросами.
           </p>
         </div>
@@ -182,8 +182,8 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
-            <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
-            <p class="text-gothic-secondary leading-relaxed text-base">
+            <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
+            <p class="text-gothic-secondary leading-relaxed text-lg">
               Любимые платья, аксессуары и редкие находки становятся ближе — без языкового барьера и сложностей.
             </p>
           </div>
@@ -193,8 +193,8 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
-          <h3 class="text-xl font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
-          <p class="text-gothic-secondary leading-relaxed text-base">
+          <h3 class="text-2xl font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
+          <p class="text-gothic-secondary leading-relaxed text-lg">
             Любимые платья, аксессуары и редкие находки становятся ближе — без языкового барьера и сложностей.
           </p>
         </div>

@@ -35,28 +35,28 @@
       <div class="hidden md:flex items-center space-x-8">
         <a 
           href="/" 
-          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class="nav-link nav-shimmer relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200"
           class:nav-link-active={$page.url.pathname === '/'}
         >
           Главная
         </a>
         <a 
           href="/stories" 
-          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class="nav-link nav-shimmer relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200"
           class:nav-link-active={$page.url.pathname.startsWith('/stories')}
         >
           Истории
         </a>
         <a 
           href="/faq" 
-          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class="nav-link nav-shimmer relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200"
           class:nav-link-active={$page.url.pathname === '/faq'}
         >
           Вопросы
         </a>
         <a 
           href="/track" 
-          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class="nav-link nav-shimmer relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200"
           class:nav-link-active={$page.url.pathname === '/track'}
         >
           Отследить
@@ -65,7 +65,7 @@
 
       <!-- Center: Logo -->
       <div class="absolute left-1/2 transform -translate-x-1/2">
-        <a href="/" class="flex items-center space-x-3 hover-lift">
+        <a href="/" class="flex items-center space-x-3 logo-hover">
           <span class="text-3xl font-elegant text-white tracking-wider">
             Lolita Fashion
           </span>

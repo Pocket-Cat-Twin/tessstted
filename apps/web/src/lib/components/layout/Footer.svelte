@@ -25,7 +25,7 @@
 
         <!-- Quick Links -->
         <div class="space-y-6">
-          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Быстрые ссылки</h3>
+          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament text-center">Быстрые ссылки</h3>
           <nav class="space-y-3">
             <a href="/" class="block text-gothic-secondary hover:text-gothic-accent transition-all duration-300 text-sm font-medium">
               Главная
@@ -47,7 +47,7 @@
 
         <!-- Support -->
         <div class="space-y-6">
-          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Поддержка</h3>
+          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament text-center">Поддержка</h3>
           <div class="space-y-3">
             {#if config.contact_email}
               <a 
@@ -81,7 +81,7 @@
 
         <!-- Social Media -->
         <div class="space-y-6">
-          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament">Связаться с нами</h3>
+          <h3 class="text-lg font-elegant text-gothic-white gothic-ornament text-center">Связаться с нами</h3>
           <div class="flex space-x-4">
             {#if config.telegram_link}
               <a 
