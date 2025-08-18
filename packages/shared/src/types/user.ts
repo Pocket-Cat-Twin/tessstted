@@ -13,8 +13,8 @@ export enum UserStatus {
   BLOCKED = "blocked",
 }
 
-// Base user schema
-export const userSchema = z.object({
+// Base user schema (legacy)
+export const userSchemaLegacy = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   name: z.string().min(1).max(100),
@@ -164,8 +164,8 @@ export const passwordResetSchema = z.object({
   password: z.string().min(8).max(100),
 });
 
-// Email verification schema
-export const emailVerificationSchema = z.object({
+// Email verification schema (legacy)
+export const emailVerificationSchemaLegacy = z.object({
   token: z.string(),
 });
 

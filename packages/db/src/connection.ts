@@ -14,21 +14,10 @@ const connectionString = process.env.DATABASE_URL ||
 // For migrations
 export const migrationClient = postgres(connectionString, { 
   max: 1,
-  host: '/var/run/postgresql',
-  port: 5433,
-  password: '',
-  user: 'postgres',
-  database: 'yuyu_lolita'
 });
 
 // For queries
-export const queryClient = postgres(connectionString, {
-  host: '/var/run/postgresql',
-  port: 5433,
-  password: '',
-  user: 'postgres',
-  database: 'yuyu_lolita'
-});
+export const queryClient = postgres(connectionString);
 export const db = drizzle(queryClient, { schema });
 
 // Connection helper
