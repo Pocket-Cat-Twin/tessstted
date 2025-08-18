@@ -13,7 +13,7 @@
   });
 </script>
 
-<div class="min-h-screen flex flex-col gothic-pattern-overlay" style="background: #ffffff;">
+<div class="min-h-screen flex flex-col gothic-pattern-background" style="background: #ffffff;">
   <Header />
   
   <main class="flex-1 relative" style="background: #ffffff;">

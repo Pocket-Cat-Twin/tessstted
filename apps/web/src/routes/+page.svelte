@@ -33,11 +33,13 @@
           class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
           in:fly={{ y: 30, duration: 600, delay: 100 }}
         >
-          <span class="text-gradient block">Ты мечтаешь — мы исполняем</span>
+          <span class="text-gradient block">Ты мечтаешь</span>
+          <span class="text-gradient block">Мы исполняем</span>
         </h1>
       {:else}
         <h1 class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
-          <span class="text-gradient block">Ты мечтаешь — мы исполняем</span>
+          <span class="text-gradient block">Ты мечтаешь</span>
+          <span class="text-gradient block">Мы исполняем</span>
         </h1>
       {/if}
 
@@ -84,26 +86,6 @@
   </div>
 </section>
 
-<!-- Grey Information Bar Section -->
-<section class="py-16" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-  <div class="container-custom">
-    <div class="flex flex-col lg:flex-row items-center justify-center space-y-8 lg:space-y-0 lg:space-x-12">
-      <!-- Logo Section -->
-      <div class="flex items-center justify-center">
-        <div class="w-24 h-24 glass-intense rounded-xl flex items-center justify-center border-2 border-gothic-accent shadow-gothic-glow">
-          <span class="text-4xl font-elegant text-gothic-white">L</span>
-        </div>
-      </div>
-      
-      <!-- Logo Only -->
-      <div class="text-center">
-        <p class="text-lg text-gothic-secondary leading-relaxed max-w-2xl mx-auto">
-          Элегантность и изысканность в каждой детали
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- Features Section -->
 <section class="section-py" style="background: #ffffff;">
