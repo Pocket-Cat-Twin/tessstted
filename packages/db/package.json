@@ -16,7 +16,13 @@
     "studio": "drizzle-kit studio",
     "setup:windows": "bun run src/setup-windows.ts",
     "clean": "if exist dist rmdir /s /q dist",
-    "clean:windows": "if exist dist rmdir /s /q dist"
+    "clean:windows": "if exist dist rmdir /s /q dist",
+    "test": "bun run src/connection.ts",
+    "health": "node -e \"import('./src/health-monitor.js').then(m => m.checkDatabaseHealth()).then(console.log)\"",
+    "diagnose": "node -e \"import('./src/windows-diagnostics.js').then(m => m.runWindowsDiagnostics()).then(m.displayDiagnosticReport)\"",
+    "monitor": "node -e \"import('./src/health-monitor.js').then(m => m.startHealthMonitoring(30000))\"",
+    "doctor": "powershell -File ../../scripts/db-doctor.ps1",
+    "emergency": "node -e \"import('./src/health-monitor.js').then(m => m.runEmergencyRecovery()).then(console.log)\""
   },
   "dependencies": {
     "drizzle-orm": "^0.29.3",

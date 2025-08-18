@@ -9,63 +9,9 @@ if (process.platform === "win32") {
 }
 
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { migrationClient, db, testConnection } from "./connection";
-import postgres from "postgres";
+import { migrationClient, db, ensureDatabaseHealth } from "./connection";
 
 const isWindows = process.platform === "win32";
-
-// Default PostgreSQL settings for Windows
-const WINDOWS_PG_DEFAULTS = {
-  host: "localhost",
-  port: 5432,
-  user: "postgres",
-  database: "postgres", // Connect to default database first
-  password: "postgres"
-};
-
-async function createDatabaseIfNotExists() {
-  console.log("[DB] Checking if database exists...");
-  
-  // Get DATABASE_URL from environment and replace database name with 'postgres' for admin connection
-  const currentConnectionString = process.env.DATABASE_URL || 
-    `postgresql://${WINDOWS_PG_DEFAULTS.user}:${WINDOWS_PG_DEFAULTS.password}@${WINDOWS_PG_DEFAULTS.host}:${WINDOWS_PG_DEFAULTS.port}/yuyu_lolita`;
-  
-  // Replace the database name with 'postgres' for administrative operations
-  const adminConnectionString = currentConnectionString.replace(/\/[^\/]*$/, '/postgres');
-  console.log("[DEBUG] Admin connection string:", adminConnectionString.replace(/:[^:]*@/, ':***@'));
-  
-  const adminClient = postgres(adminConnectionString, { max: 1 });
-  
-  try {
-    // Check if our database exists
-    const result = await adminClient`
-      SELECT 1 FROM pg_database WHERE datname = 'yuyu_lolita'
-    `;
-    
-    if (result.length === 0) {
-      console.log("[INFO] Creating yuyu_lolita database...");
-      await adminClient`CREATE DATABASE yuyu_lolita`;
-      console.log("[SUCCESS] Database yuyu_lolita created successfully");
-    } else {
-      console.log("[SUCCESS] Database yuyu_lolita already exists");
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[ERROR] Error checking/creating database:", errorMessage);
-    
-    // Show additional debug info for authentication errors
-    if (errorMessage.includes("28P01") || errorMessage.includes("authentication failed")) {
-      console.error("[DEBUG] Authentication failed for admin connection");
-      console.error("        This means the password for 'postgres' user is incorrect");
-      console.error("        Admin connection was:", adminConnectionString.replace(/:[^:]*@/, ':***@'));
-      console.error("        Please check your PostgreSQL installation and password");
-    }
-    
-    throw error;
-  } finally {
-    await adminClient.end();
-  }
-}
 
 async function checkPostgreSQLService() {
   if (!isWindows) {
@@ -108,57 +54,52 @@ async function checkPostgreSQLService() {
   return true;
 }
 
+// Enhanced database connection testing with health checks
 async function testDatabaseConnection() {
-  console.log("[DB] Testing database connection...");
-  
-  // Show connection details for debugging (mask password)
-  const connectionString = process.env.DATABASE_URL || 
-    `postgresql://${WINDOWS_PG_DEFAULTS.user}:${WINDOWS_PG_DEFAULTS.password}@${WINDOWS_PG_DEFAULTS.host}:${WINDOWS_PG_DEFAULTS.port}/yuyu_lolita`;
-  console.log("[DEBUG] Main connection string:", connectionString.replace(/:[^:]*@/, ':***@'));
+  console.log("[DB] Running comprehensive database health check...");
   
   const maxRetries = 3;
   let retries = 0;
-  
   let lastError: string | null = null;
   
   while (retries < maxRetries) {
     try {
-      const isConnected = await testConnection();
-      if (isConnected) {
-        console.log("[SUCCESS] Database connection successful");
+      console.log(`[INFO] Health check attempt ${retries + 1}/${maxRetries}`);
+      
+      const isHealthy = await ensureDatabaseHealth();
+      if (isHealthy) {
+        console.log("[SUCCESS] Database is healthy and ready");
         return true;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       lastError = errorMessage;
-      console.log(`[ERROR] Connection attempt ${retries + 1} failed: ${errorMessage}`);
+      console.log(`[ERROR] Health check ${retries + 1} failed: ${errorMessage}`);
       
-      // Check for specific error codes
-      if (errorMessage.includes("28P01")) {
-        console.log("[INFO] Authentication failed - incorrect password");
-        console.log("       Please ensure PostgreSQL user 'postgres' has password 'postgres'");
-        console.log("       Or update DATABASE_URL in .env with correct credentials");
-        break; // Don't retry authentication errors
-      } else if (errorMessage.includes("ECONNREFUSED")) {
-        console.log("[INFO] PostgreSQL server is not running or not accessible");
+      // Check for authentication errors - don't retry these
+      if (errorMessage.includes("28P01") || errorMessage.includes("authentication")) {
+        console.log("[CRITICAL] Authentication failed - cannot retry");
+        console.log("           Fix PostgreSQL password or update .env");
+        break;
       }
     }
     
     retries++;
     if (retries < maxRetries && !lastError?.includes("28P01")) {
-      console.log(`[INFO] Retrying in 2 seconds... (${retries}/${maxRetries})`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`[INFO] Retrying in 3 seconds... (${retries}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
   }
   
-  console.log("[ERROR] Could not establish database connection after all retries");
+  console.log("[ERROR] Database health check failed after all attempts");
   console.log("");
-  console.log("[HELP] Database connection troubleshooting:");
-  console.log("       1. Ensure PostgreSQL is running: net start postgresql-x64-16");
-  console.log("       2. Set PostgreSQL password:");
-  console.log("          psql -U postgres -c \"ALTER USER postgres PASSWORD 'postgres';\"");
-  console.log("       3. Or update DATABASE_URL in .env with your actual credentials");
-  console.log("       4. Verify PostgreSQL is listening on localhost:5432");
+  console.log("[HELP] Windows PostgreSQL troubleshooting:");
+  console.log("       1. Check service: sc query postgresql*");
+  console.log("       2. Start service: net start postgresql-x64-*");
+  console.log("       3. Test connection: psql -h localhost -U postgres -d postgres");
+  console.log("       4. Reset password: psql -U postgres -c \"ALTER USER postgres PASSWORD 'postgres';\"");
+  console.log("       5. Update DATABASE_URL in .env if using different credentials");
+  console.log("       6. Check firewall: netstat -an | findstr :5432");
   
   return false;
 }
@@ -204,8 +145,9 @@ async function setupWindows() {
       process.exit(1);
     }
     
-    // Step 3: Create database if needed
-    await createDatabaseIfNotExists();
+    // Step 3: Database creation is now handled by ensureDatabaseHealth()
+    // This ensures proper error handling and encoding setup
+    console.log("[INFO] Database creation handled by health check");
     
     // Step 4: Run migrations
     const migrationsOk = await runMigrations();
