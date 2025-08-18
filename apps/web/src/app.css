@@ -63,7 +63,7 @@
     opacity: 0.8;
     z-index: -1;
     pointer-events: none;
-    transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.5));
+    transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 1.0));
     transition: transform 0.1s ease-out;
     will-change: transform;
   }
@@ -96,7 +96,7 @@
     pointer-events: none;
     filter: invert(1);
     transition: opacity 0.4s ease, transform 0.1s ease-out;
-    transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.3));
+    transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.8));
     will-change: transform;
   }
 
@@ -275,7 +275,7 @@
     background-repeat: repeat;
     opacity: 0.05;
     z-index: 1;
-    transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.2));
+    transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.6));
     transition: transform 0.1s ease-out;
     will-change: transform;
   }
@@ -895,7 +895,7 @@
   pointer-events: none;
   filter: invert(1);
   transition: opacity 0.4s ease, transform 0.1s ease-out;
-  transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.4));
+  transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 1.2));
   will-change: transform;
 }
 
@@ -918,7 +918,7 @@
   pointer-events: none;
   filter: invert(1);
   transition: opacity 0.4s ease, transform 0.1s ease-out;
-  transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.6));
+  transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 1.5));
   will-change: transform;
 }
 
@@ -1034,7 +1034,47 @@
   filter: invert(1);
   mix-blend-mode: overlay;
   transition: opacity 0.4s ease, transform 0.1s ease-out;
-  transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.3));
+  transform: translateY(calc(var(--pattern-parallax-offset, 0px) * 0.9));
   will-change: transform;
+}
+
+/* Header to Content Gradient */
+.header-gradient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.3) 20%,
+    rgba(0, 0, 0, 0.2) 40%,
+    rgba(0, 0, 0, 0.1) 60%,
+    rgba(0, 0, 0, 0.05) 80%,
+    transparent 100%
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Footer to Content Gradient */
+.footer-gradient {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.7) 20%,
+    rgba(255, 255, 255, 0.5) 40%,
+    rgba(255, 255, 255, 0.3) 60%,
+    rgba(255, 255, 255, 0.1) 80%,
+    transparent 100%
+  );
+  z-index: 5;
+  pointer-events: none;
 }
 
