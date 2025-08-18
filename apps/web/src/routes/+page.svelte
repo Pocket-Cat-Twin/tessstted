@@ -125,7 +125,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 100 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <div class="w-8 h-8 bg-gothic-accent rounded-full"></div>
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -136,7 +136,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <div class="w-8 h-8 bg-gothic-accent rounded-full"></div>
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -150,7 +150,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 200 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <div class="w-8 h-8 border-2 border-gothic-accent rounded-full"></div>
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -161,7 +161,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <div class="w-8 h-8 border-2 border-gothic-accent rounded-full"></div>
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -175,7 +175,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 300 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <div class="w-8 h-8 bg-gradient-to-br from-gothic-accent to-gothic-charcoal rounded-full"></div>
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -186,7 +186,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <div class="w-8 h-8 bg-gradient-to-br from-gothic-accent to-gothic-charcoal rounded-full"></div>
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -200,7 +200,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 400 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <div class="w-8 h-8 bg-gradient-to-tr from-gothic-accent to-gothic-white rounded-full"></div>
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -211,7 +211,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <div class="w-8 h-8 bg-gradient-to-tr from-gothic-accent to-gothic-white rounded-full"></div>
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
