@@ -10,9 +10,25 @@
   $: currentKurs = $configStore.kurs;
 
   let mounted = false;
+  let parallaxOffset = 0;
+
+  function updateParallax() {
+    const scrolled = window.pageYOffset;
+    parallaxOffset = scrolled * 0.3; // Коэффициент скорости паралакса
+    
+    // Применяем CSS custom property для паралакс эффекта
+    document.documentElement.style.setProperty('--parallax-offset', `${parallaxOffset}px`);
+  }
 
   onMount(() => {
     mounted = true;
+    
+    // Добавляем обработчик скролла для паралакс эффекта
+    window.addEventListener('scroll', updateParallax, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', updateParallax);
+    };
   });
 </script>
 
@@ -24,9 +40,11 @@
 
 <!-- Hero Section -->
 <section class="relative overflow-hidden py-16 md:py-24">
+  <!-- Градиент от хэдера вниз -->
+  <div class="header-to-hero-gradient parallax-bg-slow"></div>
   
   <div class="relative container-custom">
-    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background">
+    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background parallax-bg-slow">
       <!-- Main heading -->
       {#if mounted}
         <h1 
