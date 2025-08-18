@@ -16,6 +16,9 @@
 <!-- Отдельный белый фон -->
 <div class="gothic-white-background"></div>
 
+<!-- Глобальный hero градиент -->
+<div class="global-hero-gradient"></div>
+
 <!-- Градиент от хэдера -->
 <div class="header-gradient"></div>
 

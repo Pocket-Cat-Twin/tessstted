@@ -30,7 +30,7 @@
       }
     }
     
-    parallaxOffset = scrolled * 0.5;
+    parallaxOffset = scrolled * 0.8;
     
     // Применяем CSS custom property для паралакс эффекта фоновых паттернов
     document.documentElement.style.setProperty('--pattern-parallax-offset', `${parallaxOffset}px`);
@@ -41,6 +41,9 @@
     
     // Добавляем обработчик скролла для паралакс эффекта
     window.addEventListener('scroll', updateParallax, { passive: true });
+    
+    // Инициализируем паралакс сразу
+    updateParallax();
     
     return () => {
       window.removeEventListener('scroll', updateParallax);
