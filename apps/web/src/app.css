@@ -60,7 +60,7 @@
     background-image: url('/patterns/7.png');
     background-size: 105px 150px;
     background-repeat: repeat;
-    opacity: 0.1;
+    opacity: 0.8;
     z-index: -1;
     pointer-events: none;
   }
@@ -252,6 +252,10 @@
     @apply rounded-2xl shadow-2xl;
     position: relative;
     overflow: hidden;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   .card-gothic::before {
@@ -708,6 +712,35 @@
   border-radius: 30px;
   z-index: -1;
   filter: blur(15px);
+}
+
+/* Hero Text Background - White gradient fade */
+.hero-text-background {
+  position: relative;
+  padding: 3rem 2rem;
+  border-radius: 2rem;
+}
+
+.hero-text-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 30%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.4) 70%,
+    rgba(255, 255, 255, 0.2) 85%,
+    transparent 100%
+  );
+  border-radius: 2rem;
+  z-index: -1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Gothic Ornaments for Hero Section - Removed for cleaner design */
