@@ -21,30 +21,22 @@
   <meta name="description" content="LolitaFashion.su - премиальный сервис заказов из Китая в Россию. Лолита мода, аксессуары, косметика и многое другое." />
 </svelte:head>
 
-<!-- Welcome Text -->
-<section class="py-8" style="background: #ffffff;">
-  <div class="container-custom text-center">
-    <h2 class="text-2xl md:text-3xl font-elegant font-bold text-gothic-white gothic-ornament">
-      Добро пожаловать в Lolita Fashion
-    </h2>
-  </div>
-</section>
 
 <!-- Hero Section -->
-<section class="relative overflow-hidden" style="background: #ffffff;">
+<section class="relative overflow-hidden py-32 md:py-48" style="background: #ffffff;">
   
-  <div class="relative container-custom section-py">
+  <div class="relative container-custom">
     <div class="text-center max-w-4xl mx-auto">
       <!-- Main heading -->
       {#if mounted}
         <h1 
-          class="text-4xl md:text-6xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
+          class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
           in:fly={{ y: 30, duration: 600, delay: 100 }}
         >
           <span class="text-gradient block">Ты мечтаешь — мы исполняем</span>
         </h1>
       {:else}
-        <h1 class="text-4xl md:text-6xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
+        <h1 class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
           <span class="text-gradient block">Ты мечтаешь — мы исполняем</span>
         </h1>
       {/if}
@@ -52,13 +44,13 @@
       <!-- Subtitle -->
       {#if mounted}
         <p 
-          class="text-xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed"
+          class="text-2xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed"
           in:fly={{ y: 30, duration: 600, delay: 200 }}
         >
           LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {:else}
-        <p class="text-xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
+        <p class="text-2xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
           LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {/if}

@@ -53,9 +53,22 @@
     background-size: 200px 200px;
     background-repeat: repeat;
     opacity: 0.08;
-    z-index: -1;
+    z-index: -2;
     pointer-events: none;
     filter: invert(1);
+  }
+
+  /* Полупрозрачный белый слой поверх паттерна */
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: -1;
+    pointer-events: none;
   }
 
   /* Light Pattern Overlay */
@@ -192,8 +205,8 @@
 
   /* Light Glass Card System */
   .card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
+    background: rgba(245, 245, 245, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     box-shadow: var(--glass-shadow);
@@ -226,8 +239,8 @@
 
   /* Gothic Elite Card */
   .card-gothic {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(240, 240, 240, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     @apply rounded-2xl shadow-2xl;

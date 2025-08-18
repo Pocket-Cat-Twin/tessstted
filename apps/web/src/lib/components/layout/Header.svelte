@@ -28,67 +28,66 @@
   }
 </script>
 
-<header class="glass-intense sticky top-0 z-40 border-b border-gothic-light" style="background: #ffffff;">
+<header class="glass-intense sticky top-0 z-40 border-b border-gothic-light" style="background: #222222;">
   <nav class="container-custom">
     <div class="flex items-center justify-between h-16">
-      <!-- Left side: Logo and navigation -->
-      <div class="flex items-center space-x-8">
-        <!-- Logo -->
+      <!-- Left side: Navigation Links -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a 
+          href="/" 
+          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class:nav-link-active={$page.url.pathname === '/'}
+        >
+          Главная
+        </a>
+        <a 
+          href="/stories" 
+          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class:nav-link-active={$page.url.pathname.startsWith('/stories')}
+        >
+          Истории
+        </a>
+        <a 
+          href="/faq" 
+          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class:nav-link-active={$page.url.pathname === '/faq'}
+        >
+          Вопросы
+        </a>
+        <a 
+          href="/track" 
+          class="nav-link relative text-white hover:text-gray-300 font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
+          class:nav-link-active={$page.url.pathname === '/track'}
+        >
+          Отследить
+        </a>
+      </div>
+
+      <!-- Center: Logo -->
+      <div class="absolute left-1/2 transform -translate-x-1/2">
         <a href="/" class="flex items-center space-x-3 hover-lift">
-          <div class="w-10 h-10 glass-intense rounded-lg flex items-center justify-center border border-gothic-accent">
-            <span class="text-gothic-white font-elegant text-lg">L</span>
+          <div class="w-10 h-10 glass-intense rounded-lg flex items-center justify-center border border-white">
+            <span class="text-white font-elegant text-lg">L</span>
           </div>
-          <span class="text-xl font-elegant text-gothic-white hidden sm:block">
+          <span class="text-xl font-elegant text-white hidden sm:block">
             Lolita Fashion
           </span>
         </a>
-
-        <!-- Navigation Links -->
-        <div class="hidden md:flex items-center space-x-8">
-          <a 
-            href="/" 
-            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
-            class:nav-link-active={$page.url.pathname === '/'}
-          >
-            Главная
-          </a>
-          <a 
-            href="/stories" 
-            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
-            class:nav-link-active={$page.url.pathname.startsWith('/stories')}
-          >
-            Истории
-          </a>
-          <a 
-            href="/faq" 
-            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
-            class:nav-link-active={$page.url.pathname === '/faq'}
-          >
-            Вопросы
-          </a>
-          <a 
-            href="/track" 
-            class="nav-link relative text-gothic-dark hover:text-gothic-pure-black font-semibold text-base tracking-wide transition-all duration-200 hover:scale-105"
-            class:nav-link-active={$page.url.pathname === '/track'}
-          >
-            Отследить
-          </a>
-        </div>
       </div>
 
-      <!-- Center: Currency rate -->
-      <div class="hidden lg:flex items-center glass px-4 py-2 rounded-lg">
-        <span class="text-sm text-gothic-dark font-medium">Курс:</span>
-        <span class="text-sm font-bold text-gothic-pure-black ml-2">
-          {currentKurs} ₽/¥
-        </span>
-      </div>
-
-      <!-- Right side: Contact links and user menu -->
+      <!-- Right side: Currency, Contact links and user menu -->
       <div class="flex items-center space-x-4">
+        <!-- Currency rate -->
+        <div class="hidden lg:flex items-center glass px-4 py-2 rounded-lg">
+          <span class="text-sm text-white font-medium">Курс:</span>
+          <span class="text-sm font-bold text-white ml-2">
+            {currentKurs} ₽/¥
+          </span>
+        </div>
+        
         <!-- Gothic Accent -->
         <div class="w-8 h-8 glass rounded-full flex items-center justify-center">
-          <div class="w-3 h-3 bg-gothic-accent rounded-full animate-pulse"></div>
+          <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
         </div>
 
         <!-- Contact Links -->
@@ -98,7 +97,7 @@
               href={config.telegram_link} 
               target="_blank"
               rel="noopener noreferrer"
-              class="text-gothic-secondary hover:text-gothic-accent transition-colors"
+              class="text-gray-300 hover:text-white transition-colors"
               title="Telegram"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -112,7 +111,7 @@
               href={config.vk_link} 
               target="_blank"
               rel="noopener noreferrer"
-              class="text-gothic-secondary hover:text-gothic-accent transition-colors"
+              class="text-gray-300 hover:text-white transition-colors"
               title="VK"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -128,10 +127,10 @@
             <button
               type="button"
               on:click={toggleUserMenu}
-              class="flex items-center space-x-2 text-gothic-secondary hover:text-gothic-white focus:outline-none focus-visible rounded-md p-1 transition-all duration-300"
+              class="flex items-center space-x-2 text-gray-300 hover:text-white focus:outline-none focus-visible rounded-md p-1 transition-all duration-300"
             >
-              <div class="w-8 h-8 glass-intense rounded-full flex items-center justify-center border border-gothic-accent">
-                <span class="text-gothic-white font-medium text-sm">
+              <div class="w-8 h-8 glass-intense rounded-full flex items-center justify-center border border-white">
+                <span class="text-white font-medium text-sm">
                   {user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -161,7 +160,7 @@
                   <hr class="my-1" />
                   <a 
                     href="/admin" 
-                    class="block px-4 py-2 text-sm text-gothic-accent hover:text-gothic-white hover:bg-gothic-accent-light transition-all duration-200"
+                    class="block px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-gray-100 transition-all duration-200"
                     on:click={() => showUserMenu = false}
                   >
                     Админ панель
@@ -171,7 +170,7 @@
                 <button
                   type="button"
                   on:click={handleLogout}
-                  class="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gothic-accent-light transition-all duration-200"
+                  class="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gray-100 transition-all duration-200"
                 >
                   Выйти
                 </button>
@@ -192,7 +191,7 @@
         <!-- Mobile menu button -->
         <button
           type="button"
-          class="md:hidden p-2 text-gothic-secondary hover:text-gothic-white focus:outline-none focus-visible rounded-md transition-all duration-300"
+          class="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none focus-visible rounded-md transition-all duration-300"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
