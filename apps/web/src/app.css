@@ -66,6 +66,18 @@
     filter: invert(1);
   }
 
+  .gothic-pattern-background::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    z-index: -2;
+    pointer-events: none;
+  }
+
   /* Light Pattern Overlay */
   .gothic-pattern-overlay::after {
     content: "";
