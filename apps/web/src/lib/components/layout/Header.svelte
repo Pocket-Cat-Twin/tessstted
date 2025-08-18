@@ -66,10 +66,7 @@
       <!-- Center: Logo -->
       <div class="absolute left-1/2 transform -translate-x-1/2">
         <a href="/" class="flex items-center space-x-3 hover-lift">
-          <div class="w-10 h-10 glass-intense rounded-lg flex items-center justify-center border border-white">
-            <span class="text-white font-elegant text-lg">L</span>
-          </div>
-          <span class="text-3xl font-elegant text-white hidden sm:block tracking-wider">
+          <span class="text-3xl font-elegant text-white tracking-wider">
             Lolita Fashion
           </span>
         </a>

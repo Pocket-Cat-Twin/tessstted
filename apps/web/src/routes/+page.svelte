@@ -23,7 +23,7 @@
 
 
 <!-- Hero Section -->
-<section class="relative overflow-hidden py-32 md:py-48" style="background: #ffffff;">
+<section class="relative overflow-hidden py-16 md:py-24">
   
   <div class="relative container-custom">
     <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments">
@@ -88,7 +88,7 @@
 
 
 <!-- Features Section -->
-<section class="section-py" style="background: #ffffff;">
+<section class="section-py">
   <div class="container-custom">
     <div class="text-center mb-20">
       <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
@@ -204,7 +204,7 @@
 </section>
 
 <!-- How it works -->
-<section class="section-py" style="background: #ffffff;">
+<section class="section-py">
   <div class="container-custom">
     <div class="text-center mb-20">
       <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
@@ -264,7 +264,7 @@
 </section>
 
 <!-- CTA Section -->
-<section class="section-py relative overflow-hidden" style="background: #ffffff;">
+<section class="section-py relative overflow-hidden">
   
   <div class="container-custom text-center relative z-10">
     <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
