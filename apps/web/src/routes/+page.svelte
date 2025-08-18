@@ -16,8 +16,8 @@
     const scrolled = window.pageYOffset;
     parallaxOffset = scrolled * 0.3; // Коэффициент скорости паралакса
     
-    // Применяем CSS custom property для паралакс эффекта
-    document.documentElement.style.setProperty('--parallax-offset', `${parallaxOffset}px`);
+    // Применяем CSS custom property для паралакс эффекта фоновых паттернов
+    document.documentElement.style.setProperty('--pattern-parallax-offset', `${parallaxOffset}px`);
   }
 
   onMount(() => {
@@ -40,11 +40,9 @@
 
 <!-- Hero Section -->
 <section class="relative overflow-hidden py-16 md:py-24">
-  <!-- Градиент от хэдера вниз -->
-  <div class="header-to-hero-gradient parallax-bg-slow"></div>
   
   <div class="relative container-custom">
-    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background parallax-bg-slow">
+    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background">
       <!-- Main heading -->
       {#if mounted}
         <h1 
