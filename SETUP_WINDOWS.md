@@ -179,7 +179,7 @@ sc query postgresql-x64-15
 - **Port**: 5432
 - **Database**: yuyu_lolita
 - **Username**: postgres
-- **Password**: password (change in production)
+- **Password**: postgres
 
 ---
 
@@ -330,7 +330,7 @@ Add these folders to Windows Defender exclusions for better performance:
 
 ### Default Credentials (CHANGE IN PRODUCTION)
 - PostgreSQL User: `postgres`
-- PostgreSQL Password: `password`
+- PostgreSQL Password: `postgres`
 - JWT Secret: `your-super-secret-jwt-key`
 
 ---
