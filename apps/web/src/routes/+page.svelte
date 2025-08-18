@@ -21,6 +21,15 @@
   <meta name="description" content="LolitaFashion.su - премиальный сервис заказов из Китая в Россию. Лолита мода, аксессуары, косметика и многое другое." />
 </svelte:head>
 
+<!-- Welcome Text -->
+<section class="py-8" style="background: #ffffff;">
+  <div class="container-custom text-center">
+    <h2 class="text-2xl md:text-3xl font-elegant font-bold text-gothic-white gothic-ornament">
+      Добро пожаловать в Lolita Fashion
+    </h2>
+  </div>
+</section>
+
 <!-- Hero Section -->
 <section class="relative overflow-hidden" style="background: #ffffff;">
   
@@ -94,13 +103,10 @@
         </div>
       </div>
       
-      <!-- Text Content -->
-      <div class="text-center lg:text-left max-w-2xl">
-        <h2 class="text-2xl md:text-3xl font-elegant font-bold text-gothic-white mb-4 gothic-ornament">
-          Добро пожаловать в Lolita Fashion
-        </h2>
-        <p class="text-lg text-gothic-secondary leading-relaxed">
-          Ваш надежный проводник в мир изысканной лолита моды. Мы делаем заказы из Китая простыми, безопасными и доступными для каждой мечтательницы.
+      <!-- Logo Only -->
+      <div class="text-center">
+        <p class="text-lg text-gothic-secondary leading-relaxed max-w-2xl mx-auto">
+          Элегантность и изысканность в каждой детали
         </p>
       </div>
     </div>
@@ -125,7 +131,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 100 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -136,7 +142,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -150,7 +156,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 200 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -161,7 +167,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -175,7 +181,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 300 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -186,7 +192,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -200,7 +206,7 @@
         <div in:fly={{ y: 30, duration: 600, delay: 400 }}>
           <div class="card-gothic p-6 text-center hover-lift hover-glow">
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+              <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
             </div>
             <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
@@ -211,7 +217,7 @@
       {:else}
         <div class="card-gothic p-6 text-center hover-lift hover-glow">
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
-            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-contain" />
+            <img src="/images/rose.png" alt="Rose icon" class="w-10 h-10 object-cover rounded-full opacity-80" />
           </div>
           <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
