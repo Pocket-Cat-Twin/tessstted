@@ -26,7 +26,7 @@
 <section class="relative overflow-hidden py-32 md:py-48" style="background: #ffffff;">
   
   <div class="relative container-custom">
-    <div class="text-center max-w-4xl mx-auto">
+    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments">
       <!-- Main heading -->
       {#if mounted}
         <h1 

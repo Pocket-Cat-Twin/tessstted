@@ -704,6 +704,45 @@
   filter: blur(15px);
 }
 
+/* Gothic Ornaments for Hero Section */
+.hero-gothic-ornaments {
+  position: relative;
+}
+
+.hero-gothic-ornaments::before {
+  content: "❦";
+  position: absolute;
+  left: -120px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 5rem;
+  color: rgba(0, 0, 0, 0.08);
+  font-family: "Crimson Pro", serif;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-gothic-ornaments::after {
+  content: "❧";
+  position: absolute;
+  right: -120px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 5rem;
+  color: rgba(0, 0, 0, 0.08);
+  font-family: "Crimson Pro", serif;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Для планшетов скрыть узоры */
+@media (max-width: 1024px) {
+  .hero-gothic-ornaments::before,
+  .hero-gothic-ornaments::after {
+    display: none;
+  }
+}
+
 /* Gothic Text Effects */
 .text-shadow-gothic {
   text-shadow: 
