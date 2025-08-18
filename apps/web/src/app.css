@@ -66,9 +66,9 @@
     filter: invert(1);
   }
 
-  .gothic-pattern-background::after {
-    content: "";
-    position: absolute;
+  /* Отдельный белый фон */
+  .gothic-white-background {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;

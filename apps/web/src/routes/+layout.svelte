@@ -13,6 +13,9 @@
   });
 </script>
 
+<!-- Отдельный белый фон -->
+<div class="gothic-white-background"></div>
+
 <div class="min-h-screen flex flex-col gothic-pattern-background">
   <Header />
   
