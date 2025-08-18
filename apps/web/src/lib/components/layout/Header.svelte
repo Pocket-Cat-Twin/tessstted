@@ -78,7 +78,7 @@
 
       <!-- Center: Currency rate -->
       <div class="hidden lg:flex items-center glass px-4 py-2 rounded-lg">
-        <span class="text-sm text-gothic-dark font-medium">Актуальный курс:</span>
+        <span class="text-sm text-gothic-dark font-medium">Курс:</span>
         <span class="text-sm font-bold text-gothic-pure-black ml-2">
           {currentKurs} ₽/¥
         </span>
