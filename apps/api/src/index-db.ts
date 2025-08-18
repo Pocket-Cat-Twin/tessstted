@@ -15,16 +15,65 @@ import {
   customers,
   customerAddresses,
   desc,
+  // Enhanced database system
+  ensureDatabaseHealth,
+  checkDatabaseHealth,
+  dbLogger
 } from "@yuyu/db";
 
-// Database connection test
-async function testDBConnection() {
+// Enhanced database connection and health check
+async function initializeDatabaseSystem() {
   try {
+    console.log("🔄 Running enhanced database initialization...");
+    
+    // Step 1: Ensure database health (auto-creates DB if needed)
+    dbLogger.info('connection', 'Starting database health check and auto-recovery');
+    const isHealthy = await ensureDatabaseHealth();
+    
+    if (!isHealthy) {
+      console.error("❌ Database health check failed - attempting recovery...");
+      
+      // Step 2: Run comprehensive health check with auto-fix
+      const healthStatus = await checkDatabaseHealth({ 
+        autoFix: true, 
+        detailed: true, 
+        retries: 3 
+      });
+      
+      if (healthStatus.overall === 'critical') {
+        console.error("🚨 Critical database issues detected:");
+        healthStatus.issues.forEach(issue => console.error(`   • ${issue}`));
+        console.error("💡 Recommendations:");
+        healthStatus.recommendations.forEach(rec => console.error(`   • ${rec}`));
+        return false;
+      }
+    }
+    
+    // Step 3: Test actual database query
     const result = await db.select().from(config).limit(1);
-    console.log("✅ Database connection successful");
+    console.log("✅ Database connection and query test successful");
+    dbLogger.info('connection', 'Database system fully initialized', { 
+      configRecords: result.length 
+    });
+    
     return true;
-  } catch (error) {
-    console.error("❌ Database connection failed:", error);
+  } catch (error: any) {
+    console.error("❌ Enhanced database initialization failed:", error);
+    dbLogger.error('connection', 'Database initialization failed', { 
+      error: error instanceof Error ? error.message : error,
+      code: error?.code,
+      severity: error?.severity_local || error?.severity
+    });
+    
+    // Show helpful error information for Windows users
+    if (error?.code === '3D000' || error?.message?.includes('does not exist') || 
+        error?.message?.includes('не существует')) {
+      console.error("");
+      console.error("🔧 Database does not exist - this should have been auto-created!");
+      console.error("   Try running: .\\scripts\\db-doctor.ps1 -Emergency");
+      console.error("   Or manually: bun run db:setup");
+    }
+    
     return false;
   }
 }
@@ -65,7 +114,7 @@ const app = new Elysia()
   }))
 
   .get("/health", async () => {
-    const dbStatus = await testDBConnection();
+    const dbStatus = await ensureDatabaseHealth();
     return {
       success: true,
       database: dbStatus ? "connected" : "disconnected",
@@ -648,20 +697,24 @@ const app = new Elysia()
     }
   })
 
-  // Initialize database connection and seed test data
+  // Initialize enhanced database system and seed test data
   .onStart(async () => {
-    console.log("🔄 Initializing database connection...");
-    const dbConnected = await testDBConnection();
+    console.log("🔄 Initializing enhanced database system...");
+    
+    // Use enhanced database initialization with auto-recovery
+    const dbConnected = await initializeDatabaseSystem();
 
     if (dbConnected) {
+      console.log("✅ Database system is ready and healthy");
+      
       // Auto-seed database with test data on startup (unless SKIP_SEED is set)
       if (!process.env.SKIP_SEED) {
         try {
           console.log("🌱 Auto-seeding database with test data...");
-          const { seedDatabase } = await import("@yuyu/db/src/seed.ts");
+          const { seedDatabase } = await import("@yuyu/db");
           await seedDatabase();
           console.log("✅ Test data seeding completed");
-        } catch (error) {
+        } catch (error: any) {
           console.log(
             "ℹ️ Seeding skipped (data may already exist):",
             error?.message || error,
@@ -670,6 +723,9 @@ const app = new Elysia()
       } else {
         console.log("⏭️ Seeding skipped due to SKIP_SEED environment variable");
       }
+    } else {
+      console.error("🚨 Database initialization failed - API may not function properly");
+      console.error("   For troubleshooting run: .\\scripts\\db-doctor.ps1 -Diagnose");
     }
   })
 
