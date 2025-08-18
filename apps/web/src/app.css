@@ -48,6 +48,7 @@
   /* Класс для применения фонового паттерна */
   .gothic-pattern-background {
     position: relative;
+    overflow: hidden;
   }
 
   .gothic-pattern-background::before {
@@ -257,7 +258,9 @@
     @apply rounded-2xl shadow-2xl;
     position: relative;
     overflow: hidden;
-    min-height: 280px;
+    height: 320px;
+    min-height: 320px;
+    max-height: 320px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1044,14 +1047,12 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 300px;
+  height: 150px;
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.3) 20%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(0, 0, 0, 0.1) 60%,
-    rgba(0, 0, 0, 0.05) 80%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.1) 70%,
     transparent 100%
   );
   z-index: 5;
@@ -1060,18 +1061,16 @@
 
 /* Footer to Content Gradient */
 .footer-gradient {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 300px;
+  height: 150px;
   background: linear-gradient(
     to top,
     rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.7) 20%,
-    rgba(255, 255, 255, 0.5) 40%,
-    rgba(255, 255, 255, 0.3) 60%,
-    rgba(255, 255, 255, 0.1) 80%,
+    rgba(255, 255, 255, 0.7) 30%,
+    rgba(255, 255, 255, 0.3) 70%,
     transparent 100%
   );
   z-index: 5;

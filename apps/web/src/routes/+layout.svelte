@@ -16,9 +16,8 @@
 <!-- Отдельный белый фон -->
 <div class="gothic-white-background"></div>
 
-<!-- Градиенты -->
+<!-- Градиент от хэдера -->
 <div class="header-gradient"></div>
-<div class="footer-gradient"></div>
 
 <div class="min-h-screen flex flex-col gothic-pattern-background">
   <Header />
@@ -27,5 +26,9 @@
     <slot />
   </main>
   
-  <Footer />
+  <div class="relative">
+    <!-- Градиент к футеру -->
+    <div class="footer-gradient"></div>
+    <Footer />
+  </div>
 </div>

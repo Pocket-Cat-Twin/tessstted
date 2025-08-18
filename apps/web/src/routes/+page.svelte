@@ -15,21 +15,22 @@
   function updateParallax() {
     const scrolled = window.pageYOffset;
     const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
     
     // Находим футер и вычисляем его позицию
     const footer = document.querySelector('footer');
-    let footerTop = documentHeight; // По умолчанию, если футер не найден
     
     if (footer) {
-      footerTop = footer.offsetTop;
+      const footerTop = footer.offsetTop;
+      // Останавливаем паралакс за 200px до футера
+      const stopPoint = footerTop - 200;
+      
+      // Если скролл достиг точки остановки, не обновляем паралакс
+      if (scrolled >= stopPoint) {
+        return; // Не изменяем parallaxOffset, оставляем последнее значение
+      }
     }
     
-    // Ограничиваем паралакс: он не должен работать после начала футера
-    const maxScroll = Math.max(0, footerTop - windowHeight);
-    const effectiveScroll = Math.min(scrolled, maxScroll);
-    
-    parallaxOffset = effectiveScroll * 0.5; // Увеличенный коэффициент скорости паралакса
+    parallaxOffset = scrolled * 0.5;
     
     // Применяем CSS custom property для паралакс эффекта фоновых паттернов
     document.documentElement.style.setProperty('--pattern-parallax-offset', `${parallaxOffset}px`);
