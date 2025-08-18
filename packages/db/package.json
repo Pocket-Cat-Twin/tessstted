@@ -15,7 +15,7 @@
     "seed:windows": "bun run src/seed.ts",
     "studio": "drizzle-kit studio",
     "setup:windows": "bun run src/setup-windows.ts",
-    "clean": "rm -rf dist",
+    "clean": "if exist dist rmdir /s /q dist",
     "clean:windows": "if exist dist rmdir /s /q dist"
   },
   "dependencies": {

@@ -17,7 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",
-    "clean": "rm -rf dist",
+    "clean": "if exist dist rmdir /s /q dist",
     "clean:windows": "if exist dist rmdir /s /q dist"
   },
   "dependencies": {

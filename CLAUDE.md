@@ -1,46 +1,40 @@
-# YuYu Lolita Shopping - Claude Development Guide
+# YuYu Lolita Shopping - Windows Development Guide 🪟
 
 ## Project Overview
-This is a YuYu Lolita Shopping website built with modern stack migration using Bun, PostgreSQL, Svelte, and TypeScript.
+This is a YuYu Lolita Shopping website built **exclusively for Windows environments** using Bun, PostgreSQL, Svelte, and TypeScript.
+
+**⚠️ IMPORTANT: This project is designed exclusively for Windows 10/11. Other platforms are not supported.**
 
 ## Running the Project
 
-### Windows Setup (Recommended)
-```bash
-# One-time setup (Windows)
-bun run setup:windows
+### Windows Development (Only Supported Platform)
+```powershell
+# One-time setup (Windows only)
+bun run setup
 
 # Start development (Windows)
-bun run dev:windows
+bun run dev
 
 # Or start individually:
 # Terminal 1 - API Server
 cd apps/api && bun run dev:windows
 
 # Terminal 2 - Web App  
-cd apps/web && bun run dev:windows
+cd apps/web && bun run dev
 
-# Smart startup (Automatic port detection)
-cd apps/web && bun run start:windows
+# Production build
+bun run build
+
+# Production start
+bun run start
 ```
 
-**🚀 NEW: Smart Port Detection**
-- Automatically finds available ports if default ones are busy
-- Graceful fallback to alternative ports
-- Clear console output showing actual URLs
-
-### Cross-Platform (Legacy)
-```bash
-# Start both API and Web app
-bun run dev
-
-# Or start individually:
-# Terminal 1 - API Server
-cd apps/api && SKIP_SEED=true bun dev
-
-# Terminal 2 - Web App  
-cd apps/web && bun dev
-```
+**🚀 Windows-Exclusive Features:**
+- Native PostgreSQL TCP connection on port 5432
+- PowerShell automation scripts
+- Windows service integration ready
+- Advanced Windows error diagnostics
+- Windows Firewall configuration support
 
 ### Access URLs (Local Development)
 **🔗 Local URLs:**
@@ -52,27 +46,23 @@ cd apps/web && bun dev
 - Replace `localhost` with your machine's IP address
 - Ensure Windows Firewall allows ports 3001 and 5173
 
-### Database Commands
-```bash
+### Database Commands (Windows Only)
+```powershell
 # Windows database setup (one-time)
-bun run db:setup:windows
+bun run db:setup
 
 # Generate new migrations
 bun run db:generate
 
 # Run migrations
-bun run db:migrate:windows
+bun run db:migrate
 
 # Seed database
-bun run db:seed:windows
-
-# Cross-platform (legacy)
-bun run db:migrate
 bun run db:seed
 ```
 
-### Development Commands
-```bash
+### Development Commands (Windows)
+```powershell
 # Lint code
 bun run lint
 
@@ -82,10 +72,7 @@ bun run type-check
 # Format code
 bun run format
 
-# Build project (Windows)
-bun run build:windows
-
-# Build project (Cross-platform)
+# Build project
 bun run build
 ```
 
@@ -93,8 +80,8 @@ bun run build
 
 ### Key Environment Variables (.env)
 ```bash
-# API Configuration (Windows)
-API_HOST=localhost    # Windows-optimized
+# API Configuration (Windows Only)
+API_HOST=localhost    # TCP connection for Windows
 API_PORT=3001
 CORS_ORIGIN=http://localhost:5173
 
@@ -113,9 +100,9 @@ NODE_ENV=development
 SKIP_SEED=false
 ```
 
-### Windows Template (.env.windows)
-Use the pre-configured Windows template:
-```bash
+### Environment Setup (Windows)
+The project includes a pre-configured Windows environment template:
+```powershell
 # Copy Windows template
 copy .env.windows .env
 ```
@@ -154,12 +141,13 @@ copy .env.windows .env
 - Web app avoids API ports automatically
 - Clear error messages with suggested fixes
 
-### Database Connection Issues
+### Database Connection Issues (Windows)
 **Problem**: Cannot connect to PostgreSQL
 **Solution**: 
 1. Ensure PostgreSQL is installed and running: `net start postgresql-x64-15`
-2. Verify connection string in .env
-3. Run database setup: `bun run db:setup:windows`
+2. Verify connection string in .env uses port 5432
+3. Run database setup: `bun run db:setup`
+4. Check Windows PostgreSQL service status: `sc query postgresql*`
 
 ### Windows Firewall Issues
 **Problem**: Cannot access from other devices
@@ -197,13 +185,15 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 └── .env              # Environment configuration
 ```
 
-## Tech Stack
-- **Runtime**: Bun
+## Tech Stack (Windows-Optimized)
+- **Runtime**: Bun (Windows builds)
 - **Backend**: Elysia.js + PostgreSQL + Drizzle ORM
 - **Frontend**: SvelteKit + TailwindCSS
-- **Database**: Native PostgreSQL (Windows)
+- **Database**: Native PostgreSQL on Windows (TCP port 5432)
 - **Documentation**: Swagger/OpenAPI
-- **Deployment**: Windows-native (no Docker)
+- **Platform**: Windows 10/11 exclusive
+- **Scripts**: PowerShell automation
+- **Deployment**: Windows-native (no Docker/containers)
 
 ## Development Workflow
 1. Make changes to code
@@ -212,27 +202,33 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 4. Test functionality in the web app
 5. Run linting and type checking before committing
 
-## Windows-Specific Setup
+## Setup & Commands
 
 For detailed Windows setup instructions, see [SETUP_WINDOWS.md](SETUP_WINDOWS.md)
 
-### Quick Windows Commands
+### Essential Commands
 ```powershell
-# Complete setup
+# Complete Windows setup
 .\scripts\setup-windows.ps1
 
-# Start development
+# Development mode
 .\scripts\start-dev.ps1
 
-# Start production
+# Production build
+.\scripts\build-windows.ps1
+
+# Production mode
 .\scripts\start-prod.ps1
 ```
 
-## Troubleshooting
-- If API fails to start: Check PostgreSQL service and database connection
-- If web app can't connect to API: Verify API_HOST=localhost in .env
-- If ports not accessible: Check Windows Firewall settings
-- For database issues: Run `bun run db:setup:windows`
-- For PowerShell issues: Set execution policy or run as Administrator
+## Windows Troubleshooting
+- **API fails to start**: Check PostgreSQL service status (`sc query postgresql*`)
+- **Database connection**: Ensure PostgreSQL runs on port 5432, not Unix socket
+- **Web app can't connect**: Verify API_HOST=localhost in .env
+- **Port conflicts**: Check Windows Firewall settings for ports 3001, 5173, 5432
+- **Database issues**: Run `bun run db:setup` with Administrator privileges
+- **PowerShell errors**: Set execution policy (`Set-ExecutionPolicy RemoteSigned`)
+- **Service issues**: Use `net start postgresql-x64-15` to start PostgreSQL
 
-Last updated: 2025-08-16
+**Windows-Exclusive Version**  
+Last updated: 2025-08-18
