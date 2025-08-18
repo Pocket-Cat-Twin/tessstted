@@ -63,7 +63,6 @@
     opacity: 0.1;
     z-index: -1;
     pointer-events: none;
-    filter: invert(1);
   }
 
   /* Отдельный белый фон */
