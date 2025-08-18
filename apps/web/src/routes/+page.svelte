@@ -54,26 +54,6 @@
         </p>
       {/if}
 
-      <!-- Currency rate -->
-      {#if mounted}
-        <div 
-          class="inline-flex items-center glass rounded-lg px-6 py-4 mb-12 hover-glow"
-          in:fly={{ y: 30, duration: 600, delay: 300 }}
-        >
-          <div class="w-3 h-3 bg-gothic-accent rounded-full mr-4 animate-pulse"></div>
-          <span class="text-gothic-white font-medium">
-            Актуальный курс: <span class="text-gothic-accent font-bold">{currentKurs} ₽/¥</span>
-          </span>
-        </div>
-      {:else}
-        <div class="inline-flex items-center glass rounded-lg px-6 py-4 mb-12 hover-glow">
-          <div class="w-3 h-3 bg-gothic-accent rounded-full mr-4 animate-pulse"></div>
-          <span class="text-gothic-white font-medium">
-            Актуальный курс: <span class="text-gothic-accent font-bold">{currentKurs} ₽/¥</span>
-          </span>
-        </div>
-      {/if}
-
       <!-- CTA Buttons -->
       {#if mounted}
         <div 
