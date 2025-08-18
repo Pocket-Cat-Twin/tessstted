@@ -4,8 +4,8 @@ import * as schema from "./schema";
 
 // Windows-specific database configuration
 const isWindows = process.platform === "win32";
-const defaultWindowsConnectionString = "postgresql://postgres:postgres@localhost:5432/yuyu_lolita";
-const defaultUnixConnectionString = "postgresql://postgres:postgres@localhost:5432/yuyu_lolita";
+const defaultWindowsConnectionString = "postgresql://postgres:postgres@localhost:5433/yuyu_lolita";
+const defaultUnixConnectionString = "postgresql://postgres:postgres@localhost:5433/yuyu_lolita";
 
 // Create connection with Windows-specific handling
 const connectionString = process.env.DATABASE_URL || 
