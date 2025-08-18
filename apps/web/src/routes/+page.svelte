@@ -46,15 +46,11 @@
           class="text-xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed"
           in:fly={{ y: 30, duration: 600, delay: 200 }}
         >
-          LolitaFashion.su — ваш надёжный проводник в мир лолита моды и японских трендов. 
-          Мы специализируемся на заказах одежды, аксессуаров, косметики и уникальных товаров 
-          из Китая с полным сопровождением от выбора до получения.
+          LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {:else}
         <p class="text-xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
-          LolitaFashion.su — ваш надёжный проводник в мир лолита моды и японских трендов. 
-          Мы специализируемся на заказах одежды, аксессуаров, косметики и уникальных товаров 
-          из Китая с полным сопровождением от выбора до получения.
+          LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {/if}
 
@@ -107,6 +103,30 @@
   </div>
 </section>
 
+<!-- Grey Information Bar Section -->
+<section class="py-16" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+  <div class="container-custom">
+    <div class="flex flex-col lg:flex-row items-center justify-center space-y-8 lg:space-y-0 lg:space-x-12">
+      <!-- Logo Section -->
+      <div class="flex items-center justify-center">
+        <div class="w-24 h-24 glass-intense rounded-xl flex items-center justify-center border-2 border-gothic-accent shadow-gothic-glow">
+          <span class="text-4xl font-elegant text-gothic-white">L</span>
+        </div>
+      </div>
+      
+      <!-- Text Content -->
+      <div class="text-center lg:text-left max-w-2xl">
+        <h2 class="text-2xl md:text-3xl font-elegant font-bold text-gothic-white mb-4 gothic-ornament">
+          Добро пожаловать в Lolita Fashion
+        </h2>
+        <p class="text-lg text-gothic-secondary leading-relaxed">
+          Ваш надежный проводник в мир изысканной лолита моды. Мы делаем заказы из Китая простыми, безопасными и доступными для каждой мечтательницы.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Features Section -->
 <section class="section-py" style="background: #ffffff;">
   <div class="container-custom">
@@ -127,9 +147,9 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <div class="w-8 h-8 bg-gothic-accent rounded-full"></div>
             </div>
-            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Лолита мода</h3>
+            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
-              Специализируемся на authentic лолита брендах: Baby, Angelic Pretty, BTSSB и других
+              Честная комиссия, актуальный курс валют, никаких скрытых платежей.
             </p>
           </div>
         </div>
@@ -138,9 +158,9 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <div class="w-8 h-8 bg-gothic-accent rounded-full"></div>
           </div>
-          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Лолита мода</h3>
+          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Прозрачные цены</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
-            Специализируемся на authentic лолита брендах: Baby, Angelic Pretty, BTSSB и других
+            Честная комиссия, актуальный курс валют, никаких скрытых платежей.
           </p>
         </div>
       {/if}
@@ -152,9 +172,9 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <div class="w-8 h-8 border-2 border-gothic-accent rounded-full"></div>
             </div>
-            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Безопасность</h3>
+            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
-              Проверенные поставщики, гарантия доставки товара или полный возврат средств
+              Работаем с проверенными поставщиками. Гарантируем получение заказа или возврат средств.
             </p>
           </div>
         </div>
@@ -163,9 +183,9 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <div class="w-8 h-8 border-2 border-gothic-accent rounded-full"></div>
           </div>
-          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Безопасность</h3>
+          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Надежность</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
-            Проверенные поставщики, гарантия доставки товара или полный возврат средств
+            Работаем с проверенными поставщиками. Гарантируем получение заказа или возврат средств.
           </p>
         </div>
       {/if}
@@ -177,9 +197,9 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <div class="w-8 h-8 bg-gradient-to-br from-gothic-accent to-gothic-charcoal rounded-full"></div>
             </div>
-            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Выгодные цены</h3>
+            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
-              Честная комиссия 10%, актуальный курс валют, никаких скрытых платежей
+              Мы на связи на всём пути заказа и всегда готовы помочь с любыми вопросами.
             </p>
           </div>
         </div>
@@ -188,9 +208,9 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <div class="w-8 h-8 bg-gradient-to-br from-gothic-accent to-gothic-charcoal rounded-full"></div>
           </div>
-          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Выгодные цены</h3>
+          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Полное сопровождение</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
-            Честная комиссия 10%, актуальный курс валют, никаких скрытых платежей
+            Мы на связи на всём пути заказа и всегда готовы помочь с любыми вопросами.
           </p>
         </div>
       {/if}
@@ -202,9 +222,9 @@
             <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
               <div class="w-8 h-8 bg-gradient-to-tr from-gothic-accent to-gothic-white rounded-full"></div>
             </div>
-            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Быстрая доставка</h3>
+            <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
             <p class="text-gothic-secondary leading-relaxed text-sm">
-              Доставка от 2 недель. Отслеживание на каждом этапе от заказа до получения
+              Любимые платья, аксессуары и редкие находки становятся ближе — без языкового барьера и сложностей.
             </p>
           </div>
         </div>
@@ -213,9 +233,9 @@
           <div class="w-16 h-16 mx-auto mb-6 glass-intense rounded-full flex items-center justify-center">
             <div class="w-8 h-8 bg-gradient-to-tr from-gothic-accent to-gothic-white rounded-full"></div>
           </div>
-          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Быстрая доставка</h3>
+          <h3 class="text-lg font-elegant font-bold text-gothic-white mb-4">Доступ к китайским магазинам</h3>
           <p class="text-gothic-secondary leading-relaxed text-sm">
-            Доставка от 2 недель. Отслеживание на каждом этапе от заказа до получения
+            Любимые платья, аксессуары и редкие находки становятся ближе — без языкового барьера и сложностей.
           </p>
         </div>
       {/if}

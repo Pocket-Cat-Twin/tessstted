@@ -1,7 +1,7 @@
-# YuYu Lolita Shopping - Windows Development Guide 🪟
+# Lolita Fashion Shopping - Windows Development Guide 🪟
 
 ## Project Overview
-This is a YuYu Lolita Shopping website built **exclusively for Windows environments** using Bun, PostgreSQL, Svelte, and TypeScript.
+This is a Lolita Fashion Shopping website built **exclusively for Windows environments** using Bun, PostgreSQL, Svelte, and TypeScript.
 
 **⚠️ IMPORTANT: This project is designed exclusively for Windows 10/11. Other platforms are not supported.**
 

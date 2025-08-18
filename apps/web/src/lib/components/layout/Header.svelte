@@ -36,10 +36,10 @@
         <!-- Logo -->
         <a href="/" class="flex items-center space-x-3 hover-lift">
           <div class="w-10 h-10 glass-intense rounded-lg flex items-center justify-center border border-gothic-accent">
-            <span class="text-gothic-white font-elegant text-lg">Y</span>
+            <span class="text-gothic-white font-elegant text-lg">L</span>
           </div>
           <span class="text-xl font-elegant text-gothic-white hidden sm:block">
-            YuYu Lolita
+            Lolita Fashion
           </span>
         </a>
 

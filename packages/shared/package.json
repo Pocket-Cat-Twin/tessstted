@@ -1,7 +1,7 @@
 {
-  "name": "@yuyu/shared",
+  "name": "@lolita-fashion/shared",
   "version": "1.0.0",
-  "description": "Shared types and utilities for YuYu Lolita project",
+  "description": "Shared types and utilities for Lolita Fashion project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

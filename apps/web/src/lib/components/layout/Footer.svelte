@@ -14,9 +14,9 @@
         <div class="space-y-6">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 glass-intense rounded-lg flex items-center justify-center border border-gothic-accent">
-              <span class="text-gothic-white font-elegant text-lg">Y</span>
+              <span class="text-gothic-white font-elegant text-lg">L</span>
             </div>
-            <span class="text-xl font-elegant text-gothic-white">YuYu Lolita</span>
+            <span class="text-xl font-elegant text-gothic-white">Lolita Fashion</span>
           </div>
           <p class="text-gothic-secondary text-sm leading-relaxed">
             {config.site_description || 'Профессиональный сервис заказов из Китая в Россию. Быстро, надёжно, эффективно.'}

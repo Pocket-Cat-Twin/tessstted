@@ -1,4 +1,4 @@
-# YuYu Lolita Shopping - Windows Setup Script
+# Lolita Fashion Shopping - Windows Setup Script
 # Complete Windows environment setup
 
 param(
@@ -7,7 +7,7 @@ param(
     [string]$PostgreSQLVersion = "15"
 )
 
-Write-Host "[SETUP] YuYu Lolita Shopping - Windows Setup" -ForegroundColor Green
+Write-Host "[SETUP] Lolita Fashion Shopping - Windows Setup" -ForegroundColor Green
 Write-Host "=====================================" -ForegroundColor Green
 
 # Function to check if running as administrator

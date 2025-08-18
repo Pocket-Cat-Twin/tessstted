@@ -1,4 +1,4 @@
-# YuYu Lolita Shopping - Production Startup Script
+# Lolita Fashion Shopping - Production Startup Script
 # Builds and starts the application in production mode
 
 param(
@@ -7,7 +7,7 @@ param(
     [string]$LogDir = "logs"
 )
 
-Write-Host "[PROD] Starting YuYu Lolita Shopping - Production Mode" -ForegroundColor Green
+Write-Host "[PROD] Starting Lolita Fashion Shopping - Production Mode" -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Green
 
 # Get the project root directory
@@ -191,13 +191,13 @@ if ($Daemon) {
     # Start as background services with logging
     Write-Host "[API] Starting API server as background service..." -ForegroundColor Yellow
     $apiLogFile = Join-Path $LogDir "api.log"
-    Start-Process bun -ArgumentList "--filter=@yuyu/api", "start" -WorkingDirectory $projectRoot -RedirectStandardOutput $apiLogFile -RedirectStandardError $apiLogFile -WindowStyle Hidden
+    Start-Process bun -ArgumentList "--filter=@lolita-fashion/api", "start" -WorkingDirectory $projectRoot -RedirectStandardOutput $apiLogFile -RedirectStandardError $apiLogFile -WindowStyle Hidden
     
     Start-Sleep -Seconds 3
     
     Write-Host "[WEB] Starting Web app as background service..." -ForegroundColor Yellow
     $webLogFile = Join-Path $LogDir "web.log"
-    Start-Process bun -ArgumentList "--filter=@yuyu/web", "start" -WorkingDirectory $projectRoot -RedirectStandardOutput $webLogFile -RedirectStandardError $webLogFile -WindowStyle Hidden
+    Start-Process bun -ArgumentList "--filter=@lolita-fashion/web", "start" -WorkingDirectory $projectRoot -RedirectStandardOutput $webLogFile -RedirectStandardError $webLogFile -WindowStyle Hidden
     
     Write-Host "[SUCCESS] Services started in background" -ForegroundColor Green
     Write-Host "[LOGS] Logs are being written to:" -ForegroundColor Cyan
@@ -207,13 +207,13 @@ if ($Daemon) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] YuYu Lolita API Server - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: API_PORT=3001, API_HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@yuyu/api start"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] Lolita Fashion API Server - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: API_PORT=3001, API_HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@lolita-fashion/api start"
     
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] YuYu Lolita Web App - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: WEB_PORT=5173, HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@yuyu/web start:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] Lolita Fashion Web App - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: WEB_PORT=5173, HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@lolita-fashion/web start:windows"
 }
 
 # Wait for services to start

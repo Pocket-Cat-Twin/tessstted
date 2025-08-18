@@ -1,7 +1,7 @@
 {
-  "name": "yuyu-lolita-v2",
+  "name": "lolita-fashion",
   "version": "1.0.0",
-  "description": "YuYu Lolita Shopping website - modern stack migration",
+  "description": "Lolita Fashion Shopping website - modern stack migration",
   "private": true,
   "workspaces": [
     "apps/*",

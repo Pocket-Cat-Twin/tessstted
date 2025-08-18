@@ -1,4 +1,4 @@
-# YuYu Lolita Shopping - Development Startup Script
+# Lolita Fashion Shopping - Development Startup Script
 # Starts both API and Web app in separate windows
 
 param(
@@ -6,7 +6,7 @@ param(
     [switch]$SkipBrowser = $false
 )
 
-Write-Host "[DEV] Starting YuYu Lolita Shopping - Development Mode" -ForegroundColor Green
+Write-Host "[DEV] Starting Lolita Fashion Shopping - Development Mode" -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Green
 
 # Get the project root directory
@@ -149,14 +149,14 @@ if ($NoNewWindows) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; `$env:NODE_ENV='development'; `$env:API_PORT='3001'; `$env:API_HOST='localhost'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] YuYu Lolita API Server' -ForegroundColor Green; Write-Host 'Environment: API_PORT=3001, API_HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; bun --hot src/index-db.ts"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; `$env:NODE_ENV='development'; `$env:API_PORT='3001'; `$env:API_HOST='localhost'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] Lolita Fashion API Server' -ForegroundColor Green; Write-Host 'Environment: API_PORT=3001, API_HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; bun --hot src/index-db.ts"
     
     # Wait a moment for API to start
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; `$env:NODE_ENV='development'; `$env:WEB_PORT='5173'; `$env:HOST='localhost'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] YuYu Lolita Web App' -ForegroundColor Blue; Write-Host 'Environment: WEB_PORT=5173, HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; vite dev --host localhost"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; `$env:NODE_ENV='development'; `$env:WEB_PORT='5173'; `$env:HOST='localhost'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] Lolita Fashion Web App' -ForegroundColor Blue; Write-Host 'Environment: WEB_PORT=5173, HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; vite dev --host localhost"
     
     # Wait for services to start
     Start-Sleep -Seconds 5

@@ -1,4 +1,4 @@
-# YuYu Lolita Shopping - Build Script for Windows
+# Lolita Fashion Shopping - Build Script for Windows
 # Builds both API and Web app for production
 
 param(
@@ -7,7 +7,7 @@ param(
     [switch]$SkipWeb = $false
 )
 
-Write-Host "[BUILD] Starting YuYu Lolita Shopping - Production Build" -ForegroundColor Green
+Write-Host "[BUILD] Starting Lolita Fashion Shopping - Production Build" -ForegroundColor Green
 Write-Host "=======================================================" -ForegroundColor Green
 
 # Get the project root directory

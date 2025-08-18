@@ -1,7 +1,7 @@
 {
-  "name": "@yuyu/db",
+  "name": "@lolita-fashion/db",
   "version": "1.0.0",
-  "description": "Database schema and utilities for YuYu Lolita project",
+  "description": "Database schema and utilities for Lolita Fashion project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -28,7 +28,7 @@
     "drizzle-orm": "^0.29.3",
     "drizzle-zod": "^0.5.1",
     "postgres": "^3.4.3",
-    "@yuyu/shared": "workspace:*"
+    "@lolita-fashion/shared": "workspace:*"
   },
   "devDependencies": {
     "drizzle-kit": "^0.20.8",

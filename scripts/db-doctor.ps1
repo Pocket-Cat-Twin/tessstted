@@ -12,7 +12,7 @@ param(
     [string]$Action = "help"
 )
 
-Write-Host "🏥 YuYu Lolita Database Doctor v1.0" -ForegroundColor Cyan
+Write-Host "🏥 Lolita Fashion Database Doctor v1.0" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 
 # Check if running on Windows
