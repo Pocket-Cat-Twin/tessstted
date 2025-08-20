@@ -151,30 +151,25 @@ export const emailTemplates = pgTable(
 
     // Template identification
     name: text("name").notNull().unique(), // e.g., 'subscription_expiring'
-    displayName: text("display_name").notNull(),
-    description: text("description"),
-
-    // Template content
+    displayName: text("display_name"),
+    
+    // Template content  
     subject: text("subject").notNull(),
     htmlContent: text("html_content").notNull(),
     textContent: text("text_content"),
 
     // Template settings
     isActive: boolean("is_active").default(true).notNull(),
-    language: text("language").default("ru").notNull(),
-    category: text("category").default("system").notNull(),
-
-    // Variables documentation
-    availableVariables: text("available_variables"), // JSON array of variable names
+    
+    // Variables documentation (mapped to "variables" column in DB)
+    availableVariables: text("variables"),
 
     // Audit
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    createdBy: uuid("created_by"),
   },
   (table) => ({
     nameIdx: index("email_templates_name_idx").on(table.name),
-    categoryIdx: index("email_templates_category_idx").on(table.category),
     isActiveIdx: index("email_templates_is_active_idx").on(table.isActive),
   }),
 );

@@ -16,7 +16,7 @@ import { users, userSessions } from "./users";
 import { customers, customerAddresses } from "./customers";
 import { orders, orderGoods, orderStatusHistory } from "./orders";
 import { stories } from "./stories";
-import { uploads, faqs, faqCategories } from "./config";
+import { uploads, faqs } from "./config";
 import { userSubscriptions, subscriptionHistory } from "./subscriptions";
 import {
   blogCategories,
@@ -229,17 +229,7 @@ export const notificationPreferencesRelations = relations(
   }),
 );
 
-// FAQ category relations
-export const faqCategoriesRelations = relations(faqCategories, ({ many }) => ({
-  faqs: many(faqs),
-}));
-
-export const faqsRelations = relations(faqs, ({ one }) => ({
-  category: one(faqCategories, {
-    fields: [faqs.categoryId],
-    references: [faqCategories.id],
-  }),
-}));
+// FAQ relations (no category relations - faqCategories table doesn't exist)
 
 // Webhook relations
 export const webhookSubscriptionsRelations = relations(

@@ -46,9 +46,7 @@ export const faqs = pgTable("faqs", {
   id: uuid("id").defaultRandom().primaryKey(),
   question: varchar("question", { length: 500 }).notNull(),
   answer: text("answer").notNull(),
-  categoryId: uuid("category_id").references(() => faqCategories.id, {
-    onDelete: "set null",
-  }),
+  // categoryId field removed as faq_categories table doesn't exist in current DB
   order: integer("order").default(0).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
