@@ -16,7 +16,7 @@ import { users, userSessions } from "./users";
 import { customers, customerAddresses } from "./customers";
 import { orders, orderGoods, orderStatusHistory } from "./orders";
 import { stories } from "./stories";
-import { uploads, faqs } from "./config";
+import { uploads } from "./config";
 import { userSubscriptions, subscriptionHistory } from "./subscriptions";
 import {
   blogCategories,
