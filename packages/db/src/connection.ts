@@ -5,6 +5,10 @@ import * as schema from "./schema";
 // Windows-only database configuration with enhanced error handling
 // This project is designed exclusively for Windows environments
 const WINDOWS_DEFAULT_CONNECTION = "postgresql://postgres:postgres@localhost:5432/yuyu_lolita";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 120c7896c4e30c3edf1faf5140a5ca72ad0cd15f
 
 // Enhanced connection configuration for Windows
 function getConnectionConfig() {
