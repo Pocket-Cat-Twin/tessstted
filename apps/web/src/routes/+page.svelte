@@ -121,7 +121,7 @@
 
 
 <!-- Features Section -->
-<section class="section-py">
+<section class="section-py radial-gradient-background">
   <div class="container-custom">
     <div class="text-center mb-20">
       <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
@@ -236,68 +236,9 @@
   </div>
 </section>
 
-<!-- How it works -->
-<section class="section-py">
-  <div class="container-custom">
-    <div class="text-center mb-20">
-      <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
-        Как это работает
-      </h2>
-      <p class="text-xl text-gothic-secondary max-w-2xl mx-auto">
-        Простой процесс в 4 шага
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-      <!-- Step 1 -->
-      <div class="text-center group">
-        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
-          1
-        </div>
-        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Создание заказа</h3>
-        <p class="text-gothic-secondary text-sm leading-relaxed">
-          Укажите ссылки на товары и контактную информацию
-        </p>
-      </div>
-
-      <!-- Step 2 -->
-      <div class="text-center group">
-        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
-          2
-        </div>
-        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Расчёт стоимости</h3>
-        <p class="text-gothic-secondary text-sm leading-relaxed">
-          Рассчитываем стоимость включая комиссию и доставку
-        </p>
-      </div>
-
-      <!-- Step 3 -->
-      <div class="text-center group">
-        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
-          3
-        </div>
-        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Оплата заказа</h3>
-        <p class="text-gothic-secondary text-sm leading-relaxed">
-          Оплачиваете заказ удобным для вас способом
-        </p>
-      </div>
-
-      <!-- Step 4 -->
-      <div class="text-center group">
-        <div class="w-16 h-16 glass-intense rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-xl text-gothic-white group-hover:scale-110 transition-transform duration-300">
-          4
-        </div>
-        <h3 class="text-lg font-elegant font-semibold text-gothic-white mb-3">Получение товара</h3>
-        <p class="text-gothic-secondary text-sm leading-relaxed">
-          Отслеживаете доставку и получаете посылку
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- CTA Section -->
-<section class="section-py relative overflow-hidden">
+<section class="section-py relative overflow-hidden radial-gradient-background">
   
   <div class="container-custom text-center relative z-10">
     <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">

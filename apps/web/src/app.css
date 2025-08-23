@@ -1145,10 +1145,10 @@ footer .text-gothic-secondary:hover {
 .radial-gradient-background::before {
   content: "";
   position: absolute;
-  top: -50px;
-  left: -100px;
-  right: -100px;
-  bottom: -50px;
+  top: -30%;
+  left: -50%;
+  right: -50%;
+  bottom: -20%;
   background: radial-gradient(
     ellipse 90% 70% at center center,
     rgba(255, 255, 255, 1) 0%,
