@@ -26,6 +26,13 @@
     "db:seed:windows": "cd packages/db && bun run seed:windows",
     "db:setup": "cd packages/db && bun run setup:windows",
     "db:setup:windows": "cd packages/db && bun run setup:windows",
+    "db:reset": "cd packages/db && bun run reset",
+    "db:reset:full": "cd packages/db && bun run reset:full",
+    "db:validate": "cd packages/db && bun run validate",
+    "db:fix": "cd packages/db && bun run fix",
+    "db:complete": "cd packages/db && bun run setup:complete",
+    "db:troubleshoot": "cd packages/db && bun run troubleshoot",
+    "emergency:db": "cd packages/db && bun run reset && echo \"🚨 База данных экстренно восстановлена!\"",
     "lint": "eslint . --ext .ts,.svelte",
     "format": "prettier --write .",
     "type-check": "(cd apps/web && bun run check) && (cd apps/api && bun run type-check)"

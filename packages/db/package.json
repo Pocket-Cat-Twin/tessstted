@@ -22,7 +22,14 @@
     "diagnose": "node -e \"import('./src/windows-diagnostics.js').then(m => m.runWindowsDiagnostics()).then(m.displayDiagnosticReport)\"",
     "monitor": "node -e \"import('./src/health-monitor.js').then(m => m.startHealthMonitoring(30000))\"",
     "doctor": "powershell -File ../../scripts/db-doctor.ps1",
-    "emergency": "node -e \"import('./src/health-monitor.js').then(m => m.runEmergencyRecovery()).then(console.log)\""
+    "emergency": "node -e \"import('./src/health-monitor.js').then(m => m.runEmergencyRecovery()).then(console.log)\"",
+    "reset": "bun run src/database-reset.ts",
+    "reset:full": "bun run src/database-reset.ts",
+    "validate": "bun run src/schema-validator.ts",
+    "validate:schema": "bun run src/schema-validator.ts",
+    "fix": "bun run reset && bun run validate",
+    "setup:complete": "bun run reset && bun run validate && echo \"✅ База данных полностью настроена!\"",
+    "troubleshoot": "bun run validate && bun run test"
   },
   "dependencies": {
     "drizzle-orm": "^0.29.3",

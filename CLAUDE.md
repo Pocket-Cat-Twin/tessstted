@@ -48,17 +48,21 @@ bun run start
 
 ### Database Commands (Windows Only)
 ```powershell
-# Windows database setup (one-time)
-bun run db:setup
+# 🚨 ЭКСТРЕННЫЕ КОМАНДЫ (решают все проблемы):
+bun run emergency:db      # Полное восстановление БД
+bun run db:reset          # Сброс + миграция + seed
+bun run db:fix            # Автоматическое исправление
+bun run db:validate       # Проверка целостности
 
-# Generate new migrations
-bun run db:generate
+# 🔧 СТАНДАРТНЫЕ КОМАНДЫ:
+bun run db:setup          # Windows database setup (one-time)
+bun run db:generate       # Generate new migrations
+bun run db:migrate        # Run migrations
+bun run db:seed           # Seed database
 
-# Run migrations
-bun run db:migrate
-
-# Seed database
-bun run db:seed
+# 🎯 ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ:
+bun run db:complete       # Полная настройка с диагностикой
+bun run db:troubleshoot   # Диагностика проблем
 ```
 
 ### Development Commands (Windows)
@@ -267,7 +271,31 @@ git commit -m "Add [feature]: migration + schema"
 
 ### Migration Recovery Process
 
-If migration issues occur again:
+**🚨 ПРОБЛЕМА ПОЛНОСТЬЮ РЕШЕНА (2025-08-23)**
+
+✅ **Новые команды для автоматического исправления:**
+
+```powershell
+# 🚨 ЭКСТРЕННОЕ ВОССТАНОВЛЕНИЕ (решает все проблемы)
+bun run emergency:db
+
+# 🔄 Полный сброс БД с валидацией
+bun run db:reset
+
+# 🔍 Проверка целостности схемы
+bun run db:validate
+
+# ⚡ Автоматическое исправление
+bun run db:fix
+
+# 🎯 Полная настройка с диагностикой
+bun run db:complete
+
+# 🔧 Диагностика проблем
+bun run db:troubleshoot
+```
+
+**Если всё ещё нужен ручной процесс:**
 
 ```powershell
 # 1. Backup current database

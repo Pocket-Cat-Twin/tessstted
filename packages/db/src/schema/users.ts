@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   boolean,
+  integer,
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -23,6 +24,13 @@ export const userStatusEnum = pgEnum("user_status", [
 export const registrationMethodEnum = pgEnum("registration_method", [
   "email",
   "phone",
+]);
+
+// Additional validation enum for enhanced security
+export const userVerificationStatusEnum = pgEnum("user_verification_status", [
+  "unverified",
+  "partial", // either email or phone verified
+  "full",    // both verified
 ]);
 
 // Users table
@@ -49,9 +57,20 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").default("user").notNull(),
   status: userStatusEnum("status").default("pending").notNull(),
 
-  // Verification status
+  // Enhanced verification status
   emailVerified: boolean("email_verified").default(false).notNull(),
   phoneVerified: boolean("phone_verified").default(false).notNull(),
+  
+  // Overall verification status (computed field for easier querying)
+  overallVerificationStatus: userVerificationStatusEnum("overall_verification_status")
+    .default("unverified")
+    .notNull(),
+  
+  // Security enhancements
+  failedLoginAttempts: integer("failed_login_attempts").default(0).notNull(),
+  lockedUntil: timestamp("locked_until"),
+  emailVerifiedAt: timestamp("email_verified_at"),
+  phoneVerifiedAt: timestamp("phone_verified_at"),
 
   // Legacy verification tokens (deprecated - use verification_tokens table)
   emailVerificationToken: varchar("email_verification_token", { length: 255 }),
