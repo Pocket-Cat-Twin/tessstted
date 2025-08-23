@@ -436,7 +436,6 @@
       transparent 100%
     );
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
     transition: all 0.3s ease;
   }
@@ -1160,7 +1159,15 @@ footer .text-gothic-secondary:hover {
     rgba(255, 255, 255, 0.6) 50%,
     rgba(255, 255, 255, 0.4) 60%,
     rgba(255, 255, 255, 0.2) 70%,
-    rgba(255, 255, 255, 0.05) 85%,
+    rgba(255, 255, 255, 0.18) 73%,
+    rgba(255, 255, 255, 0.16) 76%,
+    rgba(255, 255, 255, 0.14) 79%,
+    rgba(255, 255, 255, 0.12) 82%,
+    rgba(255, 255, 255, 0.10) 85%,
+    rgba(255, 255, 255, 0.08) 88%,
+    rgba(255, 255, 255, 0.06) 91%,
+    rgba(255, 255, 255, 0.04) 94%,
+    rgba(255, 255, 255, 0.02) 97%,
     transparent 100%
   );
   z-index: -1;
