@@ -445,6 +445,11 @@
     font-size: 3.5rem;
   }
 
+  .hero-title-above-all {
+    position: relative;
+    z-index: 10;
+  }
+
   .text-gothic {
     font-family: "Lora", serif;
     background: linear-gradient(135deg, var(--gothic-pure-black) 0%, var(--gothic-slate) 100%);
@@ -1146,12 +1151,16 @@ footer .text-gothic-secondary:hover {
   right: -100px;
   bottom: -50px;
   background: radial-gradient(
-    ellipse 80% 60% at center center,
+    ellipse 90% 70% at center center,
     rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 10%,
     rgba(255, 255, 255, 0.95) 20%,
-    rgba(255, 255, 255, 0.8) 40%,
-    rgba(255, 255, 255, 0.6) 60%,
-    rgba(255, 255, 255, 0.3) 80%,
+    rgba(255, 255, 255, 0.88) 30%,
+    rgba(255, 255, 255, 0.75) 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    rgba(255, 255, 255, 0.2) 70%,
+    rgba(255, 255, 255, 0.05) 85%,
     transparent 100%
   );
   z-index: -1;
