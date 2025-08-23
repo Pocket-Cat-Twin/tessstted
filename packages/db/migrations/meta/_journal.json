@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1751604768283,
-      "tag": "0000_lean_the_initiative",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1755187839395,
-      "tag": "0001_secret_flatman",
+      "when": 1724689200000,
+      "tag": "0000_consolidated_schema",
       "breakpoints": true
     }
   ]

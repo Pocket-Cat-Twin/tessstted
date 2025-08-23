@@ -221,6 +221,93 @@ For detailed Windows setup instructions, see [SETUP_WINDOWS.md](SETUP_WINDOWS.md
 .\scripts\start-prod.ps1
 ```
 
+## Database Migration Best Practices
+
+### ⚠️ IMPORTANT: Migration Guidelines for Claude Code
+
+**PROBLEM SOLVED (2025-08-22)**: The project previously had migration synchronization issues where multiple migrations (0000, 0001, 0002) were not properly tracked in the Drizzle journal, causing "column does not exist" errors during seeding.
+
+**SOLUTION IMPLEMENTED**: All migrations have been consolidated into a single comprehensive migration file `0000_consolidated_schema.sql` with complete schema.
+
+### Migration Rules (FOLLOW THESE EXACTLY)
+
+#### ✅ **CORRECT Way to Add New Database Features:**
+
+```powershell
+# 1. ALWAYS modify schema files first
+cd packages/db/src/schema
+# Edit the relevant schema file (users.ts, orders.ts, etc.)
+
+# 2. ALWAYS generate new migration from schema
+cd packages/db
+bun run generate
+
+# 3. ALWAYS review the generated migration before applying
+# Check the SQL in migrations/XXXX_*.sql
+
+# 4. ALWAYS test migration on clean database first
+bun run db:setup     # Fresh DB
+bun run db:migrate   # Apply migration
+bun run db:seed      # Test seeding
+
+# 5. Only after success, commit migration + schema changes together
+git add .
+git commit -m "Add [feature]: migration + schema"
+```
+
+#### ❌ **WRONG - Never Do This:**
+
+```powershell
+# DON'T create manual SQL files
+# DON'T edit migration files manually
+# DON'T apply migrations out of order
+# DON'T modify old migration files
+# DON'T generate migrations without schema changes
+```
+
+### Migration Recovery Process
+
+If migration issues occur again:
+
+```powershell
+# 1. Backup current database
+pg_dump -U postgres yuyu_lolita > backup.sql
+
+# 2. Reset migrations (if needed)
+cd packages/db/migrations
+# Keep only the latest working migration
+
+# 3. Regenerate from schema
+cd packages/db
+bun run generate   # Creates new migration from current schema
+
+# 4. Fresh setup
+bun run db:setup   # Recreate DB
+bun run db:migrate # Apply migrations
+bun run db:seed    # Test seeding
+
+# 5. If success, restore data from backup (if needed)
+```
+
+### Current Migration Status (2025-08-22)
+
+- ✅ **Single consolidated migration**: `0000_consolidated_schema.sql`
+- ✅ **Complete schema coverage**: All tables, enums, relations, indexes
+- ✅ **Verified compatibility**: Tested with seeding and API
+- ✅ **Performance optimized**: All necessary indexes included
+- ✅ **Windows compatible**: All features work on Windows PostgreSQL
+
+### Schema Components Included
+
+- **User Management**: Multi-auth (email/phone), roles, sessions
+- **Order System**: Orders, goods, status tracking, commission calculation  
+- **Subscription System**: Tiers, features, history, billing
+- **Content Management**: Stories, blog categories, tags, relations
+- **Verification System**: Email/SMS verification, rate limiting
+- **Notification System**: Multi-channel notifications, preferences
+- **Webhook System**: Event subscriptions, delivery logging
+- **Configuration**: Settings, email templates, FAQs, uploads
+
 ## Windows Troubleshooting
 - **API fails to start**: Check PostgreSQL service status (`sc query postgresql*`)
 - **Database connection**: Ensure PostgreSQL runs on port 5432, not Unix socket
@@ -231,4 +318,4 @@ For detailed Windows setup instructions, see [SETUP_WINDOWS.md](SETUP_WINDOWS.md
 - **Service issues**: Use `net start postgresql-x64-15` to start PostgreSQL
 
 **Windows-Exclusive Version**  
-Last updated: 2025-08-18
+Last updated: 2025-08-22 (Migration consolidation completed)
