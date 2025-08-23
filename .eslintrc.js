@@ -46,19 +46,37 @@ module.exports = {
     'no-duplicate-imports': 'error',
     'no-redeclare': 'error',
     
+    // Prevent unused imports and enforce clean code
+    'no-unused-expressions': ['error', { 
+      allowShortCircuit: true, 
+      allowTernary: true, 
+      allowTaggedTemplates: true 
+    }],
+    
     // Prevent naming conflicts
     '@typescript-eslint/no-shadow': 'error',
     'no-shadow': 'off',
     
-    // Ensure imports are used
+    // Ensure imports are used - enhanced rules to catch all unused variables
     '@typescript-eslint/no-unused-vars': ['error', { 
+      vars: 'all',
+      args: 'all',
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
-      ignoreRestSiblings: true
+      ignoreRestSiblings: true,
+      destructuredArrayIgnorePattern: '^_',
+      caughtErrors: 'all',
+      caughtErrorsIgnorePattern: '^_'
     }],
+    'no-unused-vars': 'off', // Turn off base rule as it conflicts with TypeScript rule
     
-    // Type safety
+    // Type safety and strict checking
     '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-expressions': ['error', {
+      allowShortCircuit: true,
+      allowTernary: true,
+      allowTaggedTemplates: true
+    }],
     
     // Function and variable declarations
     'prefer-const': 'error',

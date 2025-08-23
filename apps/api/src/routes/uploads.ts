@@ -6,8 +6,6 @@ import { requireAuth } from "../middleware/auth";
 import { ValidationError, NotFoundError } from "../middleware/error";
 import {
   generateRandomString,
-  validateFileType,
-  validateFileSize,
 } from "@yuyu/shared";
 
 // File upload configuration
@@ -98,11 +96,13 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
           message: "File uploaded successfully",
           data: { upload: uploadRecord },
         };
-      } catch (error) {
+      } catch (_error) {
         // Clean up file if database save fails
         try {
           await unlink(filePath);
-        } catch {}
+        } catch (_error) {
+          // Ignore cleanup errors
+        }
 
         throw new Error("Failed to save file");
       }
@@ -181,7 +181,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
             .returning();
 
           uploadResults.push(uploadRecord);
-        } catch (error) {
+        } catch (_error) {
           failedUploads.push({
             filename: file.name,
             error: "Failed to save file",
@@ -318,7 +318,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
       try {
         // Delete file from filesystem
         await unlink(upload.path);
-      } catch (error) {
+      } catch (_error) {
         console.error("Failed to delete file from filesystem:", error);
         // Continue with database deletion even if file deletion fails
       }

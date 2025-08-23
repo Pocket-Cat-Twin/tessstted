@@ -105,7 +105,7 @@
 
     try {
       // Prepare login data
-      let loginData: any = {
+      const loginData: any = {
         loginMethod,
         password,
       };

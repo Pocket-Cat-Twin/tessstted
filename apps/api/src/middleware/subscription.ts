@@ -226,7 +226,7 @@ export function subscriptionRateLimit(
       }
 
       // Check rate limits in database (simplified implementation)
-      const windowStart = new Date(
+      const _windowStart = new Date(
         Date.now() - tierLimits.windowHours * 60 * 60 * 1000,
       );
 

@@ -23,7 +23,7 @@ export async function seedDatabase() {
   try {
     // Get or create admin user
     let adminUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, "admin@yuyulolita.com"),
+      where: (usersTable, { eq }) => eq(usersTable.email, "admin@yuyulolita.com"),
     });
 
     if (!adminUser) {
@@ -53,7 +53,7 @@ export async function seedDatabase() {
 
     // Get or create regular user
     let regularUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, "user@example.com"),
+      where: (usersTable, { eq }) => eq(usersTable.email, "user@example.com"),
     });
 
     if (!regularUser) {
@@ -84,7 +84,7 @@ export async function seedDatabase() {
 
     // Create a phone-registered user
     let phoneUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.phone, "+79991234568"),
+      where: (usersTable, { eq }) => eq(usersTable.phone, "+79991234568"),
     });
 
     if (!phoneUser) {

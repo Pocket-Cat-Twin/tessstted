@@ -5,7 +5,6 @@ import app from "../src/index";
 describe("Orders API", () => {
   let server: any;
   let authToken: string;
-  let testUserId: string;
   let testOrderId: string;
 
   beforeAll(async () => {
@@ -18,7 +17,7 @@ describe("Orders API", () => {
       name: "Orders Test User",
     };
 
-    const registerResponse = await request(app.server)
+    await request(app.server)
       .post("/api/v1/auth/register")
       .send(testUser);
 
@@ -27,7 +26,6 @@ describe("Orders API", () => {
       .send({ email: testUser.email, password: testUser.password });
 
     authToken = loginResponse.body.data.token;
-    testUserId = loginResponse.body.data.user.id;
   });
 
   afterAll(async () => {

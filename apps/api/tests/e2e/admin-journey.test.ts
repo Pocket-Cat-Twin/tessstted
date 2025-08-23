@@ -3,11 +3,9 @@ import request from "supertest";
 import app from "../../src/index";
 import { db } from "@yuyu/db";
 import { users, orders } from "@yuyu/db";
-import { eq } from "drizzle-orm";
 
 describe("Admin Journey E2E Tests", () => {
   let server: any;
-  let adminUser: any;
   let adminToken: string;
   let testUser: any;
   let testUserToken: string;
@@ -44,7 +42,6 @@ describe("Admin Journey E2E Tests", () => {
 
     expect(adminLogin.body.success).toBe(true);
     adminToken = adminLogin.body.data.token;
-    adminUser = adminLogin.body.data.user;
 
     // Create test user for admin operations
     const userRegistration = await request(app.server)

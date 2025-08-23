@@ -58,7 +58,7 @@
   }
 
   function isValidPhone(phone: string) {
-    return /^[\+]?[1-9][\d]{0,15}$/.test(phone.replace(/\s/g, ''));
+    return /^[+]?[1-9][\d]{0,15}$/.test(phone.replace(/\s/g, ''));
   }
 
   // Handle form submission
@@ -75,7 +75,7 @@
       } else {
         dispatch('error', { message: response.message || 'Ошибка при обновлении профиля' });
       }
-    } catch (error) {
+    } catch (_error) {
       dispatch('error', { message: 'Ошибка подключения к серверу' });
     } finally {
       saving = false;

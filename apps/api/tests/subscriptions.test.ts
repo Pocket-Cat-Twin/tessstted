@@ -5,7 +5,6 @@ import app from "../src/index";
 describe("Subscriptions API", () => {
   let server: any;
   let authToken: string;
-  let testUserId: string;
 
   beforeAll(async () => {
     server = app.listen(0);
@@ -17,7 +16,7 @@ describe("Subscriptions API", () => {
       name: "Subscriptions Test User",
     };
 
-    const registerResponse = await request(app.server)
+    await request(app.server)
       .post("/api/v1/auth/register")
       .send(testUser);
 
@@ -26,7 +25,6 @@ describe("Subscriptions API", () => {
       .send({ email: testUser.email, password: testUser.password });
 
     authToken = loginResponse.body.data.token;
-    testUserId = loginResponse.body.data.user.id;
   });
 
   afterAll(async () => {

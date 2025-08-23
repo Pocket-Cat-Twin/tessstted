@@ -391,23 +391,23 @@ async function validateUsersLogic(tableName: string): Promise<string[]> {
   
   try {
     // Проверяем, что у всех пользователей есть email ИЛИ phone
-    const invalidUsers = await queryClient`
+    const invalidUsers = await queryClient.unsafe(`
       SELECT COUNT(*) 
-      FROM users 
+      FROM ${tableName}
       WHERE (email IS NULL OR email = '') AND (phone IS NULL OR phone = '')
-    `;
+    `);
 
     if (Number(invalidUsers[0]?.count || 0) > 0) {
       errors.push(`❌ Найдены пользователи без email и phone: ${invalidUsers[0]?.count}`);
     }
 
     // Проверяем соответствие registration_method и фактических данных
-    const inconsistentUsers = await queryClient`
+    const inconsistentUsers = await queryClient.unsafe(`
       SELECT COUNT(*) 
-      FROM users 
+      FROM ${tableName}
       WHERE (registration_method = 'email' AND (email IS NULL OR email = ''))
          OR (registration_method = 'phone' AND (phone IS NULL OR phone = ''))
-    `;
+    `);
 
     if (Number(inconsistentUsers[0]?.count || 0) > 0) {
       errors.push(`❌ Несоответствие registration_method данным: ${inconsistentUsers[0]?.count} пользователей`);

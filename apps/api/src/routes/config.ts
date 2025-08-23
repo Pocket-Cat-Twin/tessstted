@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { db, config, faqs, eq, desc, asc, sql } from "@yuyu/db";
+import { db, config, faqs, eq, asc, sql } from "@yuyu/db";
 import {
   configUpdateSchema,
   faqCreateSchema,

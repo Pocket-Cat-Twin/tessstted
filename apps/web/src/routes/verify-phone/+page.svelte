@@ -1,7 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { dev } from '$app/environment';
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import { validateSMSCode, createFormValidator } from '$lib/utils/validation-enhanced';
@@ -18,7 +19,7 @@
   let resendLoading = false;
   let resendCooldown = 0;
   let attempts = 0;
-  let maxAttempts = 3;
+  const maxAttempts = 3;
 
   // Timer
   let cooldownTimer: number;
@@ -175,7 +176,6 @@
   }
 
   // Cleanup timer on destroy
-  import { onDestroy } from 'svelte';
   onDestroy(() => {
     if (cooldownTimer) {
       clearInterval(cooldownTimer);
@@ -335,7 +335,7 @@
     {/if}
 
     <!-- Technical info (for development) -->
-    {#if process.env.NODE_ENV === 'development' && token}
+    {#if dev && token}
       <div class="bg-gray-100 p-3 rounded text-xs text-gray-600">
         <div class="font-mono break-all">Token: {token}</div>
       </div>

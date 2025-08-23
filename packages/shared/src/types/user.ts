@@ -33,8 +33,6 @@ export enum RegistrationMethod {
   PHONE = "phone",
 }
 
-// Russian phone number validation regex
-const RUSSIAN_PHONE_REGEX = /^\+?7[0-9]{10}$|^8[0-9]{10}$|^[0-9]{10}$/;
 
 // Enhanced phone validation with Russian format support
 const phoneSchema = z.string()

@@ -78,7 +78,7 @@ async function initializeDatabaseSystem() {
   }
 }
 
-const app = new Elysia()
+new Elysia()
   .use(
     jwt({
       name: "jwt",
@@ -148,7 +148,7 @@ const app = new Elysia()
         success: true,
         data: { config: configObj },
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         data: { config: {} },
@@ -169,7 +169,7 @@ const app = new Elysia()
         success: true,
         data: { kurs },
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         data: { kurs: 13.5 },
@@ -187,7 +187,7 @@ const app = new Elysia()
         .limit(1);
       const faq = result[0]?.value ? JSON.parse(result[0].value) : [];
       return { faq };
-    } catch (error) {
+    } catch (_error) {
       return { faq: [] };
     }
   })
@@ -404,7 +404,7 @@ const app = new Elysia()
   })
 
   // Auth endpoints with real database authentication
-  .post("/api/v1/auth/login", async ({ body, jwt, cookie }) => {
+  .post("/api/v1/auth/login", async ({ body, jwt: jwtInstance, cookie: cookieInstance }) => {
     const { email, password } = body as { email: string; password: string };
     
     try {
@@ -430,14 +430,14 @@ const app = new Elysia()
       }
 
       // Generate JWT token
-      const token = await jwt.sign({
+      const token = await jwtInstance.sign({
         userId: user.id,
         email: user.email,
         role: user.role,
       });
 
       // Set cookie
-      cookie.token.set({
+      cookieInstance.token.set({
         value: token,
         maxAge: 7 * 24 * 60 * 60, // 7 days
         httpOnly: true,
@@ -472,7 +472,7 @@ const app = new Elysia()
     }
   })
 
-  .post("/api/v1/auth/register", async ({ body }) => {
+  .post("/api/v1/auth/register", async ({ body: _body }) => {
     return {
       success: true,
       message: "Пользователь успешно зарегистрирован",

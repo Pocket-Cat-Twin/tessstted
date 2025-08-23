@@ -147,7 +147,7 @@ export async function testConnection(): Promise<boolean> {
     if (testClient) {
       try {
         await testClient.end();
-      } catch (e) {
+      } catch (_e) {
         // Ignore cleanup errors
       }
     }
@@ -244,7 +244,7 @@ export async function createDatabaseIfNotExists(): Promise<boolean> {
     if (adminClient) {
       try {
         await adminClient.end();
-      } catch (e) {
+      } catch (_e) {
         // Ignore cleanup errors
       }
     }

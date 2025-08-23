@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 import { api } from "$lib/api/client-simple";
-import type { Story, StoryWithAuthor } from "@yuyu/shared";
+import type { StoryWithAuthor } from "@yuyu/shared";
 
 export interface StoriesStore {
   stories: StoryWithAuthor[];

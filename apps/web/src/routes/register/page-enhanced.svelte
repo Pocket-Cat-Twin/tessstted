@@ -6,13 +6,10 @@
   import PasswordStrength from '$lib/components/ui/PasswordStrength.svelte';
   import { 
     validateRegisterForm, 
-    validateField,
     normalizePhoneNumber,
-    formatPhoneForDisplay,
     applyPhoneMask,
     createFormValidator,
-    type RegistrationMethod,
-    type AuthMethod 
+    type RegistrationMethod
   } from '$lib/utils/validation-enhanced';
 
   // Form state
@@ -122,7 +119,7 @@
 
     try {
       // Prepare registration data
-      let registrationData: any = {
+      const registrationData: any = {
         registrationMethod,
         password,
         name,

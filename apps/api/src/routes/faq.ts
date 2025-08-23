@@ -5,16 +5,14 @@ import {
   faqCategories,
   eq,
   and,
-  desc,
   asc,
   sql,
   like,
   or,
 } from "@yuyu/db";
-import { requireAuth, requireAdmin } from "../middleware/auth";
+import { requireAdmin } from "../middleware/auth";
 import {
   NotFoundError,
-  ValidationError,
   DuplicateError,
 } from "../middleware/error";
 
@@ -74,7 +72,7 @@ export const faqRoutes = new Elysia({ prefix: "/faq" })
       const categorySlug = query.category;
       const search = query.search;
 
-      let whereConditions = [eq(faqs.isActive, true)];
+      const whereConditions = [eq(faqs.isActive, true)];
 
       // Filter by category if specified
       if (categorySlug) {
@@ -215,7 +213,7 @@ export const faqRoutes = new Elysia({ prefix: "/faq" })
         throw new NotFoundError("FAQ category not found");
       }
 
-      let whereConditions = [
+      const whereConditions = [
         eq(faqs.categoryId, category.id),
         eq(faqs.isActive, true),
       ];
@@ -493,7 +491,7 @@ export const faqRoutes = new Elysia({ prefix: "/faq" })
       const search = query.search;
       const categoryId = query.categoryId;
 
-      let whereConditions = [];
+      const whereConditions = [];
 
       if (search) {
         whereConditions.push(

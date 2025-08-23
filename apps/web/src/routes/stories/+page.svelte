@@ -9,7 +9,7 @@
   import { page } from '$app/stores';
 
   let currentPage = 1;
-  let limit = 12;
+  const limit = 12;
 
   $: if ($page.url.searchParams.has('page')) {
     currentPage = parseInt($page.url.searchParams.get('page') || '1');

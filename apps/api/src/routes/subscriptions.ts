@@ -1,12 +1,13 @@
 import { Elysia, t } from "elysia";
+import { db, subscriptionHistory, userSubscriptions, eq, desc, and, sql } from "@yuyu/db";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import {
   subscriptionMiddleware,
   requireSubscription,
   requireFeature,
 } from "../middleware/subscription";
-import { ValidationError } from "../middleware/error";
 import { subscriptionService } from "../services/subscription";
+import { NotFoundError } from "../middleware/error";
 
 export const subscriptionRoutes = new Elysia({ prefix: "/subscriptions" })
 

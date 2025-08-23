@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { requireAuth, requireAdmin } from "../middleware/auth";
-import { subscriptionMiddleware } from "../middleware/subscription";
 import { notificationService } from "../services/notification";
 import {
   db,

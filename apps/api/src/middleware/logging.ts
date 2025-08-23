@@ -61,7 +61,7 @@ export const loggingMiddleware = new Elysia({ name: "logging" })
     };
   })
   .onAfterHandle(
-    ({ response, requestLogger, startTime, request, requestIp }) => {
+    ({ response, requestLogger, startTime, request, requestIp: _requestIp }) => {
       const duration = Date.now() - startTime;
       const method = request.method;
       const url = new URL(request.url);

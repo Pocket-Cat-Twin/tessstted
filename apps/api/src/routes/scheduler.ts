@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { requireAdmin } from "../middleware/auth";
-import { NotFoundError, ValidationError } from "../middleware/error";
+import { NotFoundError } from "../middleware/error";
 import { schedulerService } from "../services/scheduler";
 
 export const schedulerRoutes = new Elysia({ prefix: "/scheduler" })

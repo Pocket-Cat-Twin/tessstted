@@ -107,7 +107,7 @@
           message: response.message || 'Ошибка при сохранении адреса' 
         });
       }
-    } catch (error) {
+    } catch (_error) {
       dispatch('error', { message: 'Ошибка подключения к серверу' });
     } finally {
       savingAddress = false;
@@ -131,7 +131,7 @@
           message: response.message || 'Ошибка при удалении адреса' 
         });
       }
-    } catch (error) {
+    } catch (_error) {
       dispatch('error', { message: 'Ошибка подключения к серверу' });
     } finally {
       deletingAddressId = '';
@@ -151,7 +151,7 @@
           message: response.message || 'Ошибка при обновлении адреса' 
         });
       }
-    } catch (error) {
+    } catch (_error) {
       dispatch('error', { message: 'Ошибка подключения к серверу' });
     }
   }

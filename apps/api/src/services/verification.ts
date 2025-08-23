@@ -364,7 +364,7 @@ class VerificationService {
   ): Promise<void> {
     try {
       let emailType: EmailType;
-      let templateData: any = { code };
+      const templateData: any = { code };
 
       if (userId) {
         const user = await db.query.users.findFirst({

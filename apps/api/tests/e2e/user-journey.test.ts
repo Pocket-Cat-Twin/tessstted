@@ -2,8 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import app from "../../src/index";
 import { db } from "@yuyu/db";
-import { users, orders, subscriptions, verificationTokens } from "@yuyu/db";
-import { eq, and } from "drizzle-orm";
+import { users, orders } from "@yuyu/db";
+import { eq } from "drizzle-orm";
 
 describe("Critical User Journey E2E Tests", () => {
   let server: any;

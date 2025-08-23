@@ -34,7 +34,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   // Update current user profile
   .put(
     "/profile",
-    async ({ body, user, set }) => {
+    async ({ body, user, _set }) => {
       const validation = userProfileUpdateSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid profile data");
@@ -396,7 +396,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .post(
     "/:id/block",
     async ({ params: { id }, body, user: currentUser }) => {
-      const { reason } = body as { reason?: string };
+      const { reason: _reason } = body as { reason?: string };
 
       // Find user
       const existingUser = await db.query.users.findFirst({
@@ -446,7 +446,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   // Unblock user
   .post(
     "/:id/unblock",
-    async ({ params: { id }, user: currentUser }) => {
+    async ({ params: { id }, user: _currentUser }) => {
       // Find user
       const existingUser = await db.query.users.findFirst({
         where: eq(users.id, id),

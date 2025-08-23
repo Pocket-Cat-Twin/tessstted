@@ -15,27 +15,15 @@ import {
   userSessions, 
   verificationTokens,
   smsLogs,
-  emailLogs,
   verificationRateLimit,
   eq, 
-  and, 
-  or,
-  gt,
-  sql
+  and,
+  gt
 } from "@yuyu/db";
 import {
   userRegistrationSchema,
-  userRegistrationEmailSchema,
-  userRegistrationPhoneSchema,
   userLoginSchema,
-  userLoginEmailSchema,
-  userLoginPhoneSchema,
   userLoginLegacySchema,
-  passwordResetRequestSchema,
-  passwordResetRequestEmailSchema,
-  passwordResetRequestPhoneSchema,
-  passwordResetRequestLegacySchema,
-  passwordResetSchema,
   emailVerificationSchema,
   phoneVerificationSchema,
   UserStatus,
@@ -44,10 +32,9 @@ import {
   isEmailRegistration,
   isPhoneRegistration,
   isEmailLogin,
-  isPhoneLogin,
   normalizePhoneNumber,
   formatPhoneForDisplay,
-  authResponseSchema,
+  generateRandomString,
 } from "@yuyu/shared";
 import {
   NotFoundError,
@@ -57,7 +44,6 @@ import {
 } from "../middleware/error";
 import { requireAuth } from "../middleware/auth";
 import { sendEmail, EmailType } from "../services/email";
-import { generateRandomString } from "@yuyu/shared";
 
 // Rate limiting service
 class RateLimitService {
@@ -172,7 +158,7 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
   // Enhanced Multi-Auth Registration
   .post(
     "/register",
-    async ({ body, jwt, cookie, set, request }) => {
+    async ({ body, jwt: _jwt, cookie: _cookie, set, request }) => {
       try {
         // Validate registration data
         const validation = userRegistrationSchema.safeParse(body);
@@ -409,7 +395,7 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
   // Enhanced Multi-Auth Login
   .post(
     "/login",
-    async ({ body, jwt, cookie, set, request }) => {
+    async ({ body, jwt: _jwt, cookie: _cookie, set, request }) => {
       try {
         // Try new multi-auth schema first, fall back to legacy
         let validation = userLoginSchema.safeParse(body);
@@ -550,7 +536,7 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
   // Verify Email
   .post(
     "/verify-email",
-    async ({ body, set }) => {
+    async ({ body, set: _set }) => {
       const validation = emailVerificationSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Некорректный токен верификации");
@@ -609,7 +595,7 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
   // Verify Phone
   .post(
     "/verify-phone",
-    async ({ body, set }) => {
+    async ({ body, set: _set }) => {
       const validation = phoneVerificationSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Некорректный код верификации");
@@ -689,9 +675,9 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
   .use(requireAuth)
   .post(
     "/logout",
-    async ({ cookie, store }) => {
+    async ({ cookie: cookieStore, store }) => {
       // Clear cookie
-      cookie.token.remove();
+      cookieStore.token.remove();
 
       // Clear user sessions
       if (store.user) {

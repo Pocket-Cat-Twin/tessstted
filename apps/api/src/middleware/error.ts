@@ -47,7 +47,7 @@ export const errorHandler = new Elysia({ name: "errorHandler" }).onError(
         };
 
       case "INTERNAL_SERVER_ERROR":
-      default:
+      default: {
         // Don't expose internal errors in production
         const isProduction = process.env.NODE_ENV === "production";
 
@@ -58,6 +58,7 @@ export const errorHandler = new Elysia({ name: "errorHandler" }).onError(
           message: isProduction ? "Internal server error" : errorMessage,
           ...(isProduction ? {} : { stack: errorStack }),
         };
+      }
     }
   },
 );

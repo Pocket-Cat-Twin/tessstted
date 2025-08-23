@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  // import { onMount } from 'svelte';
   import { ordersStore } from '$lib/stores/orders';
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
-  import { formatCurrency, formatDate } from '@yuyu/shared';
-  import type { Order } from '@yuyu/shared';
+  import { formatCurrency, formatDate, type Order } from '@yuyu/shared';
 
   let orderNumber = '';
   let loading = false;

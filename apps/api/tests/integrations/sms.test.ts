@@ -11,7 +11,7 @@ vi.mock("../../src/services/sms", async () => {
     // Mock the external API call but keep the internal logic
     sendSMSViaProvider: vi
       .fn()
-      .mockImplementation(async (phone: string, message: string) => {
+      .mockImplementation(async (phone: string, _message: string) => {
         // Simulate different provider responses
         if (phone.includes("fail")) {
           throw new Error("SMS provider error");

@@ -6,7 +6,7 @@
   import Badge from '$lib/components/ui/Badge.svelte';
   import { api } from '$lib/api/client-simple';
 
-  let stats: any = {
+  const stats: any = {
     orders: { total: 0, processing: 0, completed: 0 },
     users: { total: 0, active: 0, subscribed: 0 },
     revenue: { total: 0, thisMonth: 0 },

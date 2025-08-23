@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { Elysia } from "elysia";
+import request from "supertest";
 import app from "../src/index";
 
 describe("Authentication API", () => {

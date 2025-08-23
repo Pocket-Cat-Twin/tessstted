@@ -9,10 +9,8 @@ import {
   eq,
   and,
   desc,
-  asc,
   sql,
   gte,
-  lte,
 } from "@yuyu/db";
 import { requireAdmin } from "../middleware/auth";
 
@@ -226,20 +224,16 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
 
       // Time series data based on groupBy
       let dateFormat: string;
-      let dateInterval: string;
 
       switch (groupBy) {
         case "week":
           dateFormat = 'YYYY-"W"WW';
-          dateInterval = "1 week";
           break;
         case "month":
           dateFormat = "YYYY-MM";
-          dateInterval = "1 month";
           break;
         default: // day
           dateFormat = "YYYY-MM-DD";
-          dateInterval = "1 day";
           break;
       }
 

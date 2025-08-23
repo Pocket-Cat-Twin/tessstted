@@ -145,7 +145,7 @@ export async function resetDatabase(options: {
     try {
       await queryClient.end();
       await migrationClient.end();
-    } catch (e) {
+    } catch (_e) {
       // Игнорируем ошибки закрытия соединений
     }
   }
@@ -187,7 +187,7 @@ async function dropDatabaseIfExists(): Promise<void> {
     if (adminClient) {
       try {
         await adminClient.end();
-      } catch (e) {
+      } catch (_e) {
         // Игнорируем ошибки закрытия
       }
     }

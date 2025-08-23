@@ -1,11 +1,10 @@
 import { Elysia, t } from "elysia";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import { subscriptionMiddleware } from "../middleware/subscription";
-import {
-  NotFoundError,
-  ValidationError,
-  ForbiddenError,
-} from "../middleware/error";
+// import {
+//   ValidationError,
+//   ForbiddenError,
+// } from "../middleware/error";
 import { storageService } from "../services/storage";
 
 export const storageRoutes = new Elysia({ prefix: "/storage" })

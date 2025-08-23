@@ -26,7 +26,6 @@ import { cleanupRoutes } from "./routes/cleanup";
 import { backupRoutes } from "./routes/backup";
 
 // Import middleware
-import { authMiddleware } from "./middleware/auth";
 import { errorHandler } from "./middleware/error";
 import { rateLimiter } from "./middleware/rateLimit";
 import { loggingMiddleware } from "./middleware/logging";
@@ -118,8 +117,8 @@ const app = new Elysia()
   })
 
   // API routes
-  .group("/api/v1", (app) =>
-    app
+  .group("/api/v1", (apiGroup) =>
+    apiGroup
       .use(authRoutes)
       .use(authV2Routes)
       .use(userRoutes)

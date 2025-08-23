@@ -161,6 +161,7 @@
         <div class="prose prose-lg max-w-none">
           <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
             <div class="text-gray-700 leading-relaxed">
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
               {@html formatContent(story.content)}
             </div>
           </div>

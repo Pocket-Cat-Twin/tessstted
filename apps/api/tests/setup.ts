@@ -26,19 +26,19 @@ afterAll(async () => {
 // Mock external services for testing
 export const mockServices = {
   sms: {
-    send: async (phone: string, message: string) => ({
+    send: async (_phone: string, _message: string) => ({
       success: true,
       messageId: "test-sms-" + Date.now(),
     }),
   },
   email: {
-    send: async (email: string, subject: string, content: string) => ({
+    send: async (_email: string, _subject: string, _content: string) => ({
       success: true,
       messageId: "test-email-" + Date.now(),
     }),
   },
   payment: {
-    process: async (amount: number, method: string) => ({
+    process: async (_amount: number, _method: string) => ({
       success: true,
       transactionId: "test-payment-" + Date.now(),
     }),

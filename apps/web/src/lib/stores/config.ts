@@ -19,7 +19,7 @@ const initialState: ConfigState = {
 };
 
 function createConfigStore() {
-  const { subscribe, set, update } = writable<ConfigState>(initialState);
+  const { subscribe, update } = writable<ConfigState>(initialState);
 
   return {
     subscribe,

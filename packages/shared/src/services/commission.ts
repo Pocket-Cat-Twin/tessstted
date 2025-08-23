@@ -30,7 +30,7 @@ export interface CommissionCalculationResult {
 export function calculateCommission(
   input: CommissionCalculationInput,
 ): CommissionCalculationResult {
-  const { priceYuan, exchangeRate, quantity = 1 } = input;
+  const { priceYuan, exchangeRate } = input;
 
   // Validate input
   if (priceYuan <= 0 || exchangeRate <= 0) {

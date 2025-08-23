@@ -35,7 +35,7 @@
           currentSubscription = statusResponse.data.subscription;
         }
       }
-    } catch (error) {
+    } catch (_error) {
       showMessage('Ошибка загрузки данных', 'error');
     } finally {
       loading = false;
@@ -101,7 +101,7 @@
   }
 
   // Format price
-  function formatPrice(price: number, currency: string = 'RUB') {
+  function formatPrice(price: number, _currency: string = 'RUB') {
     if (price === 0) return 'Бесплатно';
     return `${price.toLocaleString()} ₽`;
   }

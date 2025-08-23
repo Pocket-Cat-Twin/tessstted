@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import { authStore } from '$stores/auth';
   import { configStore } from '$stores/config';
-  import Button from '$components/ui/Button.svelte';
+  // import Button from '$components/ui/Button.svelte';
 
   export let showUserMenu = false;
 
@@ -12,10 +12,10 @@
   $: currentKurs = $configStore.kurs;
 
   // Gothic theme management - simplified
-  let mounted = false;
+  let _mounted = false;
 
   onMount(() => {
-    mounted = true;
+    _mounted = true;
   });
 
   function toggleUserMenu() {

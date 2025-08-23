@@ -44,7 +44,7 @@ export async function detectPostgreSQLServices(): Promise<PostgreSQLServiceInfo[
           state: isRunning ? 'RUNNING' : 'STOPPED',
           displayName: serviceName
         });
-      } catch (error) {
+      } catch (_error) {
         services.push({
           name: serviceName,
           state: 'NOT_FOUND'
@@ -64,13 +64,13 @@ export async function detectPostgreSQLServices(): Promise<PostgreSQLServiceInfo[
       
       for (const name of commonNames) {
         try {
-          const { stdout } = await execAsync(`sc query "${name}"`);
-          const isRunning = stdout.includes('RUNNING');
+          const { stdout: serviceOutput } = await execAsync(`sc query "${name}"`);
+          const isRunning = serviceOutput.includes('RUNNING');
           services.push({
             name,
             state: isRunning ? 'RUNNING' : 'STOPPED'
           });
-        } catch (error) {
+        } catch (_error) {
           // Service doesn't exist, skip
         }
       }
@@ -88,7 +88,7 @@ export async function checkPort5432(): Promise<boolean> {
   try {
     const { stdout } = await execAsync('netstat -an | findstr :5432');
     return stdout.trim().length > 0;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -98,7 +98,7 @@ export async function checkLocalhostResolution(): Promise<boolean> {
   try {
     const { stdout } = await execAsync('nslookup localhost');
     return stdout.includes('127.0.0.1');
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -119,7 +119,7 @@ export async function findPostgreSQLExecutable(): Promise<string | undefined> {
       if (stdout.includes('psql')) {
         return path;
       }
-    } catch (error) {
+    } catch (_error) {
       // Path doesn't exist, continue
     }
   }
@@ -128,7 +128,7 @@ export async function findPostgreSQLExecutable(): Promise<string | undefined> {
   try {
     const { stdout } = await execAsync('where psql');
     return stdout.trim().split('\n')[0];
-  } catch (error) {
+  } catch (_error) {
     return undefined;
   }
 }
@@ -148,7 +148,7 @@ export async function getWindowsInfo(): Promise<{ osInfo: string; encoding: stri
       osInfo: osInfo.split(':')[1]?.trim() || 'Windows',
       encoding: encoding === '65001' ? 'UTF-8' : `CP${encoding}`
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       osInfo: 'Windows (unknown version)',
       encoding: 'unknown'
@@ -282,7 +282,7 @@ export async function autoFixWindowsIssues(): Promise<{ fixed: string[]; failed:
     if (serviceStarted) {
       fixed.push('Started PostgreSQL service');
     }
-  } catch (error) {
+  } catch (_error) {
     failed.push('Could not start PostgreSQL service');
   }
   
@@ -290,7 +290,7 @@ export async function autoFixWindowsIssues(): Promise<{ fixed: string[]; failed:
   try {
     await execAsync('chcp 65001');
     fixed.push('Set UTF-8 encoding for session');
-  } catch (error) {
+  } catch (_error) {
     failed.push('Could not set UTF-8 encoding');
   }
   

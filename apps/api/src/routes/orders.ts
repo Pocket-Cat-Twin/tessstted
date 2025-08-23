@@ -9,7 +9,6 @@ import {
   eq,
   and,
   desc,
-  asc,
   sql,
 } from "@yuyu/db";
 import {
@@ -17,16 +16,12 @@ import {
   orderUpdateSchema,
   orderGoodCreateSchema,
   orderGoodUpdateSchema,
-  orderLookupSchema,
   OrderStatus,
-  generateOrderNomerok,
-  calculateOrderTotals,
   calculateCommission,
   calculateTotalCommission,
 } from "@yuyu/shared";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import {
-  orderSubscriptionMiddleware,
   orderCreationRateLimit,
   generateTierOrderNumber,
   subscriptionMiddleware,
@@ -34,7 +29,6 @@ import {
 import {
   NotFoundError,
   ValidationError,
-  ForbiddenError,
 } from "../middleware/error";
 import { sendOrderCreatedEmail } from "../services/email";
 import { orderService } from "../services/order";
@@ -44,7 +38,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   // Get processing information for user (with or without auth)
   .get(
     "/processing-info",
-    async ({ query, store }) => {
+    async ({ query: _query, store }) => {
       const userId = store?.user?.id;
       const processingInfo = await orderService.getOrderProcessingInfo(userId);
 
@@ -176,7 +170,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   // Public order lookup by nomerok
   .get(
     "/lookup/:nomerok",
-    async ({ params: { nomerok }, set }) => {
+    async ({ params: { nomerok }, _set }) => {
       const order = await db.query.orders.findFirst({
         where: eq(orders.nomerok, nomerok),
         with: {
@@ -1062,7 +1056,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   .post(
     "/bulk/export",
     async ({ body }) => {
-      const { orderIds, format } = body;
+      const { orderIds, format: _format } = body;
 
       // Find orders to export
       const whereClause =

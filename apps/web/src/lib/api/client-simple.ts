@@ -25,7 +25,7 @@ class ApiClient {
 
   private async request<T = any>(
     endpoint: string,
-    options: RequestInit = {},
+    options: Omit<RequestInit, 'body'> & { body?: string } = {},
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseUrl}${endpoint}`;
@@ -114,7 +114,7 @@ class ApiClient {
 
   // Stories methods
   async getStories(page: number = 1, limit: number = 10) {
-    return this.request(`/stories`);
+    return this.request(`/stories?page=${page}&limit=${limit}`);
   }
 
   async getStory(link: string) {
@@ -422,11 +422,6 @@ class ApiClient {
     return null;
   }
 
-  private setToken(token: string) {
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem("auth_token", token);
-    }
-  }
 
   private removeToken() {
     if (typeof localStorage !== "undefined") {

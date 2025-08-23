@@ -9,7 +9,7 @@ vi.mock("../../src/services/email", async () => {
   
   // Create mock functions for all email service methods
   const mockEmailService = {
-    sendEmail: vi.fn().mockImplementation(async (to: string, subject: string, content: string) => {
+    sendEmail: vi.fn().mockImplementation(async (to: string, _subject: string, _content: string) => {
       if (to.includes("fail")) {
         return { success: false, error: "Email provider error" };
       }
@@ -22,7 +22,7 @@ vi.mock("../../src/services/email", async () => {
         messageId: "mock_msg_" + Date.now(),
       };
     }),
-    sendVerificationEmail: vi.fn().mockImplementation(async (email: string, code?: string) => {
+    sendVerificationEmail: vi.fn().mockImplementation(async (_email: string, code?: string) => {
       const verificationCode = code || "ABC123";
       return {
         success: true,
@@ -30,19 +30,19 @@ vi.mock("../../src/services/email", async () => {
         code: verificationCode,
       };
     }),
-    sendOrderNotificationEmail: vi.fn().mockImplementation(async (email: string, orderData: any) => {
+    sendOrderNotificationEmail: vi.fn().mockImplementation(async (_email: string, _orderData: any) => {
       return {
         success: true,
         providerId: "mock_order_" + Date.now(),
       };
     }),
-    sendSubscriptionNotificationEmail: vi.fn().mockImplementation(async (email: string, data: any) => {
+    sendSubscriptionNotificationEmail: vi.fn().mockImplementation(async (_email: string, _data: any) => {
       return {
         success: true,
         providerId: "mock_subscription_" + Date.now(),
       };
     }),
-    sendPasswordResetEmail: vi.fn().mockImplementation(async (email: string, data: any) => {
+    sendPasswordResetEmail: vi.fn().mockImplementation(async (_email: string, _data: any) => {
       return {
         success: true,
         providerId: "mock_reset_" + Date.now(),
@@ -50,7 +50,7 @@ vi.mock("../../src/services/email", async () => {
     }),
     updateEmailStatus: vi.fn().mockResolvedValue({ success: true }),
     trackEmailEvent: vi.fn().mockResolvedValue({ success: true }),
-    sendEmailWithAttachments: vi.fn().mockImplementation(async (to: string, subject: string, content: string, attachments: any[]) => {
+    sendEmailWithAttachments: vi.fn().mockImplementation(async (_to: string, _subject: string, _content: string, _attachments: any[]) => {
       return {
         success: true,
         providerId: "mock_attachment_" + Date.now(),
@@ -65,7 +65,7 @@ vi.mock("../../src/services/email", async () => {
     sendEmailViaProvider: vi
       .fn()
       .mockImplementation(
-        async (to: string, subject: string, content: string) => {
+        async (to: string, _subject: string, _content: string) => {
           // Simulate different provider responses
           if (to.includes("fail")) {
             throw new Error("Email provider error");

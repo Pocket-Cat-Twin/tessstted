@@ -24,7 +24,7 @@ export interface HealthCheckOptions {
 
 class DatabaseHealthMonitor {
   private isMonitoring = false;
-  private monitoringInterval: NodeJS.Timeout | null = null;
+  private monitoringInterval: ReturnType<typeof setTimeout> | null = null;
   private lastHealthStatus: HealthStatus | null = null;
   private checkInterval = 60000; // 1 minute default
 

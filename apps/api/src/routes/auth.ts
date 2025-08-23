@@ -11,6 +11,7 @@ import {
   emailVerificationSchema,
   UserStatus,
   UserRole,
+  generateRandomString,
 } from "@yuyu/shared";
 import {
   NotFoundError,
@@ -20,7 +21,6 @@ import {
 } from "../middleware/error";
 import { requireAuth } from "../middleware/auth";
 import { sendEmail, EmailType } from "../services/email";
-import { generateRandomString } from "@yuyu/shared";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(
@@ -35,7 +35,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Register new user
   .post(
     "/register",
-    async ({ body, jwt, cookie, set }) => {
+    async ({ body, _jwt, _cookie, set }) => {
       const validation = userRegistrationSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid registration data");
@@ -117,7 +117,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Login user
   .post(
     "/login",
-    async ({ body, jwt, cookie, set }) => {
+    async ({ body, jwt: jwtService, cookie: cookieStore, _set }) => {
       const validation = userLoginSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid login data");
@@ -146,7 +146,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       }
 
       // Generate JWT token
-      const token = await jwt.sign({
+      const token = await jwtService.sign({
         userId: user.id,
         email: user.email,
         role: user.role,
@@ -169,7 +169,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         .where(eq(users.id, user.id));
 
       // Set cookie
-      cookie.token.set({
+      cookieStore.token.set({
         value: token,
         maxAge: 7 * 24 * 60 * 60, // 7 days
         httpOnly: true,
@@ -213,9 +213,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(requireAuth)
   .post(
     "/logout",
-    async ({ cookie, store }) => {
+    async ({ cookie: cookieStore, store }) => {
       // Clear cookie
-      cookie.token.remove();
+      cookieStore.token.remove();
 
       // If user is authenticated, clear their sessions
       if (store.user) {
@@ -257,7 +257,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Verify email
   .post(
     "/verify-email",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const validation = emailVerificationSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid verification token");
@@ -304,7 +304,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Request password reset
   .post(
     "/forgot-password",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const validation = passwordResetRequestSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid email");
@@ -371,7 +371,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Reset password
   .post(
     "/reset-password",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const validation = passwordResetSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid reset data");
@@ -432,7 +432,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Resend verification email
   .post(
     "/resend-verification",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const { email } = body as { email: string };
 
       // Find user

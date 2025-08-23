@@ -1,10 +1,10 @@
 import { spawn } from "child_process";
 import { createWriteStream, createReadStream } from "fs";
 import { mkdir, readdir, stat, unlink } from "fs/promises";
-import { join, basename } from "path";
-import { createGzip } from "zlib";
-import { pipeline } from "stream/promises";
+import { join } from "path";
+import { createGzip, createGunzip } from "zlib";
 import { createJobLogger, logBusinessEvent } from "./logger";
+import type { ReadableStream } from "stream/web";
 
 const backupLogger = createJobLogger("backup-service");
 
@@ -91,7 +91,7 @@ const executePgDump = async (options: BackupOptions): Promise<BackupResult> => {
     options.fileName || generateBackupFileName(options.type, options.compress);
   const filePath = join(BACKUP_CONFIG.backupDir, fileName);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     // Build pg_dump arguments
     const args = [
       "--host",
@@ -380,7 +380,7 @@ export const restoreFromBackup = async (
 
     backupLogger.warn("Starting database restore", { backupFileName });
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const args = [
         "--host",
         BACKUP_CONFIG.database.host,
@@ -416,7 +416,7 @@ export const restoreFromBackup = async (
         if (backupFileName.endsWith(".gz")) {
           // Compressed SQL file
           const gzipStream = createReadStream(backupPath).pipe(
-            require("zlib").createGunzip(),
+            createGunzip(),
           );
           inputStream = gzipStream;
         } else {
@@ -513,9 +513,9 @@ export const scheduleBackups = () => {
           async () => {
             try {
               backupLogger.info("Running scheduled backup");
-              const result = await createFullBackup();
+              const scheduledResult = await createFullBackup();
 
-              if (result.success) {
+              if (scheduledResult.success) {
                 await cleanupOldBackups();
               }
             } catch (error) {

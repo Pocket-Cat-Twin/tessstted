@@ -6,7 +6,7 @@ import {
   StoryStatus,
   createSlug,
 } from "@yuyu/shared";
-import { requireAuth, requireAdmin } from "../middleware/auth";
+import { requireAdmin } from "../middleware/auth";
 import {
   NotFoundError,
   ValidationError,

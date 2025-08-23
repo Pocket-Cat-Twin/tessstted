@@ -2,24 +2,18 @@ import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
 import bcrypt from "bcryptjs";
-import { db, users, userSessions, eq, and, or } from "@yuyu/db";
+import { db, users, userSessions, eq } from "@yuyu/db";
 import {
-  userRegistrationSchema,
-  userLoginSchema,
-  passwordResetRequestSchema,
-  passwordResetSchema,
-  emailVerificationSchema,
   UserStatus,
   UserRole,
+  generateRandomString,
 } from "@yuyu/shared";
 import {
-  NotFoundError,
   UnauthorizedError,
   ValidationError,
   DuplicateError,
 } from "../middleware/error";
 import { requireAuth } from "../middleware/auth";
-import { generateRandomString } from "@yuyu/shared";
 import { verificationService } from "../services/verification";
 import { phoneNumberSchema } from "../services/sms";
 
@@ -54,7 +48,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Register new user with email OR phone
   .post(
     "/register",
-    async ({ body, jwt, cookie, set }) => {
+    async ({ body, _jwt, _cookie, set }) => {
       const { registrationMethod, email, phone, password, name, fullName } =
         body;
 
@@ -185,7 +179,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Login user with email OR phone
   .post(
     "/login",
-    async ({ body, jwt, cookie, set }) => {
+    async ({ body, jwt: jwtService, cookie: cookieStore, _set }) => {
       const { loginMethod, email, phone, password } = body;
 
       // Validate login method and required fields
@@ -241,7 +235,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
       }
 
       // Generate JWT token
-      const token = await jwt.sign({
+      const token = await jwtService.sign({
         userId: user.id,
         email: user.email,
         phone: user.phone,
@@ -266,7 +260,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
         .where(eq(users.id, user.id));
 
       // Set cookie
-      cookie.token.set({
+      cookieStore.token.set({
         value: token,
         maxAge: 7 * 24 * 60 * 60, // 7 days
         httpOnly: true,
@@ -310,7 +304,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Verify email or phone
   .post(
     "/verify",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const { token, code } = body;
 
       if (!token || !code) {
@@ -377,7 +371,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Resend verification code
   .post(
     "/resend-verification",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const { type, email, phone } = body;
 
       if (type === "email" && !email) {
@@ -472,7 +466,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Request password reset (email or phone)
   .post(
     "/forgot-password",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const { type, email, phone } = body;
 
       if (type === "email" && !email) {
@@ -554,7 +548,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Reset password with verification code
   .post(
     "/reset-password",
-    async ({ body, set }) => {
+    async ({ body, _set }) => {
       const { token, code, newPassword } = body;
 
       if (!token || !code || !newPassword) {
@@ -625,8 +619,8 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   .use(requireAuth)
   .post(
     "/logout",
-    async ({ cookie, store }) => {
-      cookie.token.remove();
+    async ({ cookie: cookieStore, store }) => {
+      cookieStore.token.remove();
 
       if (store.user) {
         await db

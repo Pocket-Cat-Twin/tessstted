@@ -359,7 +359,7 @@ export async function sendEmailGeneric(
   to: string,
   subject: string,
   content: string,
-  category?: string,
+  _category?: string,
   textContent?: string,
 ) {
   // This is a simplified version for testing
@@ -446,9 +446,9 @@ export async function sendSubscriptionNotificationEmail(
 
 // Update email status (for tracking)
 export async function updateEmailStatus(
-  providerId: string,
-  status: string,
-  message?: string,
+  _providerId: string,
+  _status: string,
+  _message?: string,
 ) {
   // This would typically update the database
   // For now, just return success
@@ -457,9 +457,9 @@ export async function updateEmailStatus(
 
 // Track email events
 export async function trackEmailEvent(
-  providerId: string,
-  event: string,
-  data?: string,
+  _providerId: string,
+  _event: string,
+  _data?: string,
 ) {
   // This would typically update the database
   // For now, just return success
@@ -472,7 +472,7 @@ export async function sendEmailWithAttachments(
   subject: string,
   content: string,
   attachments: any[],
-  category?: string,
+  _category?: string,
 ) {
   const transporter = createTransporter();
   

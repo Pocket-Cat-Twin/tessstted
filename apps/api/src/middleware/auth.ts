@@ -1,4 +1,4 @@
-import { Elysia, Context } from "elysia";
+import { Elysia } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
 import { db, users, eq } from "@yuyu/db";
@@ -25,12 +25,12 @@ export const authMiddleware = new Elysia({ name: "auth" })
   )
   .use(cookie())
   .state("user", null as AuthUser | null)
-  .onBeforeHandle(async ({ jwt, cookie, headers, store }) => {
+  .onBeforeHandle(async ({ jwt: jwtInstance, cookie: cookieInstance, headers, store }) => {
     // Try to get token from Authorization header or cookie
     const authHeader = headers.authorization;
     const token = authHeader?.startsWith("Bearer ")
       ? authHeader.slice(7)
-      : cookie.token;
+      : cookieInstance.token;
 
     if (!token) {
       store.user = null;
@@ -38,7 +38,7 @@ export const authMiddleware = new Elysia({ name: "auth" })
     }
 
     try {
-      const payload = await jwt.verify(token);
+      const payload = await jwtInstance.verify(token);
       if (!payload || typeof payload !== "object" || !("userId" in payload)) {
         store.user = null;
         return;

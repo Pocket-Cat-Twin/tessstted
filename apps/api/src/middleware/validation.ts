@@ -182,7 +182,7 @@ export function createFileValidationMiddleware(
     const files: File[] = [];
 
     // Extract files from body
-    for (const [key, value] of Object.entries(body)) {
+    for (const [_key, value] of Object.entries(body)) {
       if (value instanceof File) {
         files.push(value);
       } else if (Array.isArray(value)) {
@@ -266,7 +266,7 @@ export const uploadSecurityMiddleware = new Elysia({
 // Virus scanning placeholder (integrate with external service)
 export const virusScanMiddleware = new Elysia({
   name: "virusScan",
-}).onBeforeHandle(({ body, set }) => {
+}).onBeforeHandle(({ body: _body, set: _set }) => {
   // This is a placeholder for virus scanning integration
   // In production, you would integrate with services like:
   // - ClamAV

@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { requireAuth } from "../middleware/auth";
-import { ValidationError } from "../middleware/error";
+// import { ValidationError } from "../middleware/error";
 import { userProfileService } from "../services/user-profile";
 
 export const profileRoutes = new Elysia({ prefix: "/profile" })

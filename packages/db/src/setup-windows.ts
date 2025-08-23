@@ -3,7 +3,7 @@
 if (process.platform === "win32") {
   try {
     process.stdout.setDefaultEncoding('utf8');
-  } catch (e) {
+  } catch (_e) {
     // Ignore encoding errors
   }
 }
@@ -40,13 +40,13 @@ async function checkPostgreSQLService() {
         await execAsync('net start postgresql*');
         console.log("[SUCCESS] PostgreSQL service started");
         return true;
-      } catch (startError) {
+      } catch (_startError) {
         console.log("[ERROR] Failed to start PostgreSQL service automatically");
         console.log("        Please start it manually: net start postgresql-x64-16");
         return false;
       }
     }
-  } catch (error) {
+  } catch (_error) {
     console.log("[WARNING] Could not check PostgreSQL service status");
     console.log("          This is normal if PostgreSQL was installed differently");
   }
@@ -176,7 +176,7 @@ async function setupWindows() {
     // Clean up connections
     try {
       await migrationClient.end();
-    } catch (error) {
+    } catch (_error) {
       // Ignore cleanup errors
     }
   }

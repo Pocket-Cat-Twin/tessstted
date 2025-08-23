@@ -13,10 +13,9 @@ import {
   sql,
   inArray,
 } from "@yuyu/db";
-import { requireAuth, requireAdmin } from "../middleware/auth";
+import { requireAdmin } from "../middleware/auth";
 import {
   NotFoundError,
-  ValidationError,
   DuplicateError,
 } from "../middleware/error";
 
