@@ -61,7 +61,7 @@
 <section class="relative overflow-hidden py-16 md:py-24">
   
   <div class="relative container-custom">
-    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background radial-gradient-background">
+    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background radial-gradient-background-hero">
       <!-- Main heading -->
       {#if mounted}
         <h1 
@@ -121,7 +121,7 @@
 
 
 <!-- Features Section -->
-<section class="section-py radial-gradient-background">
+<section class="section-py radial-gradient-background-features">
   <div class="container-custom">
     <div class="text-center mb-20">
       <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">
@@ -238,7 +238,7 @@
 
 
 <!-- CTA Section -->
-<section class="section-py relative overflow-hidden radial-gradient-background">
+<section class="section-py relative overflow-hidden radial-gradient-background-cta">
   
   <div class="container-custom text-center relative z-10">
     <h2 class="text-3xl md:text-4xl font-elegant font-bold text-gothic-white mb-6 gothic-ornament">

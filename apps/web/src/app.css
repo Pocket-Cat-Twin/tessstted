@@ -1136,16 +1136,94 @@ footer .text-gothic-secondary:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Radial Gradient Background for Hero Text */
-.radial-gradient-background {
+/* Radial Gradient Backgrounds for Different Sections */
+
+/* Hero Section Gradient */
+.radial-gradient-background-hero {
   position: relative;
   z-index: 2;
 }
 
-.radial-gradient-background::before {
+.radial-gradient-background-hero::before {
   content: "";
   position: absolute;
   top: -30%;
+  left: -50%;
+  right: -50%;
+  bottom: -20%;
+  background: radial-gradient(
+    ellipse 90% 70% at center center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 10%,
+    rgba(255, 255, 255, 0.95) 20%,
+    rgba(255, 255, 255, 0.88) 30%,
+    rgba(255, 255, 255, 0.75) 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    rgba(255, 255, 255, 0.2) 70%,
+    rgba(255, 255, 255, 0.18) 73%,
+    rgba(255, 255, 255, 0.16) 76%,
+    rgba(255, 255, 255, 0.14) 79%,
+    rgba(255, 255, 255, 0.12) 82%,
+    rgba(255, 255, 255, 0.10) 85%,
+    rgba(255, 255, 255, 0.08) 88%,
+    rgba(255, 255, 255, 0.06) 91%,
+    rgba(255, 255, 255, 0.04) 94%,
+    rgba(255, 255, 255, 0.02) 97%,
+    transparent 100%
+  );
+  z-index: -1;
+  border-radius: 50%;
+}
+
+/* CTA Section Gradient */
+.radial-gradient-background-cta {
+  position: relative;
+  z-index: 2;
+}
+
+.radial-gradient-background-cta::before {
+  content: "";
+  position: absolute;
+  top: 2%;
+  left: -50%;
+  right: -50%;
+  bottom: -20%;
+  background: radial-gradient(
+    ellipse 90% 70% at center center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 10%,
+    rgba(255, 255, 255, 0.95) 20%,
+    rgba(255, 255, 255, 0.88) 30%,
+    rgba(255, 255, 255, 0.75) 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    rgba(255, 255, 255, 0.2) 70%,
+    rgba(255, 255, 255, 0.18) 73%,
+    rgba(255, 255, 255, 0.16) 76%,
+    rgba(255, 255, 255, 0.14) 79%,
+    rgba(255, 255, 255, 0.12) 82%,
+    rgba(255, 255, 255, 0.10) 85%,
+    rgba(255, 255, 255, 0.08) 88%,
+    rgba(255, 255, 255, 0.06) 91%,
+    rgba(255, 255, 255, 0.04) 94%,
+    rgba(255, 255, 255, 0.02) 97%,
+    transparent 100%
+  );
+  z-index: -1;
+  border-radius: 50%;
+}
+
+/* Features Section Gradient */
+.radial-gradient-background-features {
+  position: relative;
+  z-index: 2;
+}
+
+.radial-gradient-background-features::before {
+  content: "";
+  position: absolute;
+  top: -10%;
   left: -50%;
   right: -50%;
   bottom: -20%;
