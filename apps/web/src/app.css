@@ -425,14 +425,24 @@
   .text-gradient {
     background: linear-gradient(135deg, 
       transparent 0%, 
-      var(--gothic-dark) 15%, 
-      var(--gothic-gray) 85%, 
+      transparent 5%,
+      rgba(26, 26, 26, 0.1) 10%,
+      rgba(26, 26, 26, 0.3) 15%,
+      var(--gothic-dark) 25%, 
+      var(--gothic-gray) 75%, 
+      rgba(102, 102, 102, 0.3) 85%,
+      rgba(102, 102, 102, 0.1) 90%,
+      transparent 95%,
       transparent 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     transition: all 0.3s ease;
+  }
+
+  .hero-title-size {
+    font-size: 3.5rem;
   }
 
   .text-gothic {

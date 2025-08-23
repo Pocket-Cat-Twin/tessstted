@@ -65,13 +65,13 @@
       <!-- Main heading -->
       {#if mounted}
         <h1 
-          class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
+          class="hero-title-size font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
           in:fly={{ y: 30, duration: 600, delay: 100 }}
         >
           <span class="text-gradient whitespace-nowrap">Ты мечтаешь — мы исполняем</span>
         </h1>
       {:else}
-        <h1 class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
+        <h1 class="hero-title-size font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
           <span class="text-gradient whitespace-nowrap">Ты мечтаешь — мы исполняем</span>
         </h1>
       {/if}
