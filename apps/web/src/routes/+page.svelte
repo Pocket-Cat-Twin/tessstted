@@ -61,7 +61,7 @@
 <section class="relative overflow-hidden py-16 md:py-24">
   
   <div class="relative container-custom">
-    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background">
+    <div class="text-center max-w-4xl mx-auto hero-gothic-ornaments hero-text-background radial-gradient-background">
       <!-- Main heading -->
       {#if mounted}
         <h1 
@@ -79,13 +79,13 @@
       <!-- Subtitle -->
       {#if mounted}
         <p 
-          class="text-xl text-gothic-secondary mb-8 max-w-2xl mx-auto leading-relaxed paragraph-contained"
+          class="text-2xl md:text-3xl text-gothic-secondary mb-8 max-w-2xl mx-auto leading-relaxed"
           in:fly={{ y: 30, duration: 600, delay: 200 }}
         >
           LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {:else}
-        <p class="text-xl text-gothic-secondary mb-8 max-w-2xl mx-auto leading-relaxed paragraph-contained">
+        <p class="text-2xl md:text-3xl text-gothic-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
           LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {/if}

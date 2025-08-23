@@ -1117,3 +1117,29 @@ footer .text-gothic-secondary:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* Radial Gradient Background for Hero Text */
+.radial-gradient-background {
+  position: relative;
+  z-index: 2;
+}
+
+.radial-gradient-background::before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  left: -100px;
+  right: -100px;
+  bottom: -50px;
+  background: radial-gradient(
+    ellipse 80% 60% at center center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.95) 20%,
+    rgba(255, 255, 255, 0.8) 40%,
+    rgba(255, 255, 255, 0.6) 60%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%
+  );
+  z-index: -1;
+  border-radius: 50%;
+}
+

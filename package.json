@@ -33,19 +33,12 @@
     "db:complete": "cd packages/db && bun run setup:complete",
     "db:troubleshoot": "cd packages/db && bun run troubleshoot",
     "emergency:db": "cd packages/db && bun run reset && echo \"🚨 База данных экстренно восстановлена!\"",
-    "lint": "eslint . --ext .ts,.svelte",
     "format": "prettier --write .",
     "type-check": "(cd apps/web && bun run check) && (cd apps/api && bun run type-check)"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-svelte": "^2.35.1",
     "prettier": "^3.2.5",
     "prettier-plugin-svelte": "^3.2.2",
-    "svelte-eslint-parser": "^0.33.0",
     "typescript": "^5.4.2"
   },
   "engines": {
