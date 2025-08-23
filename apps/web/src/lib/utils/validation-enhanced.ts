@@ -264,7 +264,7 @@ export function validateName(name: string): FieldValidation {
   }
 
   // Allow Russian and Latin characters, spaces, hyphens
-  const namePattern = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
+  const namePattern = /^[a-zA-Zа-яА-ЯёЁ\s-]+$/;
   if (!namePattern.test(name.trim())) {
     result.isValid = false;
     result.error = "Имя может содержать только буквы, пробелы и дефисы";

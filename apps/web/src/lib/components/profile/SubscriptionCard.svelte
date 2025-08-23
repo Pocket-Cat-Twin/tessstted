@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Card, Button, Badge, Spinner } from '$lib/components/ui';
-  import { api } from '$lib/api/client-simple';
 
   // Props
   export let subscription: any = null;

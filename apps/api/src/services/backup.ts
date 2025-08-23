@@ -4,7 +4,6 @@ import { mkdir, readdir, stat, unlink } from "fs/promises";
 import { join } from "path";
 import { createGzip, createGunzip } from "zlib";
 import { createJobLogger, logBusinessEvent } from "./logger";
-import type { ReadableStream } from "stream/web";
 
 const backupLogger = createJobLogger("backup-service");
 
@@ -402,7 +401,7 @@ export const restoreFromBackup = async (
       };
 
       let restoreCommand: string;
-      let inputStream: NodeJS.ReadableStream;
+      let inputStream: any;
 
       if (backupFileName.endsWith(".dump")) {
         // Custom format backup - use pg_restore

@@ -100,7 +100,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
         // Clean up file if database save fails
         try {
           await unlink(filePath);
-        } catch (_error) {
+        } catch (_cleanupError) {
           // Ignore cleanup errors
         }
 
@@ -319,7 +319,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
         // Delete file from filesystem
         await unlink(upload.path);
       } catch (_error) {
-        console.error("Failed to delete file from filesystem:", error);
+        console.error("Failed to delete file from filesystem:", _error);
         // Continue with database deletion even if file deletion fails
       }
 

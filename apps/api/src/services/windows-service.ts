@@ -30,7 +30,7 @@ export class WindowsService {
     try {
       const { stdout } = await execAsync(`sc query "${this.config.serviceName}"`);
       return stdout.includes("SERVICE_NAME");
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -42,7 +42,7 @@ export class WindowsService {
     try {
       const { stdout } = await execAsync(`sc query "${this.config.serviceName}"`);
       return stdout.includes("RUNNING");
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -125,7 +125,7 @@ export class WindowsService {
       if (stdout.includes("PENDING")) return "PENDING";
       
       return "UNKNOWN";
-    } catch (error) {
+    } catch (_error) {
       return "NOT_INSTALLED";
     }
   }

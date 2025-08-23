@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { smsService } from "../../src/services/sms";
-import { db } from "@yuyu/db";
-import { smsLogs } from "@yuyu/db";
+import { db, smsLogs } from "@yuyu/db";
 
 // Mock external SMS provider
 vi.mock("../../src/services/sms", async () => {
@@ -57,7 +56,7 @@ describe("SMS Integration Tests", () => {
 
       // Verify SMS log was created
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.phone, testPhone),
+        where: (table, { eq }) => eq(table.phone, testPhone),
       });
 
       expect(logEntry).toBeDefined();
@@ -78,7 +77,7 @@ describe("SMS Integration Tests", () => {
 
       // Verify failed SMS log was created
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.phone, testPhone),
+        where: (table, { eq }) => eq(table.phone, testPhone),
       });
 
       expect(logEntry).toBeDefined();
@@ -141,7 +140,7 @@ describe("SMS Integration Tests", () => {
 
       // Verify the message contains the verification code
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.phone, testPhone),
+        where: (table, { eq }) => eq(table.phone, testPhone),
       });
 
       expect(logEntry?.message).toContain(verificationCode);
@@ -159,7 +158,7 @@ describe("SMS Integration Tests", () => {
 
       // Verify log contains the generated code
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.phone, testPhone),
+        where: (table, { eq }) => eq(table.phone, testPhone),
       });
 
       expect(logEntry?.message).toContain(result.code!);
@@ -183,7 +182,7 @@ describe("SMS Integration Tests", () => {
       expect(result.success).toBe(true);
 
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.phone, testPhone),
+        where: (table, { eq }) => eq(table.phone, testPhone),
       });
 
       expect(logEntry?.message).toContain(orderData.nomerok);
@@ -205,7 +204,7 @@ describe("SMS Integration Tests", () => {
       expect(result.success).toBe(true);
 
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.phone, testPhone),
+        where: (table, { eq }) => eq(table.phone, testPhone),
       });
 
       expect(logEntry?.message).toContain(subscriptionData.tier);
@@ -230,7 +229,7 @@ describe("SMS Integration Tests", () => {
 
       // Verify status was updated
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.providerId, result.providerId!),
+        where: (table, { eq }) => eq(table.providerId, result.providerId!),
       });
 
       expect(logEntry?.status).toBe("delivered");
@@ -257,7 +256,7 @@ describe("SMS Integration Tests", () => {
 
       // Verify status was updated
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.providerId, result.providerId!),
+        where: (table, { eq }) => eq(table.providerId, result.providerId!),
       });
 
       expect(logEntry?.status).toBe("failed");
@@ -279,7 +278,7 @@ describe("SMS Integration Tests", () => {
       expect(result.success).toBe(true);
 
       const logEntry = await db.query.smsLogs.findFirst({
-        where: (smsLogs, { eq }) => eq(smsLogs.providerId, result.providerId!),
+        where: (table, { eq }) => eq(table.providerId, result.providerId!),
       });
 
       expect(logEntry?.cost).toBeDefined();

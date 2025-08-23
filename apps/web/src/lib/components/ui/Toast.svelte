@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { fade, fly } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
 
   export let type: 'success' | 'error' | 'warning' | 'info' = 'info';
   export let message: string;
@@ -12,7 +12,7 @@
     dismiss: void;
   }>();
 
-  let timeout: NodeJS.Timeout;
+  let timeout: any;
 
   $: iconClasses = {
     success: 'text-green-500',
@@ -40,8 +40,8 @@
     dispatch('dismiss');
   }
 
-  function getIcon(type: string) {
-    switch (type) {
+  function getIcon(toastType: string) {
+    switch (toastType) {
       case 'success':
         return 'M5 13l4 4L19 7';
       case 'error':

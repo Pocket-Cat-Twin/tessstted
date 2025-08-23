@@ -18,7 +18,6 @@ import {
 import {
   NotFoundError,
   ValidationError,
-  UnauthorizedError,
 } from "../middleware/error";
 
 export interface UserProfile {

@@ -542,11 +542,11 @@ describe("Enhanced Validation Functions", () => {
 
   describe("Edge Cases and Error Handling", () => {
     it("should handle null and undefined inputs gracefully", () => {
-      // @ts-ignore - Testing runtime behavior
+      // @ts-expect-error - Testing runtime behavior
       expect(validateEmail(null, false).isValid).toBe(true);
-      // @ts-ignore - Testing runtime behavior
+      // @ts-expect-error - Testing runtime behavior
       expect(validatePhone(undefined, false).isValid).toBe(true);
-      // @ts-ignore - Testing runtime behavior
+      // @ts-expect-error - Testing runtime behavior
       expect(validatePassword(null).isValid).toBe(false);
     });
 

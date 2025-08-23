@@ -106,8 +106,8 @@
     try {
       const response = await fetch('/api/v1/monitoring/health');
       return await response.json();
-    } catch (error) {
-      return { success: false, error };
+    } catch (err) {
+      return { success: false, error: err };
     }
   }
 

@@ -9,11 +9,11 @@ export class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: Omit<RequestInit, 'body'> & { body?: string } = {},
+    options: { method?: string; headers?: Record<string, string>; body?: string } = {},
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
 
-    const config: Omit<RequestInit, 'body'> & { body?: string } = {
+    const config: { method?: string; headers?: Record<string, string>; body?: string } = {
       headers: {
         "Content-Type": "application/json",
         ...options.headers,

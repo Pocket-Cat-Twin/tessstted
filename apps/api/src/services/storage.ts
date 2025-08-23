@@ -5,19 +5,15 @@ import {
   eq,
   and,
   gte,
-  lt,
   desc,
-  sql,
 } from "@yuyu/db";
 import {
-  getEffectiveTier,
   isSubscriptionActive,
   SUBSCRIPTION_TIERS,
 } from "@yuyu/shared";
 import {
   NotFoundError,
   ValidationError,
-  ForbiddenError,
 } from "../middleware/error";
 
 export interface StorageItem {
@@ -341,7 +337,7 @@ class StorageService {
    */
   async moveToDelivery(
     orderId: string,
-    adminUserId: string,
+    _adminUserId: string,
   ): Promise<{ success: boolean; message: string }> {
     const order = await db.query.orders.findFirst({
       where: eq(orders.id, orderId),
@@ -376,7 +372,7 @@ class StorageService {
   async extendStorage(
     orderId: string,
     additionalDays: number,
-    adminUserId: string,
+    _adminUserId: string,
   ): Promise<{ success: boolean; message: string }> {
     const order = await db.query.orders.findFirst({
       where: eq(orders.id, orderId),

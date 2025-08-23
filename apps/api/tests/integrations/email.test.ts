@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { emailService } from "../../src/services/email";
-import { db } from "@yuyu/db";
-import { emailLogs } from "@yuyu/db";
+import { db, emailLogs } from "@yuyu/db";
 
 // Mock external Email provider
 vi.mock("../../src/services/email", async () => {
@@ -98,7 +97,7 @@ describe("Email Integration Tests", () => {
     // Clean up test email logs
     try {
       await db.delete(emailLogs).where(emailLogs.email.like("%test%"));
-    } catch (error) {
+    } catch (_error) {
       // Ignore cleanup errors in test environment
       console.log("Test cleanup skipped");
     }

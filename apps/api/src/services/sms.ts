@@ -147,7 +147,7 @@ class SmsService {
     const provider = process.env.SMS_PROVIDER || "mock";
 
     switch (provider) {
-      case "sms.ru":
+      case "sms.ru": {
         const apiId = process.env.SMS_RU_API_ID;
         if (!apiId) {
           console.warn(
@@ -161,6 +161,7 @@ class SmsService {
           apiKey: process.env.SMS_RU_API_KEY,
           from: process.env.SMS_RU_FROM,
         });
+      }
 
       case "mock":
       default:
@@ -232,7 +233,7 @@ export const smsResultSchema = z.object({
 
 export const phoneNumberSchema = z
   .string()
-  .regex(/^\+?[\d\s\-\(\)]{10,15}$/, "Invalid phone number format");
+  .regex(/^\+?[\d\s\-()]{10,15}$/, "Invalid phone number format");
 
 // Utility function to generate verification codes
 export function generateVerificationCode(): string {

@@ -6,7 +6,6 @@
   import Input from '$lib/components/ui/Input.svelte';
   import { 
     validateLoginForm, 
-    validateField,
     normalizePhoneNumber,
     applyPhoneMask,
     detectAuthMethod,
@@ -152,8 +151,8 @@
         rememberMe = true;
         autoDetectMethod = false;
       }
-    } catch (error) {
-      console.error('Failed to load remembered auth:', error);
+    } catch (err) {
+      console.error('Failed to load remembered auth:', err);
     }
   }
 

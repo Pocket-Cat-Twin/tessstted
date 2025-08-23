@@ -44,7 +44,7 @@ function createAuthStore() {
             initialized: true,
           }));
         }
-      } catch (error) {
+      } catch (_error) {
         update((state) => ({
           ...state,
           user: null,
@@ -138,7 +138,7 @@ function createAuthStore() {
         }));
 
         return { success: true };
-      } catch (error) {
+      } catch (_error) {
         // Even if logout fails on server, clear local state
         if (browser) {
           localStorage.removeItem("auth_token");

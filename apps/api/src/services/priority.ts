@@ -10,14 +10,12 @@ import {
   desc,
 } from "@yuyu/db";
 import {
-  getEffectiveTier,
   isSubscriptionActive,
   SUBSCRIPTION_TIERS,
 } from "@yuyu/shared";
 import {
   NotFoundError,
   ValidationError,
-  ForbiddenError,
 } from "../middleware/error";
 
 export interface PriorityQueueItem {
@@ -135,9 +133,7 @@ class PriorityProcessingService {
       "shipped",
     ];
 
-    const whereConditions = [
-      // Orders that are in processing statuses
-    ];
+    // Orders that are in processing statuses
 
     const ordersNeedingProcessing = await db.query.orders.findMany({
       orderBy: [asc(orders.createdAt)],

@@ -25,7 +25,7 @@ class ApiClient {
 
   private async request<T = any>(
     endpoint: string,
-    options: Omit<RequestInit, 'body'> & { body?: string } = {},
+    options: { method?: string; headers?: Record<string, string>; body?: string } = {},
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseUrl}${endpoint}`;
