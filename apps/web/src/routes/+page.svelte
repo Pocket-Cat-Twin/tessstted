@@ -68,26 +68,24 @@
           class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic"
           in:fly={{ y: 30, duration: 600, delay: 100 }}
         >
-          <span class="text-gradient block">Ты мечтаешь</span>
-          <span class="text-gradient block">Мы исполняем</span>
+          <span class="text-gradient">Ты мечтаешь — мы исполняем</span>
         </h1>
       {:else}
         <h1 class="text-5xl md:text-7xl font-bold text-elegant mb-8 hero-gothic text-shadow-gothic">
-          <span class="text-gradient block">Ты мечтаешь</span>
-          <span class="text-gradient block">Мы исполняем</span>
+          <span class="text-gradient">Ты мечтаешь — мы исполняем</span>
         </h1>
       {/if}
 
       <!-- Subtitle -->
       {#if mounted}
         <p 
-          class="text-2xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed"
+          class="text-xl text-gothic-secondary mb-8 max-w-2xl mx-auto leading-relaxed paragraph-contained"
           in:fly={{ y: 30, duration: 600, delay: 200 }}
         >
           LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {:else}
-        <p class="text-2xl text-gothic-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
+        <p class="text-xl text-gothic-secondary mb-8 max-w-2xl mx-auto leading-relaxed paragraph-contained">
           LolitaFashion.su создан, чтобы каждая девушка, влюблённая в стиль лолита, могла легко и безопасно заказывать любимые вещи с китайских площадок. Прозрачные цены, полное сопровождение и забота о каждой детали — всё для того, чтобы вы наслаждались образом мечты.
         </p>
       {/if}

@@ -66,8 +66,8 @@
       <!-- Center: Logo -->
       <div class="absolute left-1/2 transform -translate-x-1/2">
         <a href="/" class="flex items-center space-x-3 logo-hover">
-          <span class="text-3xl font-elegant text-white tracking-wider">
-            Lolita Fashion
+          <span class="text-3xl font-elegant text-white tracking-wider logo-glow-pulse">
+            LolitaFashion.su
           </span>
         </a>
       </div>
