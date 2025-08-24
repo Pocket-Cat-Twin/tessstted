@@ -190,12 +190,12 @@ async function logWebhookDelivery(
       event: payload.event,
       payload: JSON.stringify(payload),
       url: "", // Will be set by the subscription
-      statusCode: result.statusCode,
-      response: result.response,
-      error: result.error,
-      attempts: result.attempts,
-      deliveredAt: result.deliveredAt,
-      success: result.success,
+      httpStatus: result.statusCode,
+      responseBody: result.response,
+      errorMessage: result.error,
+      attemptNumber: result.attempts,
+      completedAt: result.deliveredAt,
+      status: result.success ? "success" : "failed",
     });
   } catch (error) {
     console.error("Failed to log webhook delivery:", error);
@@ -235,7 +235,7 @@ export async function sendWebhook(
         headers: subscription.headers ? JSON.parse(subscription.headers) : {},
         retryCount: subscription.retryCount || 0,
         maxRetries: subscription.maxRetries || 3,
-        timeoutMs: subscription.timeoutMs || 30000,
+        timeoutMs: 30000, // Default timeout
       };
 
       const result = await deliverWebhook(subscriptionConfig, payload);
@@ -249,8 +249,7 @@ export async function sendWebhook(
           .update(webhookSubscriptions)
           .set({
             retryCount: sql`${webhookSubscriptions.retryCount} + 1`,
-            lastError: result.error,
-            lastAttemptAt: new Date(),
+            updatedAt: new Date(),
           })
           .where(eq(webhookSubscriptions.id, subscription.id));
       } else {
@@ -259,9 +258,8 @@ export async function sendWebhook(
           .update(webhookSubscriptions)
           .set({
             retryCount: 0,
-            lastError: null,
-            lastSuccessAt: new Date(),
-            lastAttemptAt: new Date(),
+            lastTriggeredAt: new Date(),
+            updatedAt: new Date(),
           })
           .where(eq(webhookSubscriptions.id, subscription.id));
       }
@@ -355,7 +353,6 @@ export async function createWebhookSubscription(
       secret: subscriptionSecret,
       headers: headers ? JSON.stringify(headers) : null,
       maxRetries,
-      timeoutMs,
       isActive: true,
     })
     .returning();

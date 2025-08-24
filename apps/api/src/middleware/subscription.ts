@@ -22,8 +22,9 @@ export interface SubscriptionContext {
  */
 export const subscriptionMiddleware = new Elysia({
   name: "subscription",
-}).derive(async ({ store }) => {
-  const userId = store?.user?.id;
+}).derive(async ({ store, headers }) => {
+  // Get userId from store or headers (depending on auth middleware)
+  const userId = (store as any)?.user?.id || headers['x-user-id'];
 
   let tier: "free" | "group" | "elite" | "vip_temp" = "free";
   let isActive = true;
@@ -68,7 +69,7 @@ export const subscriptionMiddleware = new Elysia({
       expiresAt,
       daysRemaining,
     },
-  } as SubscriptionContext;
+  };
 });
 
 /**
@@ -83,9 +84,10 @@ export function requireSubscription(minTier: "group" | "elite" | "vip_temp") {
 
   return new Elysia({ name: `require-${minTier}` })
     .use(subscriptionMiddleware)
-    .derive(({ subscription }) => {
+    .derive((context) => {
+      const subscription = (context as any).subscription;
       const currentLevel =
-        subscription.tier === "free" ? 0 : tierLevels[subscription.tier] || 0;
+        subscription.tier === "free" ? 0 : (tierLevels as any)[subscription.tier] || 0;
       const requiredLevel = tierLevels[minTier];
 
       if (currentLevel < requiredLevel) {
@@ -104,11 +106,12 @@ export function requireFeature(
 ) {
   return new Elysia({ name: `require-${featureName}` })
     .use(subscriptionMiddleware)
-    .derive(({ subscription }) => {
+    .derive((context) => {
+      const subscription = (context as any).subscription;
       const hasFeature = subscription.features[featureName];
 
       if (!hasFeature) {
-        const featureMessages = {
+        const featureMessages: Record<string, string> = {
           canParticipateInPromotions:
             "Участие в акциях доступно только для подписчиков",
           canCombineOrders:
@@ -137,7 +140,9 @@ export function requireFeature(
 export function checkStorageLimit() {
   return new Elysia({ name: "storage-limit" })
     .use(subscriptionMiddleware)
-    .derive(async ({ subscription, store }) => {
+    .derive(async (context) => {
+      const subscription = (context as any).subscription;
+      const store = (context as any).store;
       const userId = store?.user?.id;
 
       if (!userId) {
@@ -197,7 +202,9 @@ export function subscriptionRateLimit(
 ) {
   return new Elysia({ name: `rate-limit-${action}` })
     .use(subscriptionMiddleware)
-    .derive(async ({ subscription, store }) => {
+    .derive(async (context) => {
+      const subscription = (context as any).subscription;
+      const store = (context as any).store;
       const userId = store?.user?.id;
 
       if (!userId) {
@@ -219,7 +226,7 @@ export function subscriptionRateLimit(
         },
       };
 
-      const tierLimits = limits[action][subscription.tier];
+      const tierLimits = (limits[action] as any)[subscription.tier];
 
       if (tierLimits.requests === -1) {
         return {}; // Unlimited
@@ -251,7 +258,8 @@ export function subscriptionRateLimit(
 export function addSubscriptionWarnings() {
   return new Elysia({ name: "subscription-warnings" })
     .use(subscriptionMiddleware)
-    .derive(({ subscription }) => {
+    .derive((context) => {
+      const subscription = (context as any).subscription;
       const warnings: string[] = [];
 
       // Free tier warnings
@@ -297,7 +305,9 @@ export function addSubscriptionWarnings() {
 export function validateOrderCreation() {
   return new Elysia({ name: "validate-order-creation" })
     .use(subscriptionMiddleware)
-    .derive(async ({ subscription, store }) => {
+    .derive(async (context) => {
+      const subscription = (context as any).subscription;
+      const store = (context as any).store;
       const userId = store?.user?.id;
       const tier = subscription.tier;
 
@@ -348,11 +358,12 @@ export function validateOrderCreation() {
 export function applyOrderProcessingPriority() {
   return new Elysia({ name: "order-processing-priority" })
     .use(subscriptionMiddleware)
-    .derive(({ subscription }) => {
+    .derive((context) => {
+      const subscription = (context as any).subscription;
       const tier = subscription.tier;
 
       // Priority levels: VIP temp & Elite = highest, Group = medium, Free = lowest
-      const priorityLevels = {
+      const priorityLevels: Record<string, number> = {
         free: 1,
         group: 2,
         elite: 3,
@@ -381,7 +392,8 @@ export function applyOrderProcessingPriority() {
 export function checkOrderValueAndRecommendUpgrade() {
   return new Elysia({ name: "order-value-recommendations" })
     .use(subscriptionMiddleware)
-    .derive(({ subscription }) => {
+    .derive((context) => {
+      const subscription = (context as any).subscription;
       const recommendations: string[] = [];
 
       if (subscription.tier === "free") {
@@ -425,7 +437,9 @@ export function checkOrderValueAndRecommendUpgrade() {
 export function orderCreationRateLimit() {
   return new Elysia({ name: "order-creation-rate-limit" })
     .use(subscriptionMiddleware)
-    .derive(async ({ subscription, store }) => {
+    .derive(async (context) => {
+      const subscription = (context as any).subscription;
+      const store = (context as any).store;
       const userId = store?.user?.id;
 
       if (!userId) {
@@ -439,7 +453,7 @@ export function orderCreationRateLimit() {
         };
       }
 
-      const dailyLimits = {
+      const dailyLimits: Record<string, number> = {
         free: 2,
         group: 10,
         elite: 50,
@@ -482,8 +496,9 @@ export function orderCreationRateLimit() {
 export function generateTierOrderNumber() {
   return new Elysia({ name: "tier-order-number" })
     .use(subscriptionMiddleware)
-    .derive(({ subscription }) => {
-      const prefixes = {
+    .derive((context) => {
+      const subscription = (context as any).subscription;
+      const prefixes: Record<string, string> = {
         free: "YL",
         group: "YG",
         elite: "YE",
@@ -514,13 +529,13 @@ export function orderSubscriptionMiddleware() {
     .use(checkOrderValueAndRecommendUpgrade())
     .use(addSubscriptionWarnings())
     .derive(
-      ({
-        subscription,
-        orderValidation,
-        orderPriority,
-        upgradeRecommendations,
-        subscriptionWarnings,
-      }) => {
+      (context) => {
+        const subscription = (context as any).subscription;
+        const orderValidation = (context as any).orderValidation;
+        const orderPriority = (context as any).orderPriority;
+        const upgradeRecommendations = (context as any).upgradeRecommendations;
+        const subscriptionWarnings = (context as any).subscriptionWarnings;
+
         return {
           orderContext: {
             subscription: subscription,

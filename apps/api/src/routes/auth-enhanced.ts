@@ -322,14 +322,14 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
         // Send verification
         try {
           if (isEmailRegistration(registrationData)) {
-            await sendEmail({
-              to: registrationData.email,
-              type: EmailType.EMAIL_VERIFICATION,
-              data: {
+            await sendEmail(
+              EmailType.EMAIL_VERIFICATION,
+              registrationData.email,
+              {
                 name,
                 verificationUrl: `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`,
-              },
-            });
+              }
+            );
             
             await RateLimitService.logAttempt(registrationData.email, "email_registration", "verification_sent", clientIP);
           } else {
@@ -441,10 +441,10 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
         
         if (isEmailLogin(loginData) || isLegacyLogin) {
           user = await db.query.users.findFirst({
-            where: eq(users.email, loginData.email),
+            where: eq(users.email, (loginData as { email: string }).email),
           });
         } else {
-          const normalizedPhone = normalizePhoneNumber(loginData.phone);
+          const normalizedPhone = normalizePhoneNumber((loginData as { phone: string }).phone);
           user = await db.query.users.findFirst({
             where: eq(users.phone, normalizedPhone),
           });
@@ -468,10 +468,10 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
           .where(eq(users.id, user.id));
 
         // Generate JWT token
-        const token = await jwt.sign({
+        const token = await _jwt.sign({
           id: user.id,
-          email: user.email,
-          phone: user.phone,
+          email: user.email || "",
+          phone: user.phone || "",
           role: user.role,
         });
 
@@ -486,7 +486,7 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
         });
 
         // Set authentication cookie
-        cookie.token.set({
+        _cookie.token.set({
           value: token,
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
@@ -709,7 +709,7 @@ export const authEnhancedRoutes = new Elysia({ prefix: "/auth" })
         data: {
           user: user ? {
             ...user,
-            phone: user.phone ? formatPhoneForDisplay(user.phone) : null,
+            phone: (user as any).phone ? formatPhoneForDisplay((user as any).phone) : null,
           } : null,
         },
       };

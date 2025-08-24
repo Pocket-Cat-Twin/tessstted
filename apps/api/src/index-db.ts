@@ -432,7 +432,7 @@ new Elysia()
       // Generate JWT token
       const token = await jwtInstance.sign({
         userId: user.id,
-        email: user.email,
+        email: user.email || user.phone || "",
         role: user.role,
       });
 

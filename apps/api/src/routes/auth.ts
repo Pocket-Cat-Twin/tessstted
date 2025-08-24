@@ -35,7 +35,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Register new user
   .post(
     "/register",
-    async ({ body, _jwt, _cookie, set }) => {
+    async ({ body, jwt, cookie, set }) => {
       const validation = userRegistrationSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid registration data");
@@ -44,9 +44,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const { email, password, name, phone } = validation.data;
 
       // Check if user already exists
-      const existingUser = await db.query.users.findFirst({
+      const existingUser = email ? await db.query.users.findFirst({
         where: eq(users.email, email),
-      });
+      }) : null;
 
       if (existingUser) {
         throw new DuplicateError("User with this email already exists");
@@ -70,6 +70,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           status: UserStatus.PENDING,
           emailVerified: false,
           emailVerificationToken,
+          registrationMethod: "email" as const,
         })
         .returning({
           id: users.id,

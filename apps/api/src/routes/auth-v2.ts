@@ -48,7 +48,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Register new user with email OR phone
   .post(
     "/register",
-    async ({ body, _jwt, _cookie, set }) => {
+    async ({ body, jwt, cookie, set }) => {
       const { registrationMethod, email, phone, password, name, fullName } =
         body;
 
@@ -179,7 +179,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Login user with email OR phone
   .post(
     "/login",
-    async ({ body, jwt: jwtService, cookie: cookieStore, _set }) => {
+    async ({ body, jwt: jwtService, cookie: cookieStore, set }) => {
       const { loginMethod, email, phone, password } = body;
 
       // Validate login method and required fields
@@ -237,8 +237,8 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
       // Generate JWT token
       const token = await jwtService.sign({
         userId: user.id,
-        email: user.email,
-        phone: user.phone,
+        email: user.email || "",
+        phone: user.phone || "",
         registrationMethod: user.registrationMethod,
         role: user.role,
       });
@@ -304,7 +304,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Verify email or phone
   .post(
     "/verify",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const { token, code } = body;
 
       if (!token || !code) {
@@ -371,7 +371,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Resend verification code
   .post(
     "/resend-verification",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const { type, email, phone } = body;
 
       if (type === "email" && !email) {
@@ -466,7 +466,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Request password reset (email or phone)
   .post(
     "/forgot-password",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const { type, email, phone } = body;
 
       if (type === "email" && !email) {
@@ -548,7 +548,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
   // Reset password with verification code
   .post(
     "/reset-password",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const { token, code, newPassword } = body;
 
       if (!token || !code || !newPassword) {

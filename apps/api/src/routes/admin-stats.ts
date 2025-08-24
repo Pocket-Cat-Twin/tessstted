@@ -58,14 +58,14 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
       const [{ completedOrders }] = await db
         .select({ completedOrders: sql<number>`count(*)` })
         .from(orders)
-        .where(eq(orders.status, "completed"));
+        .where(eq(orders.status, "delivered"));
 
       const [{ totalRevenue }] = await db
         .select({
           totalRevenue: sql<number>`COALESCE(SUM(${orders.totalRuble}), 0)`,
         })
         .from(orders)
-        .where(eq(orders.status, "completed"));
+        .where(eq(orders.status, "delivered"));
 
       // Recent revenue (last period)
       const [{ recentRevenue }] = await db
@@ -74,7 +74,7 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
         })
         .from(orders)
         .where(
-          and(eq(orders.status, "completed"), gte(orders.createdAt, startDate)),
+          and(eq(orders.status, "delivered"), gte(orders.createdAt, startDate)),
         );
 
       // Subscription Statistics
@@ -218,7 +218,7 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
   .get(
     "/orders",
     async ({ query }) => {
-      const period = parseInt(query.period) || 30;
+      const period = parseInt(query.period || "30") || 30;
       const groupBy = query.groupBy || "day"; // day, week, month
       const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
@@ -242,8 +242,8 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
       SELECT 
         TO_CHAR(${orders.createdAt}, ${dateFormat}) as period,
         COUNT(*)::int as order_count,
-        COUNT(CASE WHEN ${orders.status} = 'completed' THEN 1 END)::int as completed_count,
-        COALESCE(SUM(CASE WHEN ${orders.status} = 'completed' THEN ${orders.totalRuble} ELSE 0 END), 0)::int as revenue
+        COUNT(CASE WHEN ${orders.status} = 'delivered' THEN 1 END)::int as completed_count,
+        COALESCE(SUM(CASE WHEN ${orders.status} = 'delivered' THEN ${orders.totalRuble} ELSE 0 END), 0)::int as revenue
       FROM ${orders}
       WHERE ${orders.createdAt} >= ${startDate}
       GROUP BY TO_CHAR(${orders.createdAt}, ${dateFormat})
@@ -266,7 +266,7 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
       return {
         success: true,
         data: {
-          timeSeries: orderTimeSeries.rows,
+          timeSeries: orderTimeSeries,
           topItems,
           period: {
             days: period,
@@ -296,7 +296,7 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
   .get(
     "/users",
     async ({ query }) => {
-      const period = parseInt(query.period) || 30;
+      const period = parseInt(query.period || "30") || 30;
       const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
       // User registration over time
@@ -329,8 +329,8 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
       return {
         success: true,
         data: {
-          registrationTimeSeries: registrationTimeSeries.rows,
-          engagement: engagementStats.rows[0],
+          registrationTimeSeries: registrationTimeSeries,
+          engagement: engagementStats[0],
           period: {
             days: period,
             startDate: startDate.toISOString(),
@@ -355,7 +355,7 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
   .get(
     "/financial",
     async ({ query }) => {
-      const period = parseInt(query.period) || 30;
+      const period = parseInt(query.period || "30") || 30;
       const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
       // Revenue trends
@@ -385,7 +385,7 @@ export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
       return {
         success: true,
         data: {
-          timeSeries: revenueTimeSeries.rows,
+          timeSeries: revenueTimeSeries,
           byStatus: revenueByStatus,
           period: {
             days: period,

@@ -102,7 +102,7 @@ export const loggingMiddleware = new Elysia({ name: "logging" })
     },
   )
   .onError(({ error, code, requestLogger, startTime, request, requestIp }) => {
-    const duration = Date.now() - startTime;
+    const duration = startTime ? Date.now() - startTime : 0;
     const method = request.method;
     const url = new URL(request.url);
     const path = url.pathname;
@@ -117,31 +117,36 @@ export const loggingMiddleware = new Elysia({ name: "logging" })
       case "NOT_FOUND":
         statusCode = 404;
         break;
-      case "UNAUTHORIZED":
+      case "INVALID_COOKIE_SIGNATURE":
         statusCode = 401;
         break;
-      case "FORBIDDEN":
+      case "INVALID_FILE_TYPE":
         statusCode = 403;
         break;
     }
 
     // Log error with full context
-    requestLogger.error(
-      {
-        errorCode: code,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        statusCode,
-        duration,
-      },
-      `Error in ${method} ${path}: ${error.message}`,
-    );
+    const errorMessage = error && typeof error === 'object' && 'message' in error ? error.message : String(error);
+    const errorStack = error && typeof error === 'object' && 'stack' in error ? error.stack : undefined;
+    
+    if (requestLogger) {
+      requestLogger.error(
+        {
+          errorCode: code,
+          errorMessage,
+          errorStack,
+          statusCode,
+          duration,
+        },
+        `Error in ${method} ${path}: ${errorMessage}`,
+      );
+    }
 
     // Log API metrics for errors
     logApiMetrics(method, path, statusCode, duration);
 
     // Record error metrics for monitoring
-    recordError(code, path, error.message);
+    recordError(String(code), path, errorMessage);
     recordRequest(method, path, statusCode, duration);
 
     // Log security events for suspicious patterns
@@ -149,7 +154,7 @@ export const loggingMiddleware = new Elysia({ name: "logging" })
       logSecurityEvent("authentication_failure", undefined, requestIp, {
         method,
         path,
-        errorMessage: error.message,
+        errorMessage,
       });
     }
 

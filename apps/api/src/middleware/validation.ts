@@ -86,7 +86,7 @@ function validateFileExtension(
   fileName: string,
   mimeType: string,
 ): string | null {
-  const extensions = FILE_VALIDATION_CONFIG.extensions[mimeType];
+  const extensions = (FILE_VALIDATION_CONFIG.extensions as any)[mimeType];
   if (!extensions) {
     return `Unknown MIME type: ${mimeType}`;
   }
@@ -94,7 +94,7 @@ function validateFileExtension(
   const fileExtension = fileName
     .toLowerCase()
     .substring(fileName.lastIndexOf("."));
-  if (!extensions.some((ext) => ext.toLowerCase() === fileExtension)) {
+  if (!extensions.some((ext: string) => ext.toLowerCase() === fileExtension)) {
     return `File extension '${fileExtension}' does not match MIME type '${mimeType}'. Expected: ${extensions.join(", ")}`;
   }
 
