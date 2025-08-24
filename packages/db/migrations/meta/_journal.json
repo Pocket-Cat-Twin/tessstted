@@ -8,6 +8,13 @@
       "when": 1724689200000,
       "tag": "0000_consolidated_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1756022731123,
+      "tag": "0001_futuristic_yellow_claw",
+      "breakpoints": true
     }
   ]
 }

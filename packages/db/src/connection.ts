@@ -4,7 +4,7 @@ import * as schema from "./schema";
 
 // Windows-only database configuration with enhanced error handling
 // This project is designed exclusively for Windows environments
-const WINDOWS_DEFAULT_CONNECTION = "postgresql://postgres:postgres@localhost:5432/yuyu_lolita";
+const WINDOWS_DEFAULT_CONNECTION = "postgresql://codespace@localhost:5432/yuyu_lolita";
 
 // Enhanced connection configuration for Windows
 function getConnectionConfig() {
@@ -17,8 +17,8 @@ function getConnectionConfig() {
     host: url.hostname || 'localhost',
     port: parseInt(url.port) || 5432,
     database: url.pathname.slice(1) || 'yuyu_lolita', // Remove leading slash
-    username: url.username || 'postgres',
-    password: url.password || 'postgres',
+    username: url.username || 'codespace',
+    password: url.password || '',
     connectionString
   };
 }
