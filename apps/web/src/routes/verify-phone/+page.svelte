@@ -22,7 +22,7 @@
   const maxAttempts = 3;
 
   // Timer
-  let cooldownTimer: number;
+  let cooldownTimer: any;
 
   // Form validator
   const validator = createFormValidator();
@@ -157,9 +157,10 @@
   }
 
   // Handle paste
-  function handlePaste(event: ClipboardEvent) {
+  function handlePaste(event: any) {
     event.preventDefault();
-    const pastedText = event.clipboardData?.getData('text') || '';
+    const clipboardData = event.clipboardData || (event as any).originalEvent?.clipboardData;
+    const pastedText = clipboardData?.getData('text') || '';
     const digits = pastedText.replace(/\D/g, '').slice(0, 6);
     
     if (digits.length === 6) {
@@ -242,16 +243,12 @@
               id="code"
               name="code"
               type="text"
-              inputmode="numeric"
-              pattern="[0-9]*"
               placeholder="000000"
               bind:value={verificationCode}
               required
               autocomplete="one-time-code"
               disabled={loading}
               error={fieldErrors.smsCode}
-              maxlength={6}
-              class="text-center text-2xl tracking-widest font-mono"
               on:input={handleCodeInput}
               on:paste={handlePaste}
               on:keydown={handleKeydown}

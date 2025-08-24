@@ -10,7 +10,7 @@ import {
   and,
   desc,
   sql,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   orderCreateSchema,
   orderUpdateSchema,
@@ -19,7 +19,7 @@ import {
   OrderStatus,
   calculateCommission,
   calculateTotalCommission,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import {
   orderCreationRateLimit,
@@ -39,7 +39,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   .get(
     "/processing-info",
     async ({ query: _query, store }) => {
-      const userId = store?.user?.id;
+      const userId = (store as any)?.user?.id;
       const processingInfo = await orderService.getOrderProcessingInfo(userId);
 
       return {
@@ -101,7 +101,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   .post(
     "/validate",
     async ({ body, store }) => {
-      const userId = store?.user?.id;
+      const userId = (store as any)?.user?.id;
 
       const validation = await orderService.validateOrderCreation(userId, {
         customerName: body.customerName,
@@ -149,7 +149,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   .get(
     "/storage-usage",
     async ({ store }) => {
-      const userId = store.user.id;
+      const userId = (store as any)?.user?.id;
       const storageUsage = await orderService.getStorageUsage(userId);
 
       return {
@@ -421,8 +421,8 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   .get(
     "/",
     async ({ query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 10;
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "10") || 10;
       const status = query.status as OrderStatus;
       const search = query.search;
       const offset = (page - 1) * limit;
@@ -608,7 +608,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   // Update order
   .put(
     "/:id",
-    async ({ params: { id }, body, user }) => {
+    async ({ params: { id }, body, store }) => {
       const validation = orderUpdateSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid order update data");
@@ -643,7 +643,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
       if (statusChanged && updateData.status) {
         await db.insert(orderStatusHistory).values({
           orderId: id,
-          userId: user.id,
+          userId: store.user!.id,
           fromStatus: existingOrder.status,
           toStatus: updateData.status,
           comment: updateData.notes || "Статус изменен администратором",
@@ -981,7 +981,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders" })
   // Bulk status update
   .post(
     "/bulk/status",
-    async ({ body, user }) => {
+    async ({ body, store }) => {
       const { orderIds, status, comment } = body;
 
       // Validate status

@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { db, subscriptionHistory, userSubscriptions, eq, desc, and, sql } from "@yuyu/db";
+import { db, subscriptionHistory, userSubscriptions, eq, desc, and, sql } from "@lolita-fashion/db";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import {
   subscriptionMiddleware,

@@ -5,11 +5,11 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import { goto } from '$app/navigation';
-  import { formatDate } from '@yuyu/shared';
+  import { formatDate } from '@lolita-fashion/shared';
 
   // Check if user is admin
   $: user = $authStore.user;
-  $: if (user && user.role !== 'ADMIN') {
+  $: if (user && user.role !== 'admin') {
     goto('/');
   }
 
@@ -98,15 +98,16 @@
     <!-- Search and filters -->
     <div class="mb-6">
       <div class="max-w-lg">
-        <Input
-          placeholder="Поиск по имени, email или телефону..."
-          bind:value={searchTerm}
-          disabled={loading}
-        >
-          <svg slot="icon" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="relative">
+          <Input
+            placeholder="Поиск по имени, email или телефону..."
+            bind:value={searchTerm}
+            disabled={loading}
+          />
+          <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-        </Input>
+        </div>
       </div>
     </div>
 

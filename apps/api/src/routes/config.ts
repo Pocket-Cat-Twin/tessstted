@@ -1,10 +1,10 @@
 import { Elysia, t } from "elysia";
-import { db, config, faqs, eq, asc, sql } from "@yuyu/db";
+import { db, config, faqs, eq, asc, sql } from "@lolita-fashion/db";
 import {
   configUpdateSchema,
   faqCreateSchema,
   faqUpdateSchema,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import { requireAdmin } from "../middleware/auth";
 import { NotFoundError, ValidationError } from "../middleware/error";
 
@@ -158,7 +158,7 @@ export const configRoutes = new Elysia({ prefix: "/config" })
   .get(
     "/kurs/history",
     async ({ query }) => {
-      const limit = parseInt(query.limit) || 10;
+      const limit = parseInt(query.limit || "10") || 10;
 
       // For now, we'll create a simple history from the config table
       // In future, you might want a dedicated currency_history table
@@ -219,7 +219,9 @@ export const configRoutes = new Elysia({ prefix: "/config" })
       // Convert to object with current values or defaults
       const settings = { ...defaultSettings };
       commissionSettings.forEach((setting) => {
-        settings[setting.key] = setting.value;
+        if (setting.key in settings) {
+          (settings as any)[setting.key] = setting.value;
+        }
       });
 
       return {

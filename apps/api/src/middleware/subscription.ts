@@ -1,10 +1,10 @@
 import { Elysia } from "elysia";
-import { db, userSubscriptions, orders, eq, and, gte } from "@yuyu/db";
+import { db, userSubscriptions, orders, eq, and, gte } from "@lolita-fashion/db";
 import {
   getEffectiveTier,
   isSubscriptionActive,
   SUBSCRIPTION_TIERS,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import { ForbiddenError, UnauthorizedError } from "./error";
 
 export interface SubscriptionContext {

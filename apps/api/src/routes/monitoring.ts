@@ -28,8 +28,8 @@ export const monitoringRoutes = new Elysia({ prefix: "/monitoring" })
   .use(authMiddleware)
   .guard(
     {
-      beforeHandle: ({ user, set }) => {
-        if (!user || user.role !== "admin") {
+      beforeHandle: ({ store, set }) => {
+        if (!store.user || store.user.role !== "admin") {
           set.status = 403;
           return {
             success: false,

@@ -19,7 +19,7 @@ import {
   eq, 
   and,
   gt
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   userRegistrationSchema,
   userLoginSchema,
@@ -35,7 +35,7 @@ import {
   normalizePhoneNumber,
   formatPhoneForDisplay,
   generateRandomString,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import {
   NotFoundError,
   UnauthorizedError,

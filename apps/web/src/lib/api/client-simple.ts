@@ -14,6 +14,14 @@ interface ApiResponse<T = any> {
   data?: T;
   message?: string;
   error?: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 class ApiClient {
@@ -225,6 +233,32 @@ class ApiClient {
     });
   }
 
+  // Order methods
+  async getOrders(params: { page?: number; limit?: number } = {}) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        searchParams.append(key, value.toString());
+      }
+    });
+    return this.request(`/orders?${searchParams}`);
+  }
+
+  async getOrder(id: string) {
+    return this.request(`/orders/${id}`);
+  }
+
+  async updateOrder(id: string, updateData: any) {
+    return this.request(`/orders/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updateData),
+    });
+  }
+
+  async deleteOrder(id: string) {
+    return this.request(`/orders/${id}`, { method: "DELETE" });
+  }
+
   // Profile methods
   async getProfile() {
     const token = this.getToken();
@@ -427,6 +461,21 @@ class ApiClient {
     if (typeof localStorage !== "undefined") {
       localStorage.removeItem("auth_token");
     }
+  }
+
+  // Verification methods  
+  async verifyPhone(data: { token: string; code: string }) {
+    return this.request("/auth/verify-phone", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resendPhoneVerification(data: { token: string }) {
+    return this.request("/auth/resend-phone-verification", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
 }
 

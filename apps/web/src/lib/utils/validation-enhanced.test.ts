@@ -85,8 +85,8 @@ describe("Enhanced Validation Functions", () => {
       ];
 
       validPhones.forEach(phone => {
-        const result = validatePhone(phone, true);
-        expect(result.isValid).toBe(true, `Phone ${phone} should be valid`);
+        const result = validatePhone(phone);
+        expect(result.isValid).toBe(true);
         expect(result.error).toBeUndefined();
       });
     });
@@ -102,8 +102,8 @@ describe("Enhanced Validation Functions", () => {
       ];
 
       invalidPhones.forEach(phone => {
-        const result = validatePhone(phone, true);
-        expect(result.isValid).toBe(false, `Phone ${phone} should be invalid`);
+        const result = validatePhone(phone);
+        expect(result.isValid).toBe(false);
         expect(result.error).toBeDefined();
       });
     });
@@ -131,8 +131,8 @@ describe("Enhanced Validation Functions", () => {
       ];
 
       validOperators.forEach(phone => {
-        const result = validatePhone(phone, true);
-        expect(result.isValid).toBe(true, `Operator in ${phone} should be valid`);
+        const result = validatePhone(phone);
+        expect(result.isValid).toBe(true);
       });
     });
   });
@@ -198,7 +198,7 @@ describe("Enhanced Validation Functions", () => {
 
       validPasswords.forEach(password => {
         const result = validatePassword(password);
-        expect(result.isValid).toBe(true, `Password "${password}" should be valid`);
+        expect(result.isValid).toBe(true);
         expect(result.error).toBeUndefined();
       });
     });
@@ -214,7 +214,7 @@ describe("Enhanced Validation Functions", () => {
 
       invalidPasswords.forEach(password => {
         const result = validatePassword(password);
-        expect(result.isValid).toBe(false, `Password "${password}" should be invalid`);
+        expect(result.isValid).toBe(false);
         expect(result.error).toBeDefined();
       });
     });
@@ -269,7 +269,7 @@ describe("Enhanced Validation Functions", () => {
 
       validNames.forEach(name => {
         const result = validateName(name);
-        expect(result.isValid).toBe(true, `Name "${name}" should be valid`);
+        expect(result.isValid).toBe(true);
         expect(result.error).toBeUndefined();
       });
     });
@@ -286,7 +286,7 @@ describe("Enhanced Validation Functions", () => {
 
       invalidNames.forEach(name => {
         const result = validateName(name);
-        expect(result.isValid).toBe(false, `Name "${name}" should be invalid`);
+        expect(result.isValid).toBe(false);
         expect(result.error).toBeDefined();
       });
     });
@@ -314,7 +314,7 @@ describe("Enhanced Validation Functions", () => {
 
       invalidCodes.forEach(code => {
         const result = validateSMSCode(code);
-        expect(result.isValid).toBe(false, `Code "${code}" should be invalid`);
+        expect(result.isValid).toBe(false);
         expect(result.error).toBeDefined();
       });
     });

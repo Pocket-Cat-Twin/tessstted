@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 import { api } from "$lib/api/client-simple";
-import type { Order, OrderCreate } from "@yuyu/shared";
+import type { Order, OrderCreate } from "@lolita-fashion/shared";
 
 interface OrdersState {
   orders: Order[];
@@ -124,7 +124,7 @@ function createOrdersStore() {
             ...state,
             loading: false,
             orders: response.data,
-            pagination: response.pagination,
+            pagination: response.pagination || null,
           }));
 
           return { success: true };

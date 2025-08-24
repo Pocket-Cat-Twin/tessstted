@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginatedResponse } from "@yuyu/shared";
+import type { ApiResponse, PaginatedResponse } from "@lolita-fashion/shared";
 
 export class ApiClient {
   private baseUrl: string;
@@ -9,11 +9,11 @@ export class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: { method?: string; headers?: Record<string, string>; body?: string } = {},
+    options: { method?: string; headers?: Record<string, string>; body?: string; credentials?: RequestCredentials } = {},
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
 
-    const config: { method?: string; headers?: Record<string, string>; body?: string } = {
+    const config: { method?: string; headers?: Record<string, string>; body?: string; credentials?: RequestCredentials } = {
       headers: {
         "Content-Type": "application/json",
         ...options.headers,
@@ -262,7 +262,7 @@ export class ApiClient {
 
     return this.request<{ upload: any }>("/uploads", {
       method: "POST",
-      body: formData,
+      body: formData as any,
       headers: {}, // Let browser set content-type for FormData
     });
   }
@@ -275,7 +275,7 @@ export class ApiClient {
       "/uploads/multiple",
       {
         method: "POST",
-        body: formData,
+        body: formData as any,
         headers: {}, // Let browser set content-type for FormData
       },
     );
@@ -294,6 +294,21 @@ export class ApiClient {
 
   async deleteUpload(id: string) {
     return this.request(`/uploads/${id}`, { method: "DELETE" });
+  }
+
+  // Verification methods
+  async verifyPhone(data: { token: string; code: string }) {
+    return this.request("/auth/verify-phone", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resendPhoneVerification(data: { token: string }) {
+    return this.request("/auth/resend-phone-verification", {
+      method: "POST", 
+      body: JSON.stringify(data),
+    });
   }
 }
 

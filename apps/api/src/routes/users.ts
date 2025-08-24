@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import bcrypt from "bcryptjs";
-import { db, users, userSessions, eq, and, desc, sql } from "@yuyu/db";
-import { userProfileUpdateSchema, UserRole, UserStatus } from "@yuyu/shared";
+import { db, users, userSessions, eq, and, desc, sql } from "@lolita-fashion/db";
+import { userProfileUpdateSchema, UserRole, UserStatus } from "@lolita-fashion/shared";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import {
   NotFoundError,
@@ -17,10 +17,10 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   // Get current user profile
   .get(
     "/profile",
-    ({ user }) => {
+    ({ store }) => {
       return {
         success: true,
-        data: { user },
+        data: { user: store.user },
       };
     },
     {
@@ -34,7 +34,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   // Update current user profile
   .put(
     "/profile",
-    async ({ body, user, _set }) => {
+    async ({ body, store, set }) => {
       const validation = userProfileUpdateSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid profile data");
@@ -49,7 +49,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
           ...updateData,
           updatedAt: new Date(),
         })
-        .where(eq(users.id, user.id))
+        .where(eq(users.id, store.user!.id))
         .returning({
           id: users.id,
           email: users.email,
@@ -92,7 +92,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
       // Get user with password
       const userWithPassword = await db.query.users.findFirst({
-        where: eq(users.id, user.id),
+        where: eq(users.id, store.user!.id),
       });
 
       if (!userWithPassword) {
@@ -118,10 +118,10 @@ export const userRoutes = new Elysia({ prefix: "/users" })
           password: hashedNewPassword,
           updatedAt: new Date(),
         })
-        .where(eq(users.id, user.id));
+        .where(eq(users.id, store.user!.id));
 
       // Clear all sessions except current
-      await db.delete(userSessions).where(eq(userSessions.userId, user.id));
+      await db.delete(userSessions).where(eq(userSessions.userId, store.user!.id));
 
       return {
         success: true,
@@ -143,14 +143,14 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   // Get user's orders
   .get(
     "/profile/orders",
-    async ({ user, query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 10;
+    async ({ store, query }) => {
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "10") || 10;
       const offset = (page - 1) * limit;
 
       // Get user's orders
       const userOrders = await db.query.orders.findMany({
-        where: eq(db.orders.userId, user.id),
+        where: eq(db.orders.userId, store.user!.id),
         with: {
           goods: true,
         },
@@ -163,7 +163,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       const [{ count }] = await db
         .select({ count: sql<number>`count(*)` })
         .from(db.orders)
-        .where(eq(db.orders.userId, user.id));
+        .where(eq(db.orders.userId, store.user!.id));
 
       const totalPages = Math.ceil(count / limit);
 
@@ -199,8 +199,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/",
     async ({ query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 10;
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "10") || 10;
       const role = query.role as UserRole;
       const status = query.status as UserStatus;
       const search = query.search;
@@ -304,7 +304,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
       return {
         success: true,
-        data: { user },
+        data: { user: store.user },
       };
     },
     {

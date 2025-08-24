@@ -8,8 +8,9 @@ import {
   eq,
   and,
   gte,
-} from "@yuyu/db";
-import { generateRandomString } from "@yuyu/shared";
+  lte,
+} from "@lolita-fashion/db";
+import { generateRandomString } from "@lolita-fashion/shared";
 import { smsService, generateVerificationCode } from "./sms";
 import { sendEmail, EmailType } from "./email";
 
@@ -483,7 +484,7 @@ class VerificationService {
         .where(
           and(
             eq(verificationTokens.status, "expired"),
-            gte(cutoffDate, verificationTokens.expiresAt),
+            lte(verificationTokens.expiresAt, cutoffDate),
           ),
         );
 
@@ -493,7 +494,7 @@ class VerificationService {
       );
       await db
         .delete(verificationRateLimit)
-        .where(gte(rateLimitCutoff, verificationRateLimit.windowStart));
+        .where(lte(verificationRateLimit.windowStart, rateLimitCutoff));
 
       console.log("Cleaned up expired verification records");
     } catch (error) {

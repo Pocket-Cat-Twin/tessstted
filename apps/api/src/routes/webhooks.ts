@@ -12,7 +12,7 @@ import {
   verifyWebhookSignature,
   sendWebhook,
 } from "../services/webhook";
-import { db, webhookSubscriptions, eq } from "@yuyu/db";
+import { db, webhookSubscriptions, eq } from "@lolita-fashion/db";
 
 export const webhookRoutes = new Elysia({ prefix: "/webhooks" })
 

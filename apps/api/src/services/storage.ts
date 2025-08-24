@@ -6,11 +6,11 @@ import {
   and,
   gte,
   desc,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   isSubscriptionActive,
   SUBSCRIPTION_TIERS,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import {
   NotFoundError,
   ValidationError,

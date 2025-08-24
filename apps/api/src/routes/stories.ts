@@ -1,11 +1,11 @@
 import { Elysia, t } from "elysia";
-import { db, stories, eq, and, desc, sql } from "@yuyu/db";
+import { db, stories, eq, and, desc, sql } from "@lolita-fashion/db";
 import {
   storyCreateSchema,
   storyUpdateSchema,
   StoryStatus,
   createSlug,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import { requireAdmin } from "../middleware/auth";
 import {
   NotFoundError,

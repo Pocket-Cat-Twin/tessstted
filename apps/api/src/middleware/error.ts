@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { ErrorCode } from "@yuyu/shared";
+import { ErrorCode } from "@lolita-fashion/shared";
 import { logError } from "../services/logger";
 
 export const errorHandler = new Elysia({ name: "errorHandler" }).onError(

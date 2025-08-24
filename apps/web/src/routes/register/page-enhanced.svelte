@@ -151,8 +151,8 @@
         acceptTerms = false;
         
         // Redirect based on verification method
-        if (result.data?.requiresVerification) {
-          if (result.data.verificationMethod === 'email') {
+        if ((result as any).data?.requiresVerification) {
+          if ((result as any).data.verificationMethod === 'email') {
             goto('/verify-email?message=' + encodeURIComponent('Проверьте почту для подтверждения регистрации'));
           } else {
             goto('/verify-phone?message=' + encodeURIComponent('Введите код из SMS для подтверждения регистрации'));

@@ -31,7 +31,7 @@ import { rateLimiter } from "./middleware/rateLimit";
 import { loggingMiddleware } from "./middleware/logging";
 
 // Import utils
-import { testConnection } from "@yuyu/db";
+import { testConnection } from "@lolita-fashion/db";
 import { startMetricsMonitoring } from "./services/monitoring";
 import { scheduleCleanup } from "./services/cleanup";
 import { scheduleBackups } from "./services/backup";

@@ -105,7 +105,7 @@
       <Spinner size="lg" />
     </div>
   {:else if error}
-    <Card variant="bordered" className="p-6 text-center">
+    <Card variant="bordered" class="p-6 text-center">
       <div class="text-red-600 mb-4">
         <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -121,7 +121,7 @@
     <!-- System Health Overview -->
     {#if healthData}
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card variant="shadow" className="p-6">
+        <Card variant="shadow" class="p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Общее состояние</h3>
             <Badge variant={getStatusBadge(healthData.status)}>
@@ -142,7 +142,7 @@
           </div>
         </Card>
 
-        <Card variant="shadow" className="p-6">
+        <Card variant="shadow" class="p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Память</h3>
           <div class="space-y-3">
             <div class="flex justify-between">
@@ -162,7 +162,7 @@
           </div>
         </Card>
 
-        <Card variant="shadow" className="p-6">
+        <Card variant="shadow" class="p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Производительность</h3>
           <div class="space-y-3">
             <div class="flex justify-between">

@@ -4,7 +4,7 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Card from '$lib/components/ui/Card.svelte';
   import Spinner from '$lib/components/ui/Spinner.svelte';
-  import type { FAQ } from '@yuyu/shared';
+  import type { FAQ } from '@lolita-fashion/shared';
 
   let faqs: FAQ[] = [];
   let loading = true;

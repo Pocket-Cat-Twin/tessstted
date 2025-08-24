@@ -95,7 +95,7 @@
   }
 </script>
 
-<Card variant="bordered" className="max-w-2xl mx-auto">
+<Card variant="bordered" class="max-w-2xl mx-auto">
   <div class="space-y-6">
     <div class="flex items-center space-x-4 pb-4 border-b border-gray-200">
       <div class="w-16 h-16 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center">
@@ -200,7 +200,7 @@
         <Button
           type="submit"
           disabled={saving || loading}
-          className="min-w-[120px]"
+          class="min-w-[120px]"
         >
           {#if saving}
             <Spinner size="sm" className="mr-2" />

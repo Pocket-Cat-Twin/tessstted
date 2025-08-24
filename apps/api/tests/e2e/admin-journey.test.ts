@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import app from "../../src/index";
-import { db, users, orders } from "@yuyu/db";
+import { db, users, orders } from "@lolita-fashion/db";
 
 describe("Admin Journey E2E Tests", () => {
   let server: any;

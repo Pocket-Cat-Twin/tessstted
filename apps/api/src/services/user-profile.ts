@@ -8,13 +8,13 @@ import {
   eq,
   and,
   gte,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   getEffectiveTier,
   isSubscriptionActive,
   getDaysRemaining,
   SUBSCRIPTION_TIERS,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import {
   NotFoundError,
   ValidationError,

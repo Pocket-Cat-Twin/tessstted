@@ -14,7 +14,7 @@
   $: user = $authStore.user;
 
   // Check if user is admin
-  $: if (user && user.role !== 'ADMIN') {
+  $: if (user && user.role !== 'admin') {
     goto('/');
   }
 
@@ -85,6 +85,13 @@
       default: return status;
     }
   }
+
+  function handleStatusChange(orderId: string, event: Event) {
+    const select = event.target as HTMLSelectElement;
+    if (select?.value) {
+      updateOrderStatus(orderId, select.value);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -125,7 +132,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
@@ -141,7 +148,7 @@
         </div>
       </Card>
 
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
@@ -159,7 +166,7 @@
         </div>
       </Card>
 
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
@@ -177,7 +184,7 @@
         </div>
       </Card>
 
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-8 h-8 bg-primary-500 rounded-md flex items-center justify-center">
@@ -197,7 +204,7 @@
     </div>
 
     <!-- Orders Table -->
-    <Card variant="shadow" className="overflow-hidden">
+    <Card variant="shadow" class="overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900">Заказы</h2>
@@ -289,7 +296,7 @@
                     <div class="flex items-center space-x-2">
                       <select 
                         value={order.status}
-                        on:change={(e) => updateOrderStatus(order.id, e.target.value)}
+                        on:change={(e) => handleStatusChange(order.id, e)}
                         class="text-xs border border-gray-300 rounded px-2 py-1"
                       >
                         <option value="created">Создан</option>

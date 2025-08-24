@@ -4,7 +4,7 @@ import {
   smsLogs,
   emailLogs,
   verificationRateLimit,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import { lt, and, or, eq } from "drizzle-orm";
 import { createJobLogger, logBusinessEvent } from "./logger";
 

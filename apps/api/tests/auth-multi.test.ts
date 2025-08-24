@@ -15,12 +15,12 @@ import {
   smsLogs,
   emailLogs,
   eq 
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import { 
   RegistrationMethod,
   normalizePhoneNumber,
   formatPhoneForDisplay 
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 
 // Test app setup
 const testApp = new Elysia().use(authEnhancedRoutes);

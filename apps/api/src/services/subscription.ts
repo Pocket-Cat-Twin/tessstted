@@ -7,13 +7,13 @@ import {
   and,
   gte,
   sql,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   SUBSCRIPTION_TIERS,
   calculateSubscriptionEndDate,
   isSubscriptionActive,
   getEffectiveTier,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import {
   NotFoundError,
   ValidationError,

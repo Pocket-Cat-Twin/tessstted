@@ -39,7 +39,7 @@
 
   // Get subscription info
   $: currentTier = subscription?.tier || 'free';
-  $: tierDetails = tierInfo[currentTier] || tierInfo.free;
+  $: tierDetails = tierInfo[currentTier as keyof typeof tierInfo] || tierInfo.free;
   $: isActive = subscription?.status === 'active';
   $: expiresAt = subscription?.expiresAt ? new Date(subscription.expiresAt) : null;
   $: daysLeft = expiresAt ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
@@ -68,7 +68,7 @@
   }
 </script>
 
-<Card variant="bordered" className="max-w-2xl mx-auto">
+<Card variant="bordered" class="max-w-2xl mx-auto">
   <div class="space-y-6">
     <div class="flex items-center justify-between pb-4 border-b border-gray-200">
       <div>
@@ -170,7 +170,7 @@
         <!-- Actions -->
         <div class="flex justify-center space-x-3 pt-4 border-t border-gray-200">
           {#if currentTier === 'free'}
-            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+            <Button class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
               Улучшить тариф
             </Button>
           {:else if !isActive}

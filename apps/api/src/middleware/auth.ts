@@ -1,8 +1,8 @@
 import { Elysia } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
-import { db, users, eq } from "@yuyu/db";
-import { UserRole } from "@yuyu/shared";
+import { db, users, eq } from "@lolita-fashion/db";
+import { UserRole } from "@lolita-fashion/shared";
 
 // User type for auth context
 interface AuthUser {

@@ -5,12 +5,12 @@ import {
   eq,
   and,
   gte,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   calculateTotalCommission,
   isSubscriptionActive,
   SUBSCRIPTION_TIERS,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 
 export interface CreateOrderData {
   customerName: string;

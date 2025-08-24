@@ -34,16 +34,16 @@
   let error = '';
 
   // Status color mapping
-  const statusColors = {
-    'CREATED': 'gray',
-    'CONFIRMED': 'blue',
-    'PAID': 'green',
-    'SHIPPED': 'purple',
-    'DELIVERED': 'green',
-    'CANCELLED': 'red'
+  const statusColors: Record<string, 'success' | 'primary' | 'secondary' | 'danger' | 'warning' | 'info'> = {
+    'CREATED': 'secondary',
+    'CONFIRMED': 'info',
+    'PAID': 'success',
+    'SHIPPED': 'primary',
+    'DELIVERED': 'success',
+    'CANCELLED': 'danger'
   };
 
-  const statusLabels = {
+  const statusLabels: Record<string, string> = {
     'CREATED': 'Создан',
     'CONFIRMED': 'Подтвержден',
     'PAID': 'Оплачен',
@@ -54,7 +54,7 @@
 
   onMount(async () => {
     // Check if user is authenticated
-    if (!$authStore.isAuthenticated) {
+    if (!$authStore.user) {
       goto('/login');
       return;
     }
@@ -69,7 +69,7 @@
     try {
       const response = await fetch('http://127.0.0.1:3001/api/v1/admin/orders', {
         headers: {
-          'Authorization': `Bearer ${$authStore.token}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -186,7 +186,7 @@
                       {formatDate(order.createdAt)}
                     </p>
                   </div>
-                  <Badge variant={statusColors[order.status] || 'gray'}>
+                  <Badge variant={statusColors[order.status] || 'secondary'}>
                     {statusLabels[order.status] || order.status}
                   </Badge>
                 </div>

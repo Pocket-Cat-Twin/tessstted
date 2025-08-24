@@ -9,7 +9,7 @@
 
   // Check if user is admin
   onMount(() => {
-    if ($authStore.initialized && (!user || user.role !== 'ADMIN')) {
+    if ($authStore.initialized && (!user || user.role !== 'admin')) {
       goto('/');
     }
   });
@@ -26,7 +26,7 @@
 </svelte:head>
 
 <!-- Check if user is admin -->
-{#if user && user.role === 'ADMIN'}
+{#if user && user.role === 'admin'}
   <div class="flex h-screen bg-gray-100">
     <!-- Sidebar -->
     <div class="w-64 flex-shrink-0">

@@ -12,7 +12,7 @@ import {
   asc,
   sql,
   inArray,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import { requireAdmin } from "../middleware/auth";
 import {
   NotFoundError,
@@ -37,7 +37,7 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
   .get(
     "/categories",
     async ({ query }) => {
-      const limit = parseInt(query.limit) || 50;
+      const limit = parseInt(query.limit || "50") || 50;
       const showOnHomepage = query.homepage === "true";
 
       const conditions = [eq(blogCategories.isActive, true)];
@@ -112,7 +112,7 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
   .get(
     "/tags",
     async ({ query }) => {
-      const limit = parseInt(query.limit) || 50;
+      const limit = parseInt(query.limit || "50") || 50;
       const popular = query.popular === "true";
 
       const tagsData = await db.query.storyTags.findMany({
@@ -150,8 +150,8 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
   .get(
     "/categories/:slug/stories",
     async ({ params: { slug }, query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 10;
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "10") || 10;
       const offset = (page - 1) * limit;
 
       // Find category first
@@ -244,8 +244,8 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
   .get(
     "/tags/:slug/stories",
     async ({ params: { slug }, query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 10;
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "10") || 10;
       const offset = (page - 1) * limit;
 
       // Find tag first
@@ -332,8 +332,8 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
   .get(
     "/admin/categories",
     async ({ query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 20;
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "20") || 20;
       const offset = (page - 1) * limit;
       const search = query.search;
 
@@ -551,8 +551,8 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
   .get(
     "/admin/tags",
     async ({ query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 50;
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "50") || 50;
       const offset = (page - 1) * limit;
       const search = query.search;
 

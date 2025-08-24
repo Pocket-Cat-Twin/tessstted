@@ -9,7 +9,7 @@ import {
   lte,
   desc,
   asc,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import {
   sendSubscriptionExpiringEmail,
   sendSubscriptionExpiredEmail,

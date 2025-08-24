@@ -19,44 +19,85 @@ import {
   ensureDatabaseHealth,
   checkDatabaseHealth,
   dbLogger
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
+
+// Basic connection test without infinite loops
+async function testBasicConnection(): Promise<boolean> {
+  try {
+    await db.select().from(config).limit(1);
+    return true;
+  } catch (error) {
+    console.warn('Basic database connection test failed:', (error as Error).message);
+    return false;
+  }
+}
 
 // Enhanced database connection and health check
 async function initializeDatabaseSystem() {
   try {
     console.log("🔄 Running enhanced database initialization...");
     
-    // Step 1: Ensure database health (auto-creates DB if needed)
-    dbLogger.info('connection', 'Starting database health check and auto-recovery');
-    const isHealthy = await ensureDatabaseHealth();
+    // Environment detection
+    const isWindows = process.platform === 'win32';
+    const hasPostgreSQL = process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('undefined');
     
-    if (!isHealthy) {
-      console.error("❌ Database health check failed - attempting recovery...");
-      
-      // Step 2: Run comprehensive health check with auto-fix
-      const healthStatus = await checkDatabaseHealth({ 
-        autoFix: true, 
-        detailed: true, 
-        retries: 3 
-      });
-      
-      if (healthStatus.overall === 'critical') {
-        console.error("🚨 Critical database issues detected:");
-        healthStatus.issues.forEach(issue => console.error(`   • ${issue}`));
-        console.error("💡 Recommendations:");
-        healthStatus.recommendations.forEach(rec => console.error(`   • ${rec}`));
+    if (!hasPostgreSQL) {
+      console.warn("⚠️  No valid PostgreSQL connection available");
+      console.warn("⚠️  API will start in limited mode without database features");
+      console.warn("⚠️  For full functionality, configure PostgreSQL connection in .env");
+      return false; // Return false but don't crash
+    }
+    
+    // Step 1: Quick connection test with timeout
+    console.log("🔄 Testing database connection...");
+    const connectionTest = await Promise.race([
+      testBasicConnection(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000))
+    ]);
+    
+    if (!connectionTest) {
+      if (isWindows) {
+        // On Windows, try health check and recovery
+        console.log("🔄 Windows detected - attempting database health check...");
+        const isHealthy = await ensureDatabaseHealth();
+        
+        if (!isHealthy) {
+          console.error("❌ Database health check failed - attempting recovery...");
+          const healthStatus = await checkDatabaseHealth({ 
+            autoFix: true, 
+            detailed: true, 
+            retries: 2  // Reduced retries to prevent infinite loops
+          });
+          
+          if (healthStatus.overall === 'critical') {
+            console.error("🚨 Critical database issues detected:");
+            healthStatus.issues.forEach(issue => console.error(`   • ${issue}`));
+            console.error("💡 Recommendations:");
+            healthStatus.recommendations.forEach(rec => console.error(`   • ${rec}`));
+            return false;
+          }
+        }
+      } else {
+        // On non-Windows, just warn and continue
+        console.warn("⚠️  Database connection failed on non-Windows environment");
+        console.warn("⚠️  API will start in limited mode");
         return false;
       }
     }
     
-    // Step 3: Test actual database query
-    const result = await db.select().from(config).limit(1);
-    console.log("✅ Database connection and query test successful");
-    dbLogger.info('connection', 'Database system fully initialized', { 
-      configRecords: result.length 
-    });
+    // Step 3: Test actual database query (only if we have a connection)
+    try {
+      const result = await db.select().from(config).limit(1);
+      console.log("✅ Database connection and query test successful");
+      dbLogger.info('connection', 'Database system fully initialized', { 
+        configRecords: result.length 
+      });
+      return true;
+    } catch (queryError) {
+      console.warn("⚠️  Database query test failed, starting in limited mode");
+      return false;
+    }
     
-    return true;
   } catch (error: any) {
     console.error("❌ Enhanced database initialization failed:", error);
     dbLogger.error('connection', 'Database initialization failed', { 
@@ -65,13 +106,19 @@ async function initializeDatabaseSystem() {
       severity: error?.severity_local || error?.severity
     });
     
-    // Show helpful error information for Windows users
+    // Show helpful error information based on platform
+    const isWindows = process.platform === 'win32';
     if (error?.code === '3D000' || error?.message?.includes('does not exist') || 
         error?.message?.includes('не существует')) {
       console.error("");
-      console.error("🔧 Database does not exist - this should have been auto-created!");
-      console.error("   Try running: .\\scripts\\db-doctor.ps1 -Emergency");
-      console.error("   Or manually: bun run db:setup");
+      if (isWindows) {
+        console.error("🔧 Database does not exist - this should have been auto-created!");
+        console.error("   Try running: .\\scripts\\db-doctor.ps1 -Emergency");
+        console.error("   Or manually: bun run db:setup");
+      } else {
+        console.warn("⚠️  Database not available - API will start in limited mode");
+        console.warn("⚠️  Configure PostgreSQL to enable full functionality");
+      }
     }
     
     return false;
@@ -711,7 +758,7 @@ new Elysia()
       if (!process.env.SKIP_SEED) {
         try {
           console.log("🌱 Auto-seeding database with test data...");
-          const { seedDatabase } = await import("@yuyu/db");
+          const { seedDatabase } = await import("@lolita-fashion/db");
           await seedDatabase();
           console.log("✅ Test data seeding completed");
         } catch (error: any) {
@@ -724,8 +771,15 @@ new Elysia()
         console.log("⏭️ Seeding skipped due to SKIP_SEED environment variable");
       }
     } else {
-      console.error("🚨 Database initialization failed - API may not function properly");
-      console.error("   For troubleshooting run: .\\scripts\\db-doctor.ps1 -Diagnose");
+      const isWindows = process.platform === 'win32';
+      if (isWindows) {
+        console.error("🚨 Database initialization failed - API may not function properly");
+        console.error("   For troubleshooting run: .\\scripts\\db-doctor.ps1 -Diagnose");
+      } else {
+        console.warn("⚠️  Database not available - API starting in limited mode");
+        console.warn("⚠️  Database-dependent features will not be available");
+        console.warn("⚠️  Configure PostgreSQL connection to enable full functionality");
+      }
     }
   })
 

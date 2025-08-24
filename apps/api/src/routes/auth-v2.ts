@@ -2,12 +2,12 @@ import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
 import bcrypt from "bcryptjs";
-import { db, users, userSessions, eq } from "@yuyu/db";
+import { db, users, userSessions, eq } from "@lolita-fashion/db";
 import {
   UserStatus,
   UserRole,
   generateRandomString,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import {
   UnauthorizedError,
   ValidationError,

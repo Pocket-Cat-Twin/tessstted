@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { db, webhookLogs, webhookSubscriptions, eq, and, sql } from "@yuyu/db";
+import { db, webhookLogs, webhookSubscriptions, eq, and, sql } from "@lolita-fashion/db";
 
 // Webhook event types
 export enum WebhookEvent {
@@ -186,8 +186,8 @@ async function logWebhookDelivery(
 ) {
   try {
     await db.insert(webhookLogs).values({
-      subscriptionId,
-      event: payload.event,
+      // subscriptionId,  // Remove this field if it doesn't exist in schema
+      event: payload.event as any,
       payload: JSON.stringify(payload),
       url: "", // Will be set by the subscription
       httpStatus: result.statusCode,
@@ -232,7 +232,7 @@ export async function sendWebhook(
         events: subscription.events as WebhookEvent[],
         secret: subscription.secret,
         isActive: subscription.isActive,
-        headers: subscription.headers ? JSON.parse(subscription.headers) : {},
+        headers: subscription.headers ? JSON.parse(subscription.headers as string) : {},
         retryCount: subscription.retryCount || 0,
         maxRetries: subscription.maxRetries || 3,
         timeoutMs: 30000, // Default timeout

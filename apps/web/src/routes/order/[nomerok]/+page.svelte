@@ -4,8 +4,8 @@
   import { ordersStore } from '$lib/stores/orders';
   import Button from '$components/ui/Button.svelte';
   import Badge from '$components/ui/Badge.svelte';
-  import { formatCurrency, formatDate } from '@yuyu/shared';
-  import type { Order } from '@yuyu/shared';
+  import { formatCurrency, formatDate } from '@lolita-fashion/shared';
+  import type { Order } from '@lolita-fashion/shared';
 
   $: nomerok = $page.params.nomerok;
   
@@ -35,28 +35,30 @@
     }
   }
 
-  function getStatusColor(status: string) {
+  function getStatusColor(status: string): 'success' | 'primary' | 'secondary' | 'danger' | 'warning' | 'info' {
     switch (status.toLowerCase()) {
       case 'новый':
       case 'new':
-        return 'gray';
+      case 'created':
+        return 'secondary';
       case 'в обработке':
       case 'processing':
-        return 'blue';
+      case 'confirmed':
+        return 'info';
       case 'оплачен':
       case 'paid':
-        return 'green';
+        return 'success';
       case 'отправлен':
       case 'shipped':
-        return 'purple';
+        return 'primary';
       case 'доставлен':
       case 'delivered':
-        return 'green';
+        return 'success';
       case 'отменен':
       case 'cancelled':
-        return 'red';
+        return 'danger';
       default:
-        return 'gray';
+        return 'secondary';
     }
   }
 
@@ -155,7 +157,7 @@
             <h2 class="text-2xl font-semibold text-gray-900">
               Статус заказа
             </h2>
-            <Badge color={getStatusColor(order.status)} size="lg">
+            <Badge variant={getStatusColor(order.status)} size="lg">
               {getStatusText(order.status)}
             </Badge>
           </div>
@@ -163,7 +165,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="text-center p-4 bg-gray-50 rounded-lg">
               <div class="text-2xl font-bold text-primary-600 mb-1">
-                {formatCurrency(order.totalCost, 'RUB')}
+                {formatCurrency(order.totalRuble, 'RUB')}
               </div>
               <div class="text-sm text-gray-600">Общая стоимость</div>
             </div>
@@ -288,7 +290,7 @@
                         </div>
                         <div>
                           <span class="text-gray-600 block">Статус</span>
-                          <Badge color="blue" size="sm">В заказе</Badge>
+                          <Badge variant="info" size="sm">В заказе</Badge>
                         </div>
                       </div>
                     </div>
@@ -299,7 +301,7 @@
           </div>
         {/if}
 
-        <!-- Status History -->
+        <!-- Status History - Commented out until backend support is added
         {#if order.statusHistory && order.statusHistory.length > 0}
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
@@ -310,11 +312,11 @@
             </h2>
             
             <div class="space-y-4">
-              {#each order.statusHistory as historyItem, index}
-                <div class="flex items-start space-x-4 py-4 {index !== order.statusHistory.length - 1 ? 'border-b border-gray-100' : ''}">
+              {#each order.statusHistory || [] as historyItem, index}
+                <div class="flex items-start space-x-4 py-4 {index !== (order.statusHistory || []).length - 1 ? 'border-b border-gray-100' : ''}">
                   <div class="flex-shrink-0 pt-1">
                     <div class="w-4 h-4 rounded-full bg-primary-500 relative">
-                      {#if index !== order.statusHistory.length - 1}
+                      {#if index !== (order.statusHistory || []).length - 1}
                         <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-gray-200"></div>
                       {/if}
                     </div>
@@ -339,6 +341,7 @@
             </div>
           </div>
         {/if}
+        -->
 
         <!-- Actions -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

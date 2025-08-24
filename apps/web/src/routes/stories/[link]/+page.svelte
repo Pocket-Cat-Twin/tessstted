@@ -6,7 +6,7 @@
   import { formatDate } from '$lib/utils/date';
   import Button from '$lib/components/ui/Button.svelte';
   import Spinner from '$lib/components/ui/Spinner.svelte';
-  import type { StoryWithAuthor } from '@yuyu/shared';
+  import type { StoryWithAuthor } from '@lolita-fashion/shared';
 
   let story: StoryWithAuthor | null = null;
   let loading = true;

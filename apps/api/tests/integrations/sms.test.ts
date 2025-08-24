@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { smsService } from "../../src/services/sms";
-import { db, smsLogs } from "@yuyu/db";
+import { db, smsLogs } from "@lolita-fashion/db";
 
 // Mock external SMS provider
 vi.mock("../../src/services/sms", async () => {

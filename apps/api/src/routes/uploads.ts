@@ -1,12 +1,12 @@
 import { Elysia, t } from "elysia";
 import { join } from "path";
 import { mkdir, writeFile, unlink, stat } from "fs/promises";
-import { db, uploads, eq } from "@yuyu/db";
+import { db, uploads, eq } from "@lolita-fashion/db";
 import { requireAuth } from "../middleware/auth";
 import { ValidationError, NotFoundError } from "../middleware/error";
 import {
   generateRandomString,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 
 // File upload configuration
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "uploads";
@@ -45,7 +45,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
   // Upload single file
   .post(
     "/",
-    async ({ body, user, set }) => {
+    async ({ body, store, set }) => {
       await ensureUploadDir();
 
       const file = (body as any).file as File;
@@ -86,7 +86,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
             size: file.size,
             path: filePath,
             url: fileUrl,
-            uploadedBy: user.id,
+            uploadedBy: store.user!.id,
           })
           .returning();
 
@@ -121,7 +121,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
   // Upload multiple files
   .post(
     "/multiple",
-    async ({ body, user, set }) => {
+    async ({ body, store, set }) => {
       await ensureUploadDir();
 
       const files = (body as any).files as File[];
@@ -176,7 +176,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
               size: file.size,
               path: filePath,
               url: fileUrl,
-              uploadedBy: user.id,
+              uploadedBy: store.user!.id,
             })
             .returning();
 
@@ -213,13 +213,13 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
   // Get user uploads
   .get(
     "/",
-    async ({ user, query }) => {
-      const page = parseInt(query.page) || 1;
-      const limit = parseInt(query.limit) || 20;
+    async ({ store, query }) => {
+      const page = parseInt(query.page || "1") || 1;
+      const limit = parseInt(query.limit || "20") || 20;
       const offset = (page - 1) * limit;
 
       const userUploads = await db.query.uploads.findMany({
-        where: eq(uploads.uploadedBy, user.id),
+        where: eq(uploads.uploadedBy, store.user!.id),
         orderBy: db.desc(uploads.createdAt),
         limit,
         offset,
@@ -229,7 +229,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
       const [{ count }] = await db
         .select({ count: db.sql<number>`count(*)` })
         .from(uploads)
-        .where(eq(uploads.uploadedBy, user.id));
+        .where(eq(uploads.uploadedBy, store.user!.id));
 
       const totalPages = Math.ceil(count / limit);
 
@@ -278,7 +278,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
       }
 
       // Only allow access to own uploads (unless admin)
-      if (upload.uploadedBy !== user.id && user.role !== "admin") {
+      if (upload.uploadedBy !== store.user!.id && store.user!.role !== "admin") {
         throw new NotFoundError("Upload not found");
       }
 
@@ -311,7 +311,7 @@ export const uploadRoutes = new Elysia({ prefix: "/uploads" })
       }
 
       // Only allow deletion of own uploads (unless admin)
-      if (upload.uploadedBy !== user.id && user.role !== "admin") {
+      if (upload.uploadedBy !== store.user!.id && store.user!.role !== "admin") {
         throw new NotFoundError("Upload not found");
       }
 

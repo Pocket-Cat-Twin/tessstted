@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { db, emailTemplates, eq, and } from "@yuyu/db";
+import { db, emailTemplates, eq, and } from "@lolita-fashion/db";
 
 export enum EmailType {
   WELCOME = "welcome",

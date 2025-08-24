@@ -139,12 +139,12 @@ Write-Host "[SERVERS] Starting development servers..." -ForegroundColor Cyan
 if ($NoNewWindows) {
     # Start both in the same terminal (background API)
     Write-Host "[INFO] Starting API server in background..." -ForegroundColor Yellow
-    Start-Process bun -ArgumentList "--filter=@yuyu/api", "dev" -WorkingDirectory $projectRoot -WindowStyle Hidden
+    Start-Process bun -ArgumentList "--filter=@lolita-fashion/api", "dev" -WorkingDirectory $projectRoot -WindowStyle Hidden
     
     Start-Sleep -Seconds 3
     
     Write-Host "[INFO] Starting Web app..." -ForegroundColor Yellow
-    bun --filter=@yuyu/web dev
+    bun --filter=@lolita-fashion/web dev
 }
 else {
     # Start API server in new window

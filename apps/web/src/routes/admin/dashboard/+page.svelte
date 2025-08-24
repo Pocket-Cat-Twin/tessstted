@@ -75,13 +75,13 @@
       if (ordersResponse.success) {
         const orders = ordersResponse.data?.orders || [];
         stats.orders.total = orders.length;
-        stats.orders.processing = orders.filter(o => ['created', 'processing', 'checking'].includes(o.status)).length;
-        stats.orders.completed = orders.filter(o => o.status === 'delivered').length;
-        stats.revenue.total = orders.reduce((sum, o) => sum + (o.totalRuble || 0), 0);
+        stats.orders.processing = orders.filter((o: any) => ['created', 'processing', 'checking'].includes(o.status)).length;
+        stats.orders.completed = orders.filter((o: any) => o.status === 'delivered').length;
+        stats.revenue.total = orders.reduce((sum: number, o: any) => sum + (o.totalRuble || 0), 0);
         
         // Get recent orders (last 10)
         recentOrders = orders
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 10);
       }
 
@@ -158,7 +158,7 @@
       <Spinner size="lg" />
     </div>
   {:else if error}
-    <Card variant="bordered" className="p-6 text-center">
+    <Card variant="bordered" class="p-6 text-center">
       <div class="text-red-600 mb-4">
         <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -174,7 +174,7 @@
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Orders Card -->
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
@@ -192,7 +192,7 @@
       </Card>
 
       <!-- Revenue Card -->
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
@@ -212,7 +212,7 @@
       </Card>
 
       <!-- System Status Card -->
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class={`w-12 h-12 rounded-xl flex items-center justify-center ${
@@ -236,7 +236,7 @@
       </Card>
 
       <!-- Performance Card -->
-      <Card variant="shadow" className="p-6">
+      <Card variant="shadow" class="p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
@@ -259,7 +259,7 @@
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {#each quickActions as action}
-        <Card variant="bordered" className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+        <Card variant="bordered" class="p-6 hover:shadow-lg transition-shadow cursor-pointer">
           <a href={action.href} class="block">
             <div class="flex items-center mb-4">
               <div class={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center mr-3`}>
@@ -276,7 +276,7 @@
     <!-- Recent Orders and System Info -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Recent Orders -->
-      <Card variant="shadow" className="overflow-hidden">
+      <Card variant="shadow" class="overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900">Последние заказы</h2>
@@ -295,7 +295,7 @@
                     <p class="text-sm font-medium text-gray-900">
                       #{order.nomerok}
                     </p>
-                    <Badge variant="secondary" className={getStatusColor(order.status)}>
+                    <Badge variant="secondary" class={getStatusColor(order.status)}>
                       {order.status}
                     </Badge>
                   </div>

@@ -186,7 +186,7 @@
 
       <!-- Quick Actions -->
       <div class="mt-12 max-w-2xl mx-auto">
-        <Card variant="shadow" className="text-center">
+        <Card variant="shadow" class="text-center">
           <div class="space-y-4">
             <h3 class="text-lg font-semibold text-gray-900">Быстрые действия</h3>
             <div class="flex flex-wrap justify-center gap-3">

@@ -7,8 +7,8 @@ import {
   notificationHistory,
   notificationPreferences,
   eq,
-} from "@yuyu/db";
-import { sendEmail } from "../services/email";
+} from "@lolita-fashion/db";
+import { sendEmail, EmailType } from "../services/email";
 import { smsService } from "../services/sms";
 import { NotFoundError } from "../middleware/error";
 
@@ -162,7 +162,7 @@ export const notificationRoutes = new Elysia({ prefix: "/notifications" })
 
       if (body.type === "email" && user.email) {
         try {
-          await sendEmail("welcome", user.email, {
+          await sendEmail(EmailType.WELCOME, user.email, {
             name: user.name || "Пользователь",
             testMessage: "Это тестовое уведомление для проверки email системы",
           });
@@ -309,7 +309,7 @@ export const notificationRoutes = new Elysia({ prefix: "/notifications" })
       // Send custom notification
       if (body.channels.includes("email") && user.email) {
         try {
-          await sendEmail("system_announcement", user.email, {
+          await sendEmail(EmailType.WELCOME, user.email, {
             name: user.name || "Пользователь",
             message: body.message,
             subject: body.subject,

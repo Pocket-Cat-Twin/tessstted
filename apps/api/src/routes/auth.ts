@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
 import bcrypt from "bcryptjs";
-import { db, users, userSessions, eq, and } from "@yuyu/db";
+import { db, users, userSessions, eq, and } from "@lolita-fashion/db";
 import {
   userRegistrationSchema,
   userLoginSchema,
@@ -12,7 +12,7 @@ import {
   UserStatus,
   UserRole,
   generateRandomString,
-} from "@yuyu/shared";
+} from "@lolita-fashion/shared";
 import {
   NotFoundError,
   UnauthorizedError,
@@ -84,7 +84,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
       // Send verification email
       try {
-        await sendEmail(EmailType.EMAIL_VERIFICATION, email, {
+        await sendEmail(EmailType.EMAIL_VERIFICATION, email!, {
           name,
           verificationToken: emailVerificationToken,
         });
@@ -118,13 +118,19 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Login user
   .post(
     "/login",
-    async ({ body, jwt: jwtService, cookie: cookieStore, _set }) => {
+    async ({ body, jwt: jwtService, cookie: cookieStore, set }) => {
       const validation = userLoginSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid login data");
       }
 
-      const { email, password } = validation.data;
+      const data = validation.data;
+      const email = 'email' in data ? data.email : undefined;
+      const password = data.password;
+      
+      if (!email) {
+        throw new ValidationError("Email is required");
+      }
 
       // Find user
       const user = await db.query.users.findFirst({
@@ -149,7 +155,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       // Generate JWT token
       const token = await jwtService.sign({
         userId: user.id,
-        email: user.email,
+        email: user.email || user.phone || user.id,
         role: user.role,
       });
 
@@ -258,7 +264,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Verify email
   .post(
     "/verify-email",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const validation = emailVerificationSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid verification token");
@@ -305,13 +311,18 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Request password reset
   .post(
     "/forgot-password",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const validation = passwordResetRequestSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid email");
       }
 
-      const { email } = validation.data;
+      const data = validation.data;
+      const email = 'email' in data ? data.email : undefined;
+      
+      if (!email) {
+        throw new ValidationError("Email is required");
+      }
 
       // Find user
       const user = await db.query.users.findFirst({
@@ -372,7 +383,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Reset password
   .post(
     "/reset-password",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const validation = passwordResetSchema.safeParse(body);
       if (!validation.success) {
         throw new ValidationError("Invalid reset data");
@@ -433,7 +444,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   // Resend verification email
   .post(
     "/resend-verification",
-    async ({ body, _set }) => {
+    async ({ body, set }) => {
       const { email } = body as { email: string };
 
       // Find user

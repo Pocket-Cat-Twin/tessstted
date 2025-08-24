@@ -162,7 +162,7 @@
       <!-- Current Subscription Status -->
       {#if authState?.user && currentSubscription}
         <div class="mb-12">
-          <Card variant="shadow" className="max-w-2xl mx-auto bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <Card variant="shadow" class="max-w-2xl mx-auto bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
             <div class="flex items-center space-x-4">
               <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                 <span class="text-2xl">✅</span>
@@ -199,7 +199,7 @@
 
             <Card 
               variant={tierInfo.isPopular ? 'shadow' : 'bordered'}
-              className={`h-full transition-all duration-300 hover:scale-105 ${
+              class={`h-full transition-all duration-300 hover:scale-105 ${
                 tierInfo.isPopular ? 'border-2 border-pink-300 shadow-lg' : ''
               } ${isCurrentTier(tier.id) ? 'ring-2 ring-green-500 ring-opacity-50' : ''}`}
             >
@@ -364,7 +364,7 @@
       <!-- Call to Action -->
       {#if !authState?.user}
         <div class="mt-16 text-center">
-          <Card variant="shadow" className="max-w-2xl mx-auto bg-gradient-to-r from-pink-50 to-purple-50">
+          <Card variant="shadow" class="max-w-2xl mx-auto bg-gradient-to-r from-pink-50 to-purple-50">
             <div class="space-y-4">
               <h3 class="text-2xl font-bold text-gray-900">
                 Готовы начать?

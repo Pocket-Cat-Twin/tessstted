@@ -115,7 +115,10 @@
         loginData.phone = normalizePhoneNumber(emailOrPhone);
       }
 
-      const result = await authStore.login(loginData);
+      const result = await authStore.login(
+        loginMethod === 'email' ? emailOrPhone : normalizePhoneNumber(emailOrPhone), 
+        password
+      );
       
       if (result.success) {
         // Handle remember me

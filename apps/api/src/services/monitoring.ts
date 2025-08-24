@@ -1,5 +1,5 @@
 import { createMetricsLogger, createJobLogger } from "./logger";
-import { db } from "@yuyu/db";
+import { db } from "@lolita-fashion/db";
 
 // In-memory metrics storage (for production, use proper metrics store like Prometheus)
 interface MetricStore {

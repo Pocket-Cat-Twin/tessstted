@@ -10,7 +10,7 @@
   import Input from '$components/ui/Input.svelte';
   import Modal from '$components/ui/Modal.svelte';
   import CustomerSelector from '$lib/components/customers/CustomerSelector.svelte';
-  import { formatCurrency, calculateOrderTotals } from '@yuyu/shared';
+  import { formatCurrency, calculateOrderTotals } from '@lolita-fashion/shared';
 
   // Customer selection mode
   let customerMode: 'new' | 'existing' = 'new';
@@ -136,6 +136,19 @@
   function handleGoodChange(index: number, field: string, value: any) {
     goods[index] = { ...goods[index], [field]: value };
     goods = [...goods]; // Trigger reactivity
+  }
+
+  function handleGoodInput(index: number, field: string, event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input?.value !== undefined) {
+      let value: any = input.value;
+      if (field === 'quantity') {
+        value = parseInt(input.value || '1') || 1;
+      } else if (field === 'priceYuan') {
+        value = parseFloat(input.value || '0') || 0;
+      }
+      handleGoodChange(index, field, value);
+    }
   }
 
   async function handleSubmit() {
@@ -347,8 +360,8 @@
                 placeholder="Иван Иванов"
                 bind:value={customerName}
                 required
-                disabled={loading || (customerMode === 'existing' && !selectedCustomer)}
-                readonly={customerMode === 'existing' && selectedCustomer}
+                disabled={Boolean(loading || (customerMode === 'existing' && !selectedCustomer))}
+                readonly={Boolean(customerMode === 'existing' && selectedCustomer)}
               />
               
               <Input
@@ -357,8 +370,8 @@
                 placeholder="+7 (999) 123-45-67"
                 bind:value={customerPhone}
                 required
-                disabled={loading || (customerMode === 'existing' && !selectedCustomer)}
-                readonly={customerMode === 'existing' && selectedCustomer}
+                disabled={Boolean(loading || (customerMode === 'existing' && !selectedCustomer))}
+                readonly={Boolean(customerMode === 'existing' && selectedCustomer)}
               />
               
               <div class="md:col-span-2">
@@ -367,8 +380,8 @@
                   type="email"
                   placeholder="ivan@example.com"
                   bind:value={customerEmail}
-                  disabled={loading || (customerMode === 'existing' && !selectedCustomer)}
-                  readonly={customerMode === 'existing' && selectedCustomer}
+                  disabled={Boolean(loading || (customerMode === 'existing' && !selectedCustomer))}
+                  readonly={Boolean(customerMode === 'existing' && selectedCustomer)}
                   helperText="Для отправки уведомлений о статусе заказа"
                 />
               </div>
@@ -433,11 +446,11 @@
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label for="deliveryMethod" class="form-label">Способ доставки</label>
+                  <label for="deliveryMethod" class="block text-sm font-medium text-gray-700 mb-1">Способ доставки</label>
                   <select 
                     id="deliveryMethod"
                     bind:value={deliveryMethod}
-                    class="form-input"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                     disabled={loading}
                   >
                     <option value="Почта России">Почта России</option>
@@ -448,11 +461,11 @@
                 </div>
                 
                 <div>
-                  <label for="paymentMethod" class="form-label">Способ оплаты</label>
+                  <label for="paymentMethod" class="block text-sm font-medium text-gray-700 mb-1">Способ оплаты</label>
                   <select 
                     id="paymentMethod"
                     bind:value={paymentMethod}
-                    class="form-input"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                     disabled={loading}
                   >
                     <option value="Банковская карта">Банковская карта</option>
@@ -513,7 +526,7 @@
                         label="Название товара"
                         placeholder="Название или описание товара"
                         value={good.name}
-                        on:input={(e) => handleGoodChange(index, 'name', e.target.value)}
+                        on:input={(e) => handleGoodInput(index, 'name', e)}
                         required
                         disabled={loading}
                       />
@@ -525,7 +538,7 @@
                         type="url"
                         placeholder="https://example.com/product"
                         value={good.link}
-                        on:input={(e) => handleGoodChange(index, 'link', e.target.value)}
+                        on:input={(e) => handleGoodInput(index, 'link', e)}
                         disabled={loading}
                       />
                     </div>
@@ -533,9 +546,8 @@
                     <Input
                       label="Количество"
                       type="number"
-                      min="1"
-                      value={good.quantity}
-                      on:input={(e) => handleGoodChange(index, 'quantity', parseInt(e.target.value) || 1)}
+                      value={String(good.quantity)}
+                      on:input={(e) => handleGoodInput(index, 'quantity', e)}
                       required
                       disabled={loading}
                     />
@@ -543,10 +555,8 @@
                     <Input
                       label="Цена за единицу (¥)"
                       type="number"
-                      min="0"
-                      step="0.01"
-                      value={good.priceYuan}
-                      on:input={(e) => handleGoodChange(index, 'priceYuan', parseFloat(e.target.value) || 0)}
+                      value={String(good.priceYuan)}
+                      on:input={(e) => handleGoodInput(index, 'priceYuan', e)}
                       required
                       disabled={loading}
                     />
@@ -680,11 +690,5 @@
 </div>
 
 <style>
-  .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors;
-  }
-  
-  .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-  }
+  /* Custom styles optimized for production builds */
 </style>

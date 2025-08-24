@@ -148,7 +148,7 @@
                 >
                   Мои заказы
                 </a>
-                {#if user.role === 'ADMIN'}
+                {#if user.role === 'admin'}
                   <hr class="my-1" />
                   <a 
                     href="/admin" 

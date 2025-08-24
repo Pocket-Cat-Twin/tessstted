@@ -98,7 +98,7 @@
       <!-- Stories grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         {#each $storiesStore.stories as story}
-          <Card className="group cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-xl" variant="shadow" padding="none">
+          <Card class="group cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-xl" variant="shadow" padding="none">
             <div 
               class="h-full flex flex-col"
               on:click={() => handleStoryClick(story.link)}

@@ -161,7 +161,10 @@ function createCustomersStore() {
       update((state) => ({ ...state, loading: true }));
 
       try {
-        const response = await api.updateCustomer(customerId, customerData);
+        const response = await api.updateCustomer(customerId, { 
+          name: customerData.name || "",
+          ...customerData 
+        });
         if (response.success && response.data) {
           update((state) => ({
             ...state,

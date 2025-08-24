@@ -157,7 +157,7 @@
   }
 </script>
 
-<Card variant="bordered" className="max-w-4xl mx-auto">
+<Card variant="bordered" class="max-w-4xl mx-auto">
   <div class="space-y-6">
     <div class="flex items-center justify-between pb-4 border-b border-gray-200">
       <div>
@@ -238,7 +238,7 @@
                   size="sm"
                   on:click={() => deleteAddress(address.id)}
                   disabled={deletingAddressId === address.id}
-                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  class="text-red-600 border-red-300 hover:bg-red-50"
                 >
                   {#if deletingAddressId === address.id}
                     <Spinner size="sm" />
@@ -353,7 +353,7 @@
       <Button
         type="submit"
         disabled={savingAddress}
-        className="min-w-[120px]"
+        class="min-w-[120px]"
       >
         {#if savingAddress}
           <Spinner size="sm" className="mr-2" />

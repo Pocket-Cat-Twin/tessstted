@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 import { browser } from "$app/environment";
 import { api } from "$lib/api/client-simple";
-import type { User } from "@yuyu/shared";
+import type { User } from "@lolita-fashion/shared";
 
 interface AuthState {
   user: User | null;

@@ -11,7 +11,7 @@ import {
   desc,
   sql,
   gte,
-} from "@yuyu/db";
+} from "@lolita-fashion/db";
 import { requireAdmin } from "../middleware/auth";
 
 export const adminStatsRoutes = new Elysia({ prefix: "/admin/stats" })
