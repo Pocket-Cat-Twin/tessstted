@@ -29,7 +29,7 @@
     "validate": "bun run src/schema-validator.ts",
     "validate:schema": "bun run src/schema-validator.ts",
     "fix": "bun run reset && bun run validate",
-    "setup:complete": "bun run reset && bun run validate && echo \"✅ База данных полностью настроена!\"",
+    "setup:complete": "bun run reset && bun run validate && echo \"[OK] База данных полностью настроена!\"",
     "troubleshoot": "bun run validate && bun run test"
   },
   "dependencies": {

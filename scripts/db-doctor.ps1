@@ -1,5 +1,10 @@
 # Database Doctor - Windows PostgreSQL Diagnostic and Recovery Script
-# Comprehensive tool for diagnosing and fixing PostgreSQL issues on Windows
+# Enterprise-grade tool for diagnosing and fixing PostgreSQL issues on Windows
+# Version: 2.0 - Unicode-Safe & Production-Ready
+# Author: Senior DevOps Engineer  
+# Last Modified: 2025-08-24
+
+#Requires -Version 3.0
 
 param(
     [switch]$Diagnose,
@@ -12,352 +17,542 @@ param(
     [string]$Action = "help"
 )
 
-Write-Host "🏥 Lolita Fashion Database Doctor v1.0" -ForegroundColor Cyan
-Write-Host "=====================================" -ForegroundColor Cyan
-
-# Check if running on Windows
-if ($PSVersionTable.PSVersion.Major -lt 3 -or $env:OS -notlike "*Windows*") {
-    Write-Host "❌ This script is designed for Windows PowerShell 3.0+" -ForegroundColor Red
-    Write-Host "   Current version: $($PSVersionTable.PSVersion)" -ForegroundColor Yellow
+# Import the common PowerShell library
+$commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
+if (Test-Path $commonLibPath) {
+    . $commonLibPath
+} else {
+    Write-Error "PowerShell-Common.ps1 library not found. Please ensure it exists in the scripts directory."
     exit 1
 }
 
-# Set UTF-8 encoding for better Russian text support
-try {
-    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-    [Console]::InputEncoding = [System.Text.Encoding]::UTF8
-} catch {
-    Write-Host "⚠️  Could not set UTF-8 encoding" -ForegroundColor Yellow
-}
+Write-SafeHeader "Lolita Fashion Database Doctor v2.0" "="
+Write-SafeOutput "Enterprise-grade PostgreSQL diagnostic tool for Windows" -Status Info
 
-# Function to check if PostgreSQL service is running
+# ==============================================================================
+# POSTGRESQL SPECIFIC FUNCTIONS
+# ==============================================================================
+
 function Test-PostgreSQLService {
-    Write-Host "🔍 Checking PostgreSQL service..." -ForegroundColor Yellow
+    <#
+    .SYNOPSIS
+    Comprehensive PostgreSQL service detection and status check
+    #>
     
-    $services = Get-Service -Name "*postgresql*" -ErrorAction SilentlyContinue
+    Write-SafeOutput "Checking PostgreSQL service status..." -Status Processing
     
-    if ($services) {
-        foreach ($service in $services) {
-            $status = if ($service.Status -eq "Running") { "✅" } else { "❌" }
-            Write-Host "   $status $($service.Name): $($service.Status)" -ForegroundColor $(if ($service.Status -eq "Running") { "Green" } else { "Red" })
+    # Check for PostgreSQL services with version priority (16 > 15 > others)
+    $pgServiceResult = Test-ServiceSafely -ServiceName "*postgresql*" -PreferredVersions @("16", "15")
+    
+    if (-not $pgServiceResult.Found) {
+        Write-SafeOutput "No PostgreSQL services found" -Status Error
+        Write-SafeOutput "Install PostgreSQL from: https://www.postgresql.org/download/windows/" -Status Info
+        return @{
+            Success = $false
+            Service = $null
+            Running = $false
+            Message = "PostgreSQL service not found"
         }
-        return $services | Where-Object { $_.Status -eq "Running" }
-    } else {
-        Write-Host "   ❌ No PostgreSQL services found" -ForegroundColor Red
-        Write-Host "   💡 Install PostgreSQL: https://www.postgresql.org/download/windows/" -ForegroundColor Blue
-        return $false
+    }
+    
+    $service = $pgServiceResult.Service
+    $isRunning = $pgServiceResult.Status -eq "Running"
+    
+    $statusText = if ($isRunning) { "RUNNING" } else { "STOPPED" }
+    $statusType = if ($isRunning) { "Success" } else { "Warning" }
+    
+    Write-SafeOutput "$($service.DisplayName): $statusText" -Status $statusType
+    
+    return @{
+        Success = $true
+        Service = $service
+        Running = $isRunning
+        Message = "PostgreSQL service: $($service.Name) - $statusText"
     }
 }
 
-# Function to check network connectivity
-function Test-DatabaseNetwork {
-    Write-Host "🌐 Checking network connectivity..." -ForegroundColor Yellow
+function Test-PostgreSQLConnectivity {
+    <#
+    .SYNOPSIS
+    Tests PostgreSQL network connectivity and database access
+    #>
     
-    # Test localhost resolution
+    Write-SafeOutput "Testing PostgreSQL connectivity..." -Status Processing
+    
+    # Test localhost name resolution
     try {
         $localhost = [System.Net.Dns]::GetHostEntry("localhost")
-        Write-Host "   ✅ Localhost resolves to: $($localhost.AddressList[0])" -ForegroundColor Green
-    } catch {
-        Write-Host "   ❌ Localhost resolution failed" -ForegroundColor Red
-        Write-Host "   💡 Try using 127.0.0.1 instead of localhost" -ForegroundColor Blue
+        Write-SafeOutput "Localhost resolves to: $($localhost.AddressList[0])" -Status Success
+    }
+    catch {
+        Write-SafeOutput "Localhost resolution failed - try using 127.0.0.1" -Status Warning
     }
     
-    # Test port 5432
-    try {
-        $tcpClient = New-Object System.Net.Sockets.TcpClient
-        $tcpClient.Connect("localhost", 5432)
-        $tcpClient.Close()
-        Write-Host "   ✅ Port 5432 is accessible" -ForegroundColor Green
-        return $true
-    } catch {
-        Write-Host "   ❌ Port 5432 is not accessible" -ForegroundColor Red
-        Write-Host "   💡 Check if PostgreSQL is running on port 5432" -ForegroundColor Blue
-        return $false
-    }
-}
-
-# Function to start PostgreSQL service
-function Start-PostgreSQLService {
-    Write-Host "🚀 Attempting to start PostgreSQL service..." -ForegroundColor Yellow
+    # Test PostgreSQL port (5432)
+    $portTest = Test-NetworkPortSafely -HostName "localhost" -Port 5432 -TimeoutMs 5000
     
-    $services = Get-Service -Name "*postgresql*" -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq "Stopped" }
-    
-    if ($services) {
-        foreach ($service in $services) {
-            try {
-                Write-Host "   Starting $($service.Name)..." -ForegroundColor Yellow
-                Start-Service -Name $service.Name
-                Write-Host "   ✅ $($service.Name) started successfully" -ForegroundColor Green
-                return $true
-            } catch {
-                Write-Host "   ❌ Failed to start $($service.Name): $($_.Exception.Message)" -ForegroundColor Red
+    if ($portTest.Success) {
+        Write-SafeOutput "Port 5432 is accessible" -Status Success
+        
+        # Try database connection test using Bun
+        $dbTestResult = Invoke-SafeCommand -Command "bun" -Arguments @("run", "--silent", "packages/db/src/health-monitor.ts") -Description "Testing database connection" -IgnoreErrors
+        
+        if ($dbTestResult.Success) {
+            Write-SafeOutput "Database connection successful" -Status Success
+            return @{
+                Success = $true
+                NetworkOk = $true
+                DatabaseOk = $true
+                Message = "PostgreSQL is fully accessible"
+            }
+        } else {
+            Write-SafeOutput "Database connection failed" -Status Warning
+            return @{
+                Success = $false
+                NetworkOk = $true
+                DatabaseOk = $false
+                Message = "Network accessible but database connection failed"
             }
         }
     } else {
-        Write-Host "   ⚠️  No stopped PostgreSQL services found" -ForegroundColor Yellow
+        Write-SafeOutput $portTest.Message -Status Error
+        return @{
+            Success = $false
+            NetworkOk = $false
+            DatabaseOk = $false
+            Message = "PostgreSQL port 5432 is not accessible"
+        }
     }
-    return $false
 }
 
-# Function to run comprehensive diagnostics
-function Invoke-DatabaseDiagnostics {
-    Write-Host "🔍 Running comprehensive database diagnostics..." -ForegroundColor Cyan
-    Write-Host ""
+function Test-EnvironmentConfiguration {
+    <#
+    .SYNOPSIS
+    Validates environment configuration for database connection
+    #>
     
-    # System information
-    Write-Host "💻 System Information:" -ForegroundColor White
-    Write-Host "   OS: $([Environment]::OSVersion.VersionString)" -ForegroundColor Gray
-    Write-Host "   PowerShell: $($PSVersionTable.PSVersion)" -ForegroundColor Gray
-    Write-Host "   Encoding: $([Console]::OutputEncoding.EncodingName)" -ForegroundColor Gray
-    Write-Host ""
+    Write-SafeOutput "Checking environment configuration..." -Status Processing
     
-    # Service check
-    $serviceRunning = Test-PostgreSQLService
-    Write-Host ""
+    $projectRoot = Get-ProjectRoot
+    $envPath = Join-Path $projectRoot ".env"
     
-    # Network check
-    $networkOk = Test-DatabaseNetwork
-    Write-Host ""
+    $envCheck = Test-PathSafely -Path $envPath -Type "File"
     
-    # Database connection test using Node.js
-    Write-Host "🗃️  Testing database connection..." -ForegroundColor Yellow
-    try {
-        $result = bun run --silent packages/db/src/health-monitor.ts
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "   ✅ Database connection successful" -ForegroundColor Green
-        } else {
-            Write-Host "   ❌ Database connection failed" -ForegroundColor Red
+    if (-not $envCheck.Exists) {
+        Write-SafeOutput ".env file not found - copy .env.example to .env" -Status Error
+        return @{
+            Success = $false
+            EnvExists = $false
+            DatabaseUrl = $null
+            Message = "Environment file missing"
         }
-    } catch {
-        Write-Host "   ❌ Could not test database connection" -ForegroundColor Red
-        Write-Host "   💡 Run: bun run db:test" -ForegroundColor Blue
     }
-    Write-Host ""
     
-    # Environment check
-    Write-Host "⚙️  Environment Configuration:" -ForegroundColor White
-    if (Test-Path ".env") {
-        $envContent = Get-Content ".env" | Select-String "DATABASE_URL"
+    Write-SafeOutput "Environment file found" -Status Success
+    
+    try {
+        $envContent = Get-Content $envPath | Where-Object { $_ -like "DATABASE_URL=*" }
+        
         if ($envContent) {
-            $dbUrl = $envContent -replace "DATABASE_URL=", "" -replace "postgres:[^@]*@", "postgres:***@"
-            Write-Host "   ✅ DATABASE_URL: $dbUrl" -ForegroundColor Green
+            # Mask sensitive information for display
+            $maskedUrl = $envContent -replace "postgres:[^@]*@", "postgres:***@"
+            Write-SafeOutput "DATABASE_URL configured: $maskedUrl" -Status Success
+            return @{
+                Success = $true
+                EnvExists = $true
+                DatabaseUrl = $envContent
+                Message = "Environment properly configured"
+            }
         } else {
-            Write-Host "   ❌ DATABASE_URL not found in .env" -ForegroundColor Red
+            Write-SafeOutput "DATABASE_URL not found in .env file" -Status Error
+            return @{
+                Success = $false
+                EnvExists = $true
+                DatabaseUrl = $null
+                Message = "DATABASE_URL missing from environment"
+            }
         }
-    } else {
-        Write-Host "   ❌ .env file not found" -ForegroundColor Red
-        Write-Host "   💡 Copy .env.example to .env" -ForegroundColor Blue
     }
-    Write-Host ""
-    
-    # Summary
-    Write-Host "📊 Diagnostic Summary:" -ForegroundColor White
-    $issues = @()
-    $recommendations = @()
-    
-    if (-not $serviceRunning) {
-        $issues += "PostgreSQL service not running"
-        $recommendations += "Start PostgreSQL service or install PostgreSQL"
-    }
-    
-    if (-not $networkOk) {
-        $issues += "Network connectivity issues"
-        $recommendations += "Check firewall and PostgreSQL configuration"
-    }
-    
-    if ($issues.Count -eq 0) {
-        Write-Host "   ✅ No major issues detected" -ForegroundColor Green
-    } else {
-        Write-Host "   ❌ Issues found: $($issues.Count)" -ForegroundColor Red
-        foreach ($issue in $issues) {
-            Write-Host "      • $issue" -ForegroundColor Red
-        }
-        Write-Host ""
-        Write-Host "   💡 Recommendations:" -ForegroundColor Blue
-        foreach ($rec in $recommendations) {
-            Write-Host "      • $rec" -ForegroundColor Blue
+    catch {
+        Write-SafeOutput "Error reading environment file: $($_.Exception.Message)" -Status Error
+        return @{
+            Success = $false
+            EnvExists = $true
+            DatabaseUrl = $null
+            Message = "Error reading environment configuration"
         }
     }
 }
 
-# Function to attempt automatic fixes
-function Invoke-DatabaseFix {
-    Write-Host "🔧 Attempting automatic database fixes..." -ForegroundColor Cyan
-    Write-Host ""
+# ==============================================================================
+# DIAGNOSTIC FUNCTIONS
+# ==============================================================================
+
+function Invoke-ComprehensiveDiagnostics {
+    <#
+    .SYNOPSIS
+    Runs complete database system diagnostics
+    #>
     
-    $fixed = @()
-    $failed = @()
+    Write-SafeHeader "COMPREHENSIVE DATABASE DIAGNOSTICS" "="
     
-    # Try to start PostgreSQL service
-    Write-Host "1️⃣  Checking PostgreSQL service..." -ForegroundColor Yellow
-    $serviceStarted = Start-PostgreSQLService
-    if ($serviceStarted) {
-        $fixed += "Started PostgreSQL service"
+    $diagnostics = @{
+        SystemInfo = @{}
+        ServiceStatus = @{}
+        NetworkStatus = @{}
+        EnvironmentStatus = @{}
+        Issues = @()
+        Recommendations = @()
+    }
+    
+    # System Information
+    Write-SafeSectionHeader "System Information" 1
+    $diagnostics.SystemInfo = @{
+        OS = [Environment]::OSVersion.VersionString
+        PowerShell = $PSVersionTable.PSVersion.ToString()
+        Encoding = [Console]::OutputEncoding.EncodingName
+        WorkingDirectory = (Get-Location).Path
+        ProjectRoot = Get-ProjectRoot
+    }
+    
+    Write-SafeOutput "OS: $($diagnostics.SystemInfo.OS)" -Status Info
+    Write-SafeOutput "PowerShell: $($diagnostics.SystemInfo.PowerShell)" -Status Info
+    Write-SafeOutput "Project Root: $($diagnostics.SystemInfo.ProjectRoot)" -Status Info
+    
+    # Service Status Check
+    Write-SafeSectionHeader "PostgreSQL Service Status" 2
+    $serviceCheck = Test-PostgreSQLService
+    $diagnostics.ServiceStatus = $serviceCheck
+    
+    if (-not $serviceCheck.Success) {
+        $diagnostics.Issues += "PostgreSQL service not found or accessible"
+        $diagnostics.Recommendations += "Install PostgreSQL from https://www.postgresql.org/download/windows/"
+    } elseif (-not $serviceCheck.Running) {
+        $diagnostics.Issues += "PostgreSQL service is not running"
+        $diagnostics.Recommendations += "Start PostgreSQL service or enable auto-start"
+    }
+    
+    # Network Connectivity Check
+    Write-SafeSectionHeader "Network Connectivity" 3
+    $networkCheck = Test-PostgreSQLConnectivity
+    $diagnostics.NetworkStatus = $networkCheck
+    
+    if (-not $networkCheck.NetworkOk) {
+        $diagnostics.Issues += "PostgreSQL port 5432 is not accessible"
+        $diagnostics.Recommendations += "Check Windows Firewall and PostgreSQL configuration"
+    }
+    
+    if ($networkCheck.NetworkOk -and -not $networkCheck.DatabaseOk) {
+        $diagnostics.Issues += "Network accessible but database connection failed"
+        $diagnostics.Recommendations += "Check database credentials and permissions"
+    }
+    
+    # Environment Configuration Check
+    Write-SafeSectionHeader "Environment Configuration" 4
+    $envCheck = Test-EnvironmentConfiguration
+    $diagnostics.EnvironmentStatus = $envCheck
+    
+    if (-not $envCheck.Success) {
+        $diagnostics.Issues += $envCheck.Message
+        $diagnostics.Recommendations += "Configure .env file with proper DATABASE_URL"
+    }
+    
+    # Summary Report
+    Write-SafeSectionHeader "DIAGNOSTIC SUMMARY"
+    
+    if ($diagnostics.Issues.Count -eq 0) {
+        Write-SafeOutput "No critical issues detected - system appears healthy" -Status Complete
     } else {
-        $failed += "Could not start PostgreSQL service"
-    }
-    
-    # Set UTF-8 encoding
-    Write-Host "2️⃣  Setting UTF-8 encoding..." -ForegroundColor Yellow
-    try {
-        cmd /c "chcp 65001 >nul"
-        $fixed += "Set UTF-8 encoding"
-    } catch {
-        $failed += "Could not set UTF-8 encoding"
-    }
-    
-    # Check firewall
-    Write-Host "3️⃣  Checking Windows Firewall..." -ForegroundColor Yellow
-    try {
-        $firewallRules = netsh advfirewall firewall show rule name="PostgreSQL" 2>$null
-        if (-not $firewallRules) {
-            Write-Host "   Adding firewall rule for PostgreSQL..." -ForegroundColor Yellow
-            netsh advfirewall firewall add rule name="PostgreSQL" dir=in action=allow protocol=TCP localport=5432 >$null
-            $fixed += "Added firewall rule for PostgreSQL"
-        } else {
-            Write-Host "   ✅ Firewall rule already exists" -ForegroundColor Green
-        }
-    } catch {
-        $failed += "Could not configure firewall"
-    }
-    
-    # Test database creation
-    Write-Host "4️⃣  Testing database setup..." -ForegroundColor Yellow
-    try {
-        $result = bun run db:setup 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            $fixed += "Database setup completed"
-        } else {
-            $failed += "Database setup failed"
-        }
-    } catch {
-        $failed += "Could not run database setup"
-    }
-    
-    Write-Host ""
-    Write-Host "📊 Fix Summary:" -ForegroundColor White
-    if ($fixed.Count -gt 0) {
-        Write-Host "   ✅ Fixed ($($fixed.Count)):" -ForegroundColor Green
-        foreach ($fix in $fixed) {
-            Write-Host "      • $fix" -ForegroundColor Green
-        }
-    }
-    
-    if ($failed.Count -gt 0) {
-        Write-Host "   ❌ Failed ($($failed.Count)):" -ForegroundColor Red
-        foreach ($fail in $failed) {
-            Write-Host "      • $fail" -ForegroundColor Red
-        }
-    }
-    
-    if ($failed.Count -eq 0) {
+        Write-SafeOutput "$($diagnostics.Issues.Count) issues found requiring attention" -Status Warning
+        
         Write-Host ""
-        Write-Host "🎉 All automatic fixes completed successfully!" -ForegroundColor Green
-        Write-Host "   Run diagnostics again to verify: .\scripts\db-doctor.ps1 -Diagnose" -ForegroundColor Blue
+        Write-SafeOutput "ISSUES IDENTIFIED:" -Status Warning
+        foreach ($issue in $diagnostics.Issues) {
+            Write-SafeOutput "  * $issue" -Status Error
+        }
+        
+        Write-Host ""
+        Write-SafeOutput "RECOMMENDED ACTIONS:" -Status Info
+        foreach ($recommendation in $diagnostics.Recommendations) {
+            Write-SafeOutput "  * $recommendation" -Status Info
+        }
     }
+    
+    return $diagnostics
 }
 
-# Function to run emergency recovery
-function Invoke-EmergencyRecovery {
-    Write-Host "🆘 Emergency Database Recovery" -ForegroundColor Red
-    Write-Host "==============================" -ForegroundColor Red
+# ==============================================================================
+# REPAIR FUNCTIONS
+# ==============================================================================
+
+function Invoke-AutomaticRepairs {
+    <#
+    .SYNOPSIS
+    Attempts to automatically fix common PostgreSQL issues
+    #>
+    
+    Write-SafeHeader "AUTOMATIC DATABASE REPAIR" "="
+    
+    $repairResults = @{
+        Attempted = @()
+        Successful = @()
+        Failed = @()
+    }
+    
+    # Repair 1: Start PostgreSQL Service
+    Write-SafeSectionHeader "PostgreSQL Service Management" 1
+    $repairResults.Attempted += "PostgreSQL service startup"
+    
+    $serviceCheck = Test-PostgreSQLService
+    if ($serviceCheck.Success -and -not $serviceCheck.Running) {
+        $startResult = Start-ServiceSafely -ServiceName $serviceCheck.Service.Name -Description "PostgreSQL"
+        if ($startResult) {
+            $repairResults.Successful += "Started PostgreSQL service"
+        } else {
+            $repairResults.Failed += "Failed to start PostgreSQL service"
+        }
+    } elseif ($serviceCheck.Running) {
+        Write-SafeOutput "PostgreSQL service already running" -Status Success
+        $repairResults.Successful += "PostgreSQL service verified running"
+    } else {
+        $repairResults.Failed += "PostgreSQL service not found"
+    }
+    
+    # Repair 2: Console Encoding
+    Write-SafeSectionHeader "Console Encoding Configuration" 2
+    $repairResults.Attempted += "UTF-8 encoding setup"
+    
+    try {
+        $result = Invoke-SafeCommand -Command "cmd" -Arguments @("/c", "chcp 65001 >nul") -Description "Setting UTF-8 encoding" -IgnoreErrors
+        if ($result.Success) {
+            $repairResults.Successful += "UTF-8 encoding configured"
+        } else {
+            $repairResults.Failed += "UTF-8 encoding setup failed"
+        }
+    }
+    catch {
+        $repairResults.Failed += "UTF-8 encoding setup failed"
+    }
+    
+    # Repair 3: Windows Firewall
+    Write-SafeSectionHeader "Windows Firewall Configuration" 3
+    $repairResults.Attempted += "Windows Firewall rule setup"
+    
+    try {
+        # Check if rule already exists
+        $existingRule = netsh advfirewall firewall show rule name="PostgreSQL-5432" 2>$null
+        
+        if (-not $existingRule) {
+            $firewallResult = Invoke-SafeCommand -Command "netsh" -Arguments @("advfirewall", "firewall", "add", "rule", "name=PostgreSQL-5432", "dir=in", "action=allow", "protocol=TCP", "localport=5432") -Description "Adding PostgreSQL firewall rule" -IgnoreErrors
+            
+            if ($firewallResult.Success) {
+                $repairResults.Successful += "Added PostgreSQL firewall rule"
+            } else {
+                $repairResults.Failed += "Failed to add firewall rule (may need admin privileges)"
+            }
+        } else {
+            Write-SafeOutput "PostgreSQL firewall rule already exists" -Status Success
+            $repairResults.Successful += "PostgreSQL firewall rule verified"
+        }
+    }
+    catch {
+        $repairResults.Failed += "Firewall configuration failed"
+    }
+    
+    # Repair 4: Database Setup Test
+    Write-SafeSectionHeader "Database Setup Verification" 4
+    $repairResults.Attempted += "Database setup verification"
+    
+    $dbSetupResult = Invoke-SafeCommand -Command "bun" -Arguments @("run", "db:setup") -Description "Testing database setup" -IgnoreErrors -TimeoutSeconds 60
+    
+    if ($dbSetupResult.Success) {
+        $repairResults.Successful += "Database setup verified"
+    } else {
+        $repairResults.Failed += "Database setup failed"
+    }
+    
+    # Repair Summary
+    Write-SafeSectionHeader "REPAIR SUMMARY"
+    
+    Write-SafeOutput "REPAIRS ATTEMPTED: $($repairResults.Attempted.Count)" -Status Info
+    foreach ($attempt in $repairResults.Attempted) {
+        Write-SafeOutput "  * $attempt" -Status Info
+    }
+    
     Write-Host ""
     
-    Write-Host "⚠️  This will attempt to recover your database connection" -ForegroundColor Yellow
-    Write-Host "   and may reset some configurations. Continue? (Y/N)" -ForegroundColor Yellow
+    if ($repairResults.Successful.Count -gt 0) {
+        Write-SafeOutput "SUCCESSFUL REPAIRS: $($repairResults.Successful.Count)" -Status Success
+        foreach ($success in $repairResults.Successful) {
+            Write-SafeOutput "  * $success" -Status Success
+        }
+    }
     
-    $response = Read-Host
-    if ($response -ne "Y" -and $response -ne "y") {
-        Write-Host "   Recovery cancelled" -ForegroundColor Yellow
+    if ($repairResults.Failed.Count -gt 0) {
+        Write-Host ""
+        Write-SafeOutput "FAILED REPAIRS: $($repairResults.Failed.Count)" -Status Warning
+        foreach ($failure in $repairResults.Failed) {
+            Write-SafeOutput "  * $failure" -Status Warning
+        }
+    }
+    
+    if ($repairResults.Failed.Count -eq 0) {
+        Write-Host ""
+        Write-SafeOutput "All automatic repairs completed successfully!" -Status Complete
+        Write-SafeOutput "Run diagnostics to verify: .\scripts\db-doctor.ps1 -Diagnose" -Status Info
+    } else {
+        Write-Host ""
+        Write-SafeOutput "Some repairs failed - manual intervention may be required" -Status Warning
+    }
+    
+    return $repairResults
+}
+
+# ==============================================================================
+# EMERGENCY RECOVERY
+# ==============================================================================
+
+function Invoke-EmergencyDatabaseRecovery {
+    <#
+    .SYNOPSIS
+    Emergency recovery procedure for severe database issues
+    #>
+    
+    Write-SafeHeader "EMERGENCY DATABASE RECOVERY" "="
+    Write-SafeOutput "This will attempt comprehensive database recovery" -Status Warning
+    Write-SafeOutput "Some configurations may be reset during this process" -Status Warning
+    Write-Host ""
+    
+    $confirmation = Read-Host "Continue with emergency recovery? (Y/N)"
+    if ($confirmation -ne "Y" -and $confirmation -ne "y") {
+        Write-SafeOutput "Emergency recovery cancelled" -Status Info
         return
     }
     
-    Write-Host ""
-    Write-Host "🔧 Starting emergency recovery..." -ForegroundColor Red
+    Write-SafeHeader "EMERGENCY RECOVERY IN PROGRESS" "="
     
-    # Step 1: Full diagnostics
-    Invoke-DatabaseDiagnostics
-    Write-Host ""
+    # Step 1: Full Diagnostics
+    Write-SafeSectionHeader "Pre-Recovery Diagnostics" 1
+    $preDiagnostics = Invoke-ComprehensiveDiagnostics
     
-    # Step 2: Stop all PostgreSQL services
-    Write-Host "1️⃣  Stopping all PostgreSQL services..." -ForegroundColor Yellow
-    Get-Service -Name "*postgresql*" -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq "Running" } | ForEach-Object {
-        try {
-            Stop-Service -Name $_.Name -Force
-            Write-Host "   ✅ Stopped $($_.Name)" -ForegroundColor Green
-        } catch {
-            Write-Host "   ❌ Could not stop $($_.Name)" -ForegroundColor Red
+    # Step 2: Service Reset
+    Write-SafeSectionHeader "PostgreSQL Service Reset" 2
+    
+    try {
+        $services = Get-Service -Name "*postgresql*" -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq "Running" }
+        
+        foreach ($service in $services) {
+            Write-SafeOutput "Stopping service: $($service.Name)" -Status Processing
+            try {
+                Stop-Service -Name $service.Name -Force -ErrorAction Stop
+                Write-SafeOutput "Stopped: $($service.Name)" -Status Success
+            }
+            catch {
+                Write-SafeOutput "Could not stop: $($service.Name)" -Status Warning
+            }
+        }
+        
+        Start-Sleep -Seconds 3
+        
+        # Restart services
+        foreach ($service in $services) {
+            Write-SafeOutput "Starting service: $($service.Name)" -Status Processing
+            $startResult = Start-ServiceSafely -ServiceName $service.Name -Description $service.DisplayName
         }
     }
+    catch {
+        Write-SafeOutput "Service reset encountered issues: $($_.Exception.Message)" -Status Warning
+    }
     
-    # Step 3: Start PostgreSQL services
-    Write-Host "2️⃣  Starting PostgreSQL services..." -ForegroundColor Yellow
-    Start-PostgreSQLService
-    
-    # Step 4: Wait and test
-    Write-Host "3️⃣  Waiting for services to stabilize..." -ForegroundColor Yellow
+    # Step 3: Connection Stabilization
+    Write-SafeSectionHeader "Connection Stabilization" 3
+    Write-SafeOutput "Waiting for services to stabilize..." -Status Processing
     Start-Sleep -Seconds 5
     
-    # Step 5: Test connection
-    Write-Host "4️⃣  Testing database connection..." -ForegroundColor Yellow
-    try {
-        $result = bun run db:test
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "   ✅ Database connection restored!" -ForegroundColor Green
-        } else {
-            Write-Host "   ❌ Database connection still failing" -ForegroundColor Red
-        }
-    } catch {
-        Write-Host "   ❌ Could not test connection" -ForegroundColor Red
+    # Step 4: Database Test
+    Write-SafeSectionHeader "Database Connection Test" 4
+    $testResult = Invoke-SafeCommand -Command "bun" -Arguments @("run", "db:test") -Description "Testing database connection" -IgnoreErrors
+    
+    if ($testResult.Success) {
+        Write-SafeOutput "Database connection restored!" -Status Complete
+    } else {
+        Write-SafeOutput "Database connection still failing" -Status Error
+        Write-SafeOutput "Manual PostgreSQL configuration may be required" -Status Warning
     }
     
-    Write-Host ""
-    Write-Host "📊 Emergency Recovery Complete" -ForegroundColor Red
-    Write-Host "==============================" -ForegroundColor Red
+    Write-SafeHeader "EMERGENCY RECOVERY COMPLETE" "="
+    
+    if ($testResult.Success) {
+        Write-SafeOutput "Recovery successful - database is now accessible" -Status Complete
+    } else {
+        Write-SafeOutput "Recovery partially successful - manual steps may be required" -Status Warning
+        Write-SafeOutput "Consider checking PostgreSQL installation and configuration" -Status Info
+    }
 }
 
-# Function to show usage help
-function Show-Help {
-    Write-Host "🏥 Database Doctor - PostgreSQL Diagnostic Tool" -ForegroundColor Cyan
+# ==============================================================================
+# MAIN SCRIPT LOGIC
+# ==============================================================================
+
+function Show-DatabaseDoctorHelp {
+    <#
+    .SYNOPSIS
+    Displays comprehensive help information
+    #>
+    
+    Write-SafeHeader "Database Doctor - PostgreSQL Diagnostic Tool"
+    
+    Write-SafeOutput "USAGE:" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Diagnose    # Run comprehensive diagnostics" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Fix         # Attempt automatic fixes" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Emergency   # Emergency recovery mode" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Test        # Quick connection test" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Report      # Generate health report" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Setup       # Database setup" -Status Info
+    
     Write-Host ""
-    Write-Host "Usage:" -ForegroundColor White
-    Write-Host "  .\scripts\db-doctor.ps1 -Diagnose    # Run comprehensive diagnostics" -ForegroundColor Gray
-    Write-Host "  .\scripts\db-doctor.ps1 -Fix         # Attempt automatic fixes" -ForegroundColor Gray
-    Write-Host "  .\scripts\db-doctor.ps1 -Emergency   # Emergency recovery mode" -ForegroundColor Gray
-    Write-Host "  .\scripts\db-doctor.ps1 -Test        # Quick connection test" -ForegroundColor Gray
-    Write-Host "  .\scripts\db-doctor.ps1 -Report      # Generate health report" -ForegroundColor Gray
-    Write-Host "  .\scripts\db-doctor.ps1 -Setup       # Database setup" -ForegroundColor Gray
+    Write-SafeOutput "EXAMPLES:" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Diagnose    # Check database health" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Fix         # Fix common issues" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Emergency   # Full recovery mode" -Status Info
+    
     Write-Host ""
-    Write-Host "Examples:" -ForegroundColor White
-    Write-Host "  .\scripts\db-doctor.ps1 -Diagnose    # Check database health" -ForegroundColor Blue
-    Write-Host "  .\scripts\db-doctor.ps1 -Fix         # Fix common issues" -ForegroundColor Blue
-    Write-Host "  .\scripts\db-doctor.ps1 -Emergency   # Full recovery mode" -ForegroundColor Blue
-    Write-Host ""
-    Write-Host "For more help: bun run db:help" -ForegroundColor Yellow
+    Write-SafeOutput "For additional help: bun run db:help" -Status Info
 }
 
-# Main script logic
+# Main execution flow
 switch ($true) {
-    $Diagnose { Invoke-DatabaseDiagnostics }
-    $Fix { Invoke-DatabaseFix }
-    $Emergency { Invoke-EmergencyRecovery }
+    $Diagnose { 
+        Invoke-ComprehensiveDiagnostics | Out-Null
+    }
+    
+    $Fix { 
+        Invoke-AutomaticRepairs | Out-Null
+    }
+    
+    $Emergency { 
+        Invoke-EmergencyDatabaseRecovery
+    }
+    
     $Test {
-        Write-Host "🧪 Quick Database Connection Test" -ForegroundColor Cyan
-        Write-Host "==================================" -ForegroundColor Cyan
-        bun run db:test
+        Write-SafeHeader "Quick Database Connection Test"
+        Invoke-SafeCommand -Command "bun" -Arguments @("run", "db:test") -Description "Testing database connection"
     }
+    
     $Report {
-        Write-Host "📊 Database Health Report" -ForegroundColor Cyan
-        Write-Host "=========================" -ForegroundColor Cyan
-        bun run db:health
+        Write-SafeHeader "Database Health Report"
+        Invoke-SafeCommand -Command "bun" -Arguments @("run", "db:health") -Description "Generating health report"
     }
+    
     $Setup {
-        Write-Host "⚙️  Database Setup" -ForegroundColor Cyan
-        Write-Host "==================" -ForegroundColor Cyan
-        bun run db:setup
+        Write-SafeHeader "Database Setup"
+        Invoke-SafeCommand -Command "bun" -Arguments @("run", "db:setup") -Description "Running database setup"
     }
-    default { Show-Help }
+    
+    default { 
+        Show-DatabaseDoctorHelp 
+    }
 }
 
 Write-Host ""
-Write-Host "✓ Database Doctor completed" -ForegroundColor Green
+Write-SafeOutput "Database Doctor session completed" -Status Complete

@@ -131,15 +131,15 @@ Write-Host "[SUMMARY] Build Results:" -ForegroundColor Cyan
 Write-Host "========================" -ForegroundColor Cyan
 
 if ($apiSuccess) {
-    Write-Host "[✓] API: SUCCESS" -ForegroundColor Green
+    Write-Host "[OK] API: SUCCESS" -ForegroundColor Green
 } else {
-    Write-Host "[✗] API: FAILED" -ForegroundColor Red
+    Write-Host "[FAIL] API: FAILED" -ForegroundColor Red
 }
 
 if ($webSuccess) {
-    Write-Host "[✓] Web: SUCCESS" -ForegroundColor Green
+    Write-Host "[OK] Web: SUCCESS" -ForegroundColor Green
 } else {
-    Write-Host "[✗] Web: FAILED" -ForegroundColor Red
+    Write-Host "[FAIL] Web: FAILED" -ForegroundColor Red
 }
 
 if ($apiSuccess -and $webSuccess) {
