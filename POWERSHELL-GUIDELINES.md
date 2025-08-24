@@ -1,7 +1,8 @@
-# PowerShell Scripting Guidelines for Lolita Fashion Project
+# PowerShell Development Guidelines - Enterprise Edition
+**Lolita Fashion Project - Windows Development Standards**
 
-> **Enterprise-Grade Standards for Windows Development**  
-> Version: 2.0 | Last Updated: 2025-08-24 | Author: Senior DevOps Engineer
+> **Enterprise-grade PowerShell development standards for Windows-exclusive environments**  
+> Version: 2.1+ Module Architecture | Last Updated: 2025-08-24 | Author: Senior DevOps Engineer
 
 ## 🎯 CRITICAL REQUIREMENTS
 
@@ -20,15 +21,29 @@
    echo "[SUCCESS] Operation completed"  # WORKS EVERYWHERE
    ```
 
-2. **USE THE COMMON LIBRARY**
+2. **HYBRID MODULE IMPORT SYSTEM**
    ```powershell
-   # ✅ REQUIRED AT TOP OF EVERY SCRIPT
-   $commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
-   if (Test-Path $commonLibPath) {
-       . $commonLibPath
-   } else {
-       Write-Error "PowerShell-Common.ps1 library not found."
-       exit 1
+   # ✅ ENTERPRISE-GRADE HYBRID IMPORT (v2.1+)
+   $moduleImported = $false
+   try {
+       $modulePath = Join-Path $PSScriptRoot "PowerShell-Common.psd1"
+       if (Test-Path $modulePath) {
+           Import-Module $modulePath -Force -ErrorAction Stop
+           $moduleImported = $true
+       }
+   }
+   catch {
+       # Fallback to legacy dot-sourcing for compatibility
+   }
+   
+   if (-not $moduleImported) {
+       $commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
+       if (Test-Path $commonLibPath) {
+           . $commonLibPath
+       } else {
+           Write-Error "PowerShell-Common library not found in either format."
+           exit 1
+       }
    }
    ```
 
@@ -43,20 +58,88 @@
    Write-SafeSectionHeader "Configuration Check" 1
    ```
 
+## 🏗️ Architecture Overview - Enterprise Module System (v2.1+)
+
+### Module-First Approach
+The project uses a **hybrid module system** that supports both modern PowerShell modules (.psm1/.psd1) and legacy script imports (.ps1) for maximum compatibility.
+
+```powershell
+# ✅ PREFERRED - Module Import (Enterprise)
+Import-Module ./scripts/PowerShell-Common.psd1 -Force
+
+# ⚠️ FALLBACK - Legacy Dot-Sourcing (Compatibility)  
+. ./scripts/PowerShell-Common.ps1
+```
+
+### File Structure Standards
+
+#### Module Files (.psm1)
+```powershell
+# PowerShell-Common.psm1
+#Requires -Version 3.0
+
+# Functions here...
+
+# ✅ EXPLICIT EXPORTS (Required in modules)
+Export-ModuleMember -Function @(
+    'Write-SafeOutput',
+    'Initialize-SafeEnvironment'
+)
+```
+
+#### Module Manifests (.psd1)
+```powershell
+# PowerShell-Common.psd1  
+@{
+    RootModule = 'PowerShell-Common.psm1'
+    ModuleVersion = '2.1.0'
+    FunctionsToExport = @('Write-SafeOutput', 'Initialize-SafeEnvironment')
+    # ... other metadata
+}
+```
+
+### Critical Module Rules
+
+#### ❌ **NEVER DO** - Module Errors
+
+1. **Export-ModuleMember Outside Modules**
+   ```powershell
+   # ❌ WRONG - Will cause "Export-ModuleMember cannot be called" error
+   Export-ModuleMember -Function *  # In .ps1 files
+   ```
+
+2. **Direct .psm1 Imports**
+   ```powershell
+   # ❌ WRONG - Import module file directly
+   Import-Module PowerShell-Common.psm1
+   
+   # ✅ CORRECT - Import via manifest
+   Import-Module PowerShell-Common.psd1
+   ```
+
 ## 🔧 DEVELOPMENT WORKFLOW
 
 ### Before Making Changes
 
 1. **Validate Existing Scripts**
-   ```powershell
-   # Check all PowerShell files for issues
-   bun run validate:powershell
+   ```bash
+   # Basic validation
+   bun run validate:powershell          # Validate all PowerShell files
+   bun run fix:powershell              # Auto-fix common problems
    
-   # Auto-fix common problems
-   bun run fix:powershell
+   # Enterprise validation
+   bun run validate:powershell:strict   # Strict validation with all checks
+   bun run validate:powershell:report   # Generate detailed validation report
+   bun run validate:modules             # Module-specific validation
+   bun run validate:modules:fix         # Auto-fix module issues
    
-   # Full validation (includes linting & type-check)
-   bun run validate:all
+   # Testing commands
+   bun run test:powershell             # Test module system
+   bun run test:db-doctor              # Test database doctor
+   
+   # Complete enterprise validation
+   bun run validate:enterprise         # Full enterprise-grade validation
+   bun run validate:all                # Standard validation (PowerShell + linting + type-check)
    ```
 
 2. **Test Your Script**
@@ -101,13 +184,31 @@ param(
     [string]$Action = "help"
 )
 
-# Import common library
-$commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
-if (Test-Path $commonLibPath) {
-    . $commonLibPath
-} else {
-    Write-Error "PowerShell-Common.ps1 library not found."
-    exit 1
+# Import the common PowerShell library - Hybrid Import System (Enterprise-Grade)
+# Supports both Module (.psm1) and Legacy Script (.ps1) imports
+$moduleImported = $false
+
+# Try to import the PowerShell module first (preferred method)
+try {
+    $modulePath = Join-Path $PSScriptRoot "PowerShell-Common.psd1"
+    if (Test-Path $modulePath) {
+        Import-Module $modulePath -Force -ErrorAction Stop
+        $moduleImported = $true
+    }
+}
+catch {
+    # Fallback to legacy dot-sourcing if module import failed
+}
+
+# Fallback to legacy dot-sourcing if module import failed
+if (-not $moduleImported) {
+    $commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
+    if (Test-Path $commonLibPath) {
+        . $commonLibPath
+    } else {
+        Write-Error "PowerShell-Common library not found in either format."
+        exit 1
+    }
 }
 
 Write-SafeHeader "Your Script Name v1.0" "="
@@ -257,8 +358,10 @@ npx husky add .husky/pre-commit "bun run validate:powershell"
 |-------|---------|-----------|
 | Unicode Parse Error | `TerminatorExpectedAtEndOfString` | Replace Unicode chars with ASCII |
 | Encoding Problems | `В строке отсутствует завершающий символ` | Use `Write-SafeOutput` functions |
-| Missing Functions | `CommandNotFoundException` | Import `PowerShell-Common.ps1` |
+| Missing Functions | `CommandNotFoundException` | Use hybrid import system |
 | Permission Errors | `ExecutionPolicy` errors | Run with `-ExecutionPolicy Bypass` |
+| Export-ModuleMember Error | `Export-ModuleMember cannot be called` | Only use in .psm1 files, not .ps1 |
+| Module Import Failed | Module not found errors | Check .psd1 path, use hybrid fallback |
 
 ### Emergency Fix Process
 
@@ -285,11 +388,14 @@ npx husky add .husky/pre-commit "bun run validate:powershell"
 Before submitting any PowerShell script changes:
 
 - [ ] No Unicode characters used (emoji, special symbols)
-- [ ] `PowerShell-Common.ps1` imported and used
+- [ ] Hybrid import system implemented (module first, fallback to dot-sourcing)
 - [ ] `Write-SafeOutput` functions used for all output
 - [ ] Proper error handling with try/catch
 - [ ] `#Requires -Version 3.0` directive included
-- [ ] Validation passes: `bun run validate:powershell`
+- [ ] Export-ModuleMember only used in .psm1 files (not .ps1)
+- [ ] Module imports use .psd1 manifests (not direct .psm1 imports)
+- [ ] Enterprise validation passes: `bun run validate:enterprise`
+- [ ] Module system tests pass: `bun run test:powershell`
 - [ ] Manual testing completed in clean PowerShell session
 - [ ] No encoding issues detected
 
@@ -327,4 +433,15 @@ For questions about PowerShell scripting standards:
 
 ---
 
-**Remember: These standards exist to prevent production failures and ensure cross-environment compatibility. Following them is not optional.**
+**Remember: These standards exist to prevent production failures and ensure cross-environment compatibility. The v2.1+ module architecture provides enterprise-grade reliability with backward compatibility. Following these standards is not optional.**
+
+---
+
+## 📊 Architecture Migration Timeline
+
+- **v2.0**: Legacy dot-sourcing support with Unicode fixes
+- **v2.1**: Hybrid module system introduced ← **Current**  
+- **v3.0**: Full module-only architecture (planned)
+
+**Last Updated**: 2025-08-24  
+**Version**: 2.1+ Enterprise Module Architecture

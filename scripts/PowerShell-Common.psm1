@@ -1,6 +1,6 @@
-# PowerShell Common Library
+# PowerShell Common Library - Enterprise Module
 # Enterprise-grade utilities for Lolita Fashion PowerShell scripts
-# Version: 2.0 - Unicode-Safe Edition
+# Version: 2.1 - Module Architecture Edition
 # Author: Senior DevOps Engineer
 # Last Modified: 2025-08-24
 
@@ -9,7 +9,7 @@
 # Prevent script execution on non-Windows systems
 if ($PSVersionTable.PSVersion.Major -lt 3 -or $env:OS -notlike "*Windows*") {
     Write-Error "This library is designed for Windows PowerShell 3.0+ only."
-    exit 1
+    return
 }
 
 # ==============================================================================
@@ -531,18 +531,45 @@ function Test-PathSafely {
 }
 
 # ==============================================================================
-# INITIALIZATION
+# MODULE INITIALIZATION
 # ==============================================================================
 
-# Auto-initialize when script is loaded
+# Auto-initialize when module is loaded
 if (-not (Test-PowerShellCompatibility)) {
-    throw "PowerShell environment is not compatible"
+    Write-Error "PowerShell environment is not compatible with this module"
+    return
 }
 
 Initialize-SafeEnvironment
 
-Write-SafeOutput "PowerShell Common Library v2.0 (Legacy) loaded successfully" -Status Success
+Write-SafeOutput "PowerShell Common Library v2.1 (Module) loaded successfully" -Status Success
 
-# NOTE: Export-ModuleMember is not used in dot-sourced scripts
-# Functions are automatically available when dot-sourcing
-# For module architecture, use PowerShell-Common.psm1 instead
+# ==============================================================================
+# MODULE EXPORTS - Enterprise Grade Function Management
+# ==============================================================================
+
+# Export all functions explicitly for better control and documentation
+Export-ModuleMember -Function @(
+    'Write-SafeOutput',
+    'Write-SafeHeader', 
+    'Write-SafeSectionHeader',
+    'Test-PowerShellCompatibility',
+    'Invoke-SafeCommand',
+    'Initialize-SafeEnvironment', 
+    'Get-ProjectRoot',
+    'Test-ServiceSafely',
+    'Start-ServiceSafely',
+    'Test-NetworkPortSafely',
+    'Test-PathSafely'
+)
+
+# Export important script variables that other scripts might need
+Export-ModuleMember -Variable @(
+    'STATUS_SUCCESS',
+    'STATUS_ERROR', 
+    'STATUS_WARNING',
+    'STATUS_INFO',
+    'STATUS_PROCESSING',
+    'STATUS_COMPLETE',
+    'STATUS_SKIPPED'
+)

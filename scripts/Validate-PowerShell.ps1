@@ -13,13 +13,47 @@ param(
     [switch]$Report = $false
 )
 
-# Import common library
-$commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
-if (Test-Path $commonLibPath) {
-    . $commonLibPath
-} else {
-    Write-Error "PowerShell-Common.ps1 library not found."
-    exit 1
+# Import the common PowerShell library - Hybrid Import System (Enterprise-Grade)
+# Supports both Module (.psm1) and Legacy Script (.ps1) imports
+$moduleImported = $false
+
+# Try to import the PowerShell module first (preferred method)
+try {
+    $modulePath = Join-Path $PSScriptRoot "PowerShell-Common.psd1"
+    if (Test-Path $modulePath) {
+        Write-Host "[IMPORT] Loading PowerShell-Common module for validation..." -ForegroundColor Cyan
+        Import-Module $modulePath -Force -ErrorAction Stop
+        $moduleImported = $true
+        Write-Host "[SUCCESS] PowerShell-Common module v2.1 loaded successfully" -ForegroundColor Green
+    }
+}
+catch {
+    Write-Host "[WARNING] Module import failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "[INFO] Falling back to legacy script import..." -ForegroundColor Cyan
+}
+
+# Fallback to legacy dot-sourcing if module import failed
+if (-not $moduleImported) {
+    $commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
+    if (Test-Path $commonLibPath) {
+        Write-Host "[FALLBACK] Using legacy PowerShell-Common.ps1..." -ForegroundColor Yellow
+        . $commonLibPath
+        Write-Host "[SUCCESS] Legacy PowerShell-Common library loaded" -ForegroundColor Green
+    } else {
+        Write-Error @"
+[ERROR] PowerShell-Common library not found in either format:
+  - Module: PowerShell-Common.psd1 (preferred)
+  - Legacy: PowerShell-Common.ps1 (fallback)
+  
+Please ensure one of these files exists in the scripts directory:
+  $PSScriptRoot\PowerShell-Common.psd1
+  $PSScriptRoot\PowerShell-Common.ps1
+
+If you're using the latest version, the module files should be available.
+If you're using an older version, ensure PowerShell-Common.ps1 exists.
+"@
+        exit 1
+    }
 }
 
 Write-SafeHeader "PowerShell Script Validation Tool v1.0" "="
@@ -72,6 +106,11 @@ $PROBLEM_PATTERNS = @(
     @{ Pattern = 'echo\s+"[^"]*[^\x00-\x7F][^"]*"'; Description = "Echo with Unicode characters"; Severity = "Error" }
     @{ Pattern = 'Write-Host\s+"[^"]*[^\x00-\x7F][^"]*"'; Description = "Write-Host with Unicode characters"; Severity = "Warning" }
     @{ Pattern = '\$([A-Za-z0-9_]+)\s*=\s*"[^"]*[^\x00-\x7F][^"]*"'; Description = "Variable assignment with Unicode"; Severity = "Warning" }
+    
+    # MODULE DEPENDENCY VALIDATION PATTERNS (NEW - Enterprise Grade)
+    @{ Pattern = 'Export-ModuleMember\s+-Function\s+\*(?!\s*$)'; Description = "Export-ModuleMember -Function * used outside module context"; Severity = "Error" }
+    @{ Pattern = '^\s*\.\s+[^#\r\n]*PowerShell-Common\.ps1'; Description = "Using legacy dot-sourcing instead of module import"; Severity = "Warning" }
+    @{ Pattern = 'Import-Module.*PowerShell-Common(?!\.psd1)'; Description = "Import-Module should use .psd1 manifest, not .psm1 directly"; Severity = "Warning" }
 )
 
 # Best practices checks
@@ -80,6 +119,11 @@ $BEST_PRACTICE_PATTERNS = @(
     @{ Pattern = '\[Parameter\(Mandatory\s*=\s*\$true\)\]'; Description = "Proper parameter validation"; Required = $false }
     @{ Pattern = 'ErrorActionPreference'; Description = "Error handling configuration"; Required = $false }
     @{ Pattern = 'try\s*\{.*catch\s*\{'; Description = "Exception handling"; Required = $false }
+    
+    # MODULE BEST PRACTICES (NEW - Enterprise Grade)
+    @{ Pattern = 'Import-Module.*-Force'; Description = "Using -Force parameter for reliable module loading"; Required = $false }
+    @{ Pattern = 'Export-ModuleMember\s+-Function\s+@\('; Description = "Explicit function exports in modules"; Required = $false }
+    @{ Pattern = '\$moduleImported\s*='; Description = "Module import validation pattern"; Required = $false }
 )
 
 # ==============================================================================
@@ -174,6 +218,9 @@ function Test-PowerShellFile {
         $results.Issues += "PowerShell syntax error: $($_.Exception.Message)"
     }
     
+    # MODULE DEPENDENCY VALIDATION (NEW - Enterprise Grade)
+    $results = Test-ModuleDependencies -FilePath $FilePath -FileContent $content -Results $results
+    
     return $results
 }
 
@@ -237,6 +284,92 @@ function Repair-PowerShellFile {
     }
 }
 
+function Test-ModuleDependencies {
+    <#
+    .SYNOPSIS
+    Enterprise-grade validation of PowerShell module dependencies and import patterns
+    .DESCRIPTION
+    Validates proper use of modules vs dot-sourcing, checks for Export-ModuleMember issues,
+    and ensures proper module import patterns are followed.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$FileContent,
+        
+        [Parameter(Mandatory = $true)]
+        [hashtable]$Results
+    )
+    
+    # Check if this is a module file (.psm1)
+    $isModuleFile = $FilePath -like "*.psm1"
+    
+    # Check for Export-ModuleMember usage
+    if ($FileContent -match 'Export-ModuleMember') {
+        if (-not $isModuleFile) {
+            $Results.Issues += "Export-ModuleMember found in non-module file. Only use in .psm1 files"
+            $Results.Valid = $false
+        } elseif ($FileContent -match 'Export-ModuleMember\s+-Function\s+\*\s*$') {
+            $Results.Warnings += "Using Export-ModuleMember -Function * - consider explicit function exports for better control"
+        }
+    }
+    
+    # Check for proper module import patterns
+    if ($FileContent -match '\.\s+.*PowerShell-Common\.ps1' -and 
+        $FileContent -notmatch 'moduleImported.*=.*false|Import-Module.*PowerShell-Common') {
+        $Results.Warnings += "Using legacy dot-sourcing without hybrid import system. Consider upgrading to module-based import"
+        
+        # Add fixable suggestion for upgrading to hybrid import
+        $Results.Suggestions += "Upgrade to hybrid import system: Check for .psd1 module first, fallback to .ps1"
+    }
+    
+    # Check for Import-Module best practices
+    if ($FileContent -match 'Import-Module.*PowerShell-Common\.psm1') {
+        $Results.Warnings += "Import-Module should reference .psd1 manifest, not .psm1 directly"
+        $Results.Suggestions += "Use: Import-Module PowerShell-Common.psd1 instead of .psm1"
+    }
+    
+    # Check for missing -Force parameter in Import-Module (in scripts that import modules)
+    if ($FileContent -match 'Import-Module.*PowerShell-Common' -and 
+        $FileContent -notmatch 'Import-Module.*-Force') {
+        $Results.Suggestions += "Consider using -Force parameter with Import-Module for reliable loading"
+    }
+    
+    # Validate module structure if this is a module manifest (.psd1)
+    if ($FilePath -like "*.psd1") {
+        if ($FileContent -notmatch 'FunctionsToExport\s*=') {
+            $Results.Issues += "Module manifest missing explicit FunctionsToExport declaration"
+            $Results.Valid = $false
+        }
+        
+        if ($FileContent -notmatch 'ModuleVersion\s*=') {
+            $Results.Issues += "Module manifest missing ModuleVersion"
+            $Results.Valid = $false
+        }
+        
+        if ($FileContent -notmatch 'RootModule\s*=') {
+            $Results.Issues += "Module manifest missing RootModule declaration"
+            $Results.Valid = $false
+        }
+    }
+    
+    # Check for hybrid import system implementation
+    if ($FileContent -match 'Import-Module.*PowerShell-Common' -and 
+        $FileContent -notmatch '\$moduleImported\s*=') {
+        $Results.Suggestions += "Consider implementing hybrid import system for backward compatibility"
+    }
+    
+    # Advanced: Check for proper error handling in module imports
+    if ($FileContent -match 'Import-Module' -and 
+        $FileContent -notmatch 'try\s*\{.*Import-Module.*\}.*catch') {
+        $Results.Suggestions += "Consider wrapping Import-Module in try-catch for robust error handling"
+    }
+    
+    return $Results
+}
+
 # ==============================================================================
 # MAIN VALIDATION LOGIC
 # ==============================================================================
@@ -255,20 +388,28 @@ function Invoke-PowerShellValidation {
         return
     }
     
-    # Find PowerShell files
+    # Find PowerShell files (including modules - .ps1, .psm1, .psd1)
     $psFiles = @()
-    if ($pathCheck.Type -eq "File" -and $targetPath -like "*.ps1") {
-        $psFiles = @($targetPath)
+    $powerShellExtensions = @("*.ps1", "*.psm1", "*.psd1")
+    
+    if ($pathCheck.Type -eq "File") {
+        $extension = [System.IO.Path]::GetExtension($targetPath).ToLower()
+        if ($extension -in @(".ps1", ".psm1", ".psd1")) {
+            $psFiles = @($targetPath)
+        }
     } elseif ($pathCheck.Type -eq "Directory") {
-        $psFiles = Get-ChildItem -Path $targetPath -Filter "*.ps1" -Recurse | Select-Object -ExpandProperty FullName
+        foreach ($ext in $powerShellExtensions) {
+            $filesWithExt = Get-ChildItem -Path $targetPath -Filter $ext -Recurse | Select-Object -ExpandProperty FullName
+            $psFiles += $filesWithExt
+        }
     }
     
     if ($psFiles.Count -eq 0) {
-        Write-SafeOutput "No PowerShell files found in: $targetPath" -Status Warning
+        Write-SafeOutput "No PowerShell files (.ps1, .psm1, .psd1) found in: $targetPath" -Status Warning
         return
     }
     
-    Write-SafeOutput "Found $($psFiles.Count) PowerShell file(s) to validate" -Status Info
+    Write-SafeOutput "Found $($psFiles.Count) PowerShell file(s) to validate (.ps1, .psm1, .psd1)" -Status Info
     Write-Host ""
     
     $validationResults = @()

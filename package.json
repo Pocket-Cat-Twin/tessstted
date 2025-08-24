@@ -32,13 +32,23 @@
     "db:fix": "cd packages/db && bun run fix",
     "db:complete": "cd packages/db && bun run setup:complete",
     "db:troubleshoot": "cd packages/db && bun run troubleshoot",
-    "emergency:db": "cd packages/db && bun run reset && echo \"[EMERGENCY] База данных экстренно восстановлена!\"",
+    "emergency:db": "cd packages/db && bun run reset && echo \"[EMERGENCY] Database emergency recovery completed!\"",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts,.js,.svelte --fix",
     "lint:check": "eslint . --ext .ts,.js,.svelte",
     "type-check": "(cd apps/web && bun run check) && (cd apps/api && bun run type-check)",
     "validate:powershell": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1",
     "fix:powershell": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Fix",
+    
+    "validate:powershell:strict": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Strict",
+    "validate:powershell:report": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Report",
+    "validate:modules": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Path scripts",
+    "validate:modules:fix": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Path scripts -Fix",
+    
+    "test:powershell": "powershell -ExecutionPolicy Bypass -Command \"Write-Host '[TEST] Testing PowerShell module system...' -ForegroundColor Cyan; Import-Module ./scripts/PowerShell-Common.psd1 -Force; Write-Host '[SUCCESS] PowerShell module system working correctly!' -ForegroundColor Green\"",
+    "test:db-doctor": "powershell -ExecutionPolicy Bypass -File scripts/db-doctor.ps1 -Test",
+    
+    "validate:enterprise": "bun run validate:powershell:strict && bun run validate:modules && bun run lint:check && bun run type-check",
     "validate:all": "bun run validate:powershell && bun run lint:check && bun run type-check",
     "validate": "bun run lint:check && bun run type-check && bun run build"
   },

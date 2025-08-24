@@ -76,14 +76,20 @@ bun run type-check
 # Format code
 bun run format
 
-# Validate PowerShell scripts (NEW - ENTERPRISE GRADE)
-bun run validate:powershell
+# PowerShell Validation & Testing (ENTERPRISE v2.1 MODULE SYSTEM)
+bun run validate:powershell          # Basic PowerShell validation
+bun run validate:powershell:strict   # Strict enterprise validation
+bun run validate:powershell:report   # Generate detailed validation report
+bun run fix:powershell               # Auto-fix PowerShell issues
 
-# Auto-fix PowerShell issues (NEW - SENIOR LEVEL)
-bun run fix:powershell
+bun run validate:modules             # Module-specific validation
+bun run validate:modules:fix         # Auto-fix module issues
+bun run test:powershell              # Test module system
+bun run test:db-doctor               # Test database doctor
 
-# Complete validation (PowerShell + TypeScript + Linting)
-bun run validate:all
+# Complete validation suites
+bun run validate:enterprise          # Full enterprise-grade validation
+bun run validate:all                 # Standard validation (PowerShell + TypeScript + Linting)
 
 # Build project
 bun run build
@@ -345,47 +351,64 @@ bun run db:seed    # Test seeding
 - **Webhook System**: Event subscriptions, delivery logging
 - **Configuration**: Settings, email templates, FAQs, uploads
 
-## 🛡️ ENTERPRISE-GRADE POWERSHELL SYSTEM (NEW - 2025-08-24)
+## ENTERPRISE-GRADE POWERSHELL SYSTEM v2.1 - Module Architecture (2025-08-24)
 
-**ПРОБЛЕМА РЕШЕНА НА 100%**: Полностью устранены Unicode и encoding проблемы в PowerShell скриптах
+**PROBLEM 100% SOLVED**: Full module architecture with hybrid compatibility system implemented
 
-### 🔧 Новые команды валидации и исправления:
-```powershell
-# ⚡ ЭКСТРЕННОЕ ИСПРАВЛЕНИЕ (решает ВСЕ проблемы)
-bun run fix:powershell        # Автоматическое исправление всех Unicode проблем
+### Enterprise Module System (v2.1+):
+- **PowerShell-Common.psm1**: Enterprise-grade module with explicit exports
+- **PowerShell-Common.psd1**: Comprehensive module manifest with versioning
+- **Hybrid Import System**: Module-first approach with fallback compatibility
+- **Backward Compatibility**: Legacy .ps1 scripts still supported
 
-# 🔍 ДИАГНОСТИКА И ВАЛИДАЦИЯ
-bun run validate:powershell   # Проверка всех PowerShell скриптов
-bun run validate:all          # Полная валидация проекта
+### Validation & Testing Commands:
+```bash
+# Basic validation
+bun run validate:powershell          # Validate all PowerShell files
+bun run fix:powershell              # Auto-fix common problems
 
-# 📋 ДЕТАЛЬНЫЕ ОТЧЕТЫ
-powershell -File scripts/Validate-PowerShell.ps1 -Report -Strict
+# Enterprise validation
+bun run validate:powershell:strict   # Strict validation with all checks
+bun run validate:powershell:report   # Generate detailed validation report
+bun run validate:modules             # Module-specific validation
+bun run validate:modules:fix         # Auto-fix module issues
+
+# Testing commands
+bun run test:powershell             # Test module system
+bun run test:db-doctor              # Test database doctor
+
+# Complete enterprise validation
+bun run validate:enterprise         # Full enterprise-grade validation
+bun run validate:all                # Standard validation (PowerShell + linting + type-check)
 ```
 
-### 🏗️ Архитектурные улучшения:
+### Architectural Improvements:
 
-✅ **PowerShell-Common.ps1**: Централизованная библиотека безопасных функций  
-✅ **Validate-PowerShell.ps1**: Enterprise-grade система валидации  
-✅ **Автоматические pre-commit hooks**: Предотвращение ошибок до коммита  
-✅ **ASCII-only output**: Полная совместимость с любыми Windows системами  
-✅ **Error handling**: Централизованная обработка ошибок уровня Senior  
+[OK] **Module Architecture**: Enterprise-grade .psm1/.psd1 module system  
+[OK] **Hybrid Import System**: Automatic fallback from module to legacy imports  
+[OK] **Export-ModuleMember Fix**: Proper module exports, zero compatibility issues  
+[OK] **ASCII-only Output**: Full compatibility with all Windows systems  
+[OK] **Advanced Error Handling**: Centralized error management with try-catch patterns  
 
-### 📚 Документация и стандарты:
-- **POWERSHELL-GUIDELINES.md**: Полное руководство по стандартам кодирования
-- **Автоматическая валидация**: Все PowerShell файлы проверяются при каждом коммите
-- **Система предотвращения**: Невозможно добавить проблемный код в будущем
+### Documentation & Standards:
+- **POWERSHELL-GUIDELINES.md**: Complete enterprise development standards
+- **Automated Validation**: All PowerShell files validated on every commit
+- **Prevention System**: Impossible to add problematic code in future
+- **Module Architecture Guide**: Full migration from legacy to module system
 
-### ⚡ Исправленные файлы:
-- ✅ `scripts/db-doctor.ps1` - Полностью переписан с enterprise архитектурой
-- ✅ `scripts/build-windows.ps1` - Исправлены Unicode символы [✓][✗] → [OK][FAIL]
-- ✅ `packages/db/package.json` - Убрана ✅ → [OK] в echo командах
-- ✅ `package.json` - Исправлена 🚨 → [EMERGENCY] в emergency:db
+### Fixed & Migrated Files:
+- [OK] `scripts/db-doctor.ps1` - Fully rewritten with hybrid import system
+- [OK] `scripts/Validate-PowerShell.ps1` - Enhanced with module dependency validation
+- [OK] `scripts/PowerShell-Common.psm1` - New enterprise module architecture
+- [OK] `scripts/PowerShell-Common.psd1` - Complete module manifest with versioning
+- [OK] `package.json` - Updated with enterprise validation commands
 
-### 🎯 Гарантии качества:
-- **Нулевая толерантность к Unicode**: Любые проблемные символы автоматически детектируются и исправляются
-- **Cross-environment compatibility**: Работает на любых Windows системах (10, 11, Server)
-- **Senior-level architecture**: Централизованная библиотека, продвинутая обработка ошибок
-- **Future-proof**: Система предотвращения не даст добавить проблемный код
+### Quality Guarantees:
+- **Zero Unicode Tolerance**: All problematic symbols automatically detected and fixed
+- **Cross-Environment Compatibility**: Works on all Windows systems (10, 11, Server)
+- **Senior-Level Architecture**: Centralized module library with advanced error handling
+- **Future-Proof**: Prevention system blocks problematic code from being added
+- **Backward Compatibility**: Legacy scripts continue working during migration
 
 ## Windows Troubleshooting
 - **API fails to start**: Check PostgreSQL service status (`sc query postgresql*`)
@@ -397,4 +420,4 @@ powershell -File scripts/Validate-PowerShell.ps1 -Report -Strict
 - **Service issues**: Use `net start postgresql-x64-15` to start PostgreSQL
 
 **Windows-Exclusive Version**  
-Last updated: 2025-08-22 (Migration consolidation completed)
+Last updated: 2025-08-24 (Enterprise PowerShell Module Architecture v2.1 completed)

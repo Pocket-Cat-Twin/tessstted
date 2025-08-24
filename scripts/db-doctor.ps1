@@ -17,13 +17,47 @@ param(
     [string]$Action = "help"
 )
 
-# Import the common PowerShell library
-$commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
-if (Test-Path $commonLibPath) {
-    . $commonLibPath
-} else {
-    Write-Error "PowerShell-Common.ps1 library not found. Please ensure it exists in the scripts directory."
-    exit 1
+# Import the common PowerShell library - Hybrid Import System (Enterprise-Grade)
+# Supports both Module (.psm1) and Legacy Script (.ps1) imports
+$moduleImported = $false
+
+# Try to import the PowerShell module first (preferred method)
+try {
+    $modulePath = Join-Path $PSScriptRoot "PowerShell-Common.psd1"
+    if (Test-Path $modulePath) {
+        Write-Host "[IMPORT] Loading PowerShell-Common module..." -ForegroundColor Cyan
+        Import-Module $modulePath -Force -ErrorAction Stop
+        $moduleImported = $true
+        Write-Host "[SUCCESS] PowerShell-Common module v2.1 loaded successfully" -ForegroundColor Green
+    }
+}
+catch {
+    Write-Host "[WARNING] Module import failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "[INFO] Falling back to legacy script import..." -ForegroundColor Cyan
+}
+
+# Fallback to legacy dot-sourcing if module import failed
+if (-not $moduleImported) {
+    $commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
+    if (Test-Path $commonLibPath) {
+        Write-Host "[FALLBACK] Using legacy PowerShell-Common.ps1..." -ForegroundColor Yellow
+        . $commonLibPath
+        Write-Host "[SUCCESS] Legacy PowerShell-Common library loaded" -ForegroundColor Green
+    } else {
+        Write-Error @"
+[ERROR] PowerShell-Common library not found in either format:
+  - Module: PowerShell-Common.psd1 (preferred)
+  - Legacy: PowerShell-Common.ps1 (fallback)
+  
+Please ensure one of these files exists in the scripts directory:
+  $PSScriptRoot\PowerShell-Common.psd1
+  $PSScriptRoot\PowerShell-Common.ps1
+
+If you're using the latest version, the module files should be available.
+If you're using an older version, ensure PowerShell-Common.ps1 exists.
+"@
+        exit 1
+    }
 }
 
 Write-SafeHeader "Lolita Fashion Database Doctor v2.0" "="
