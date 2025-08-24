@@ -6,7 +6,7 @@ Modern e-commerce platform designed **exclusively for Windows environments**.
 
 **⚠️ Windows Only**: This project is designed and optimized exclusively for Windows 10/11. Other platforms are not supported.
 
-## 🚀 Quick Start
+## 🚀 Quick Start!
 
 ### Prerequisites (Windows)
 - **Bun** runtime (latest version)
