@@ -101,7 +101,7 @@ function Write-SafeHeader {
     
     Write-Host ""
     Write-Host $Title -ForegroundColor $Script:COLOR_HEADER
-    Write-Host ($Separator * $Title.Length) -ForegroundColor $Script:COLOR_BLUE
+    Write-Host ($Separator * $Title.Length) -ForegroundColor $Script:COLOR_HEADER
     Write-Host ""
 }
 
@@ -416,7 +416,7 @@ function Start-ServiceSafely {
         return $false
     }
     catch {
-        Write-SafeOutput "Failed to start $Description: $($_.Exception.Message)" -Status Error
+        Write-SafeOutput "Failed to start ${Description}: $($_.Exception.Message)" -Status Error
         return $false
     }
 }
