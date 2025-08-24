@@ -360,4 +360,4 @@ switch ($true) {
 }
 
 Write-Host ""
-Write-Host "✅ Database Doctor completed" -ForegroundColor Green
+Write-Host "✓ Database Doctor completed" -ForegroundColor Green
