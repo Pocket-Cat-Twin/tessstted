@@ -119,7 +119,7 @@ if (Test-Path ".env") {
             $name = $matches[1].Trim()
             $value = $matches[2].Trim()
             if ($name -and $value) {
-                [Environment]::SetEnvironmentVariable($name, $value, "Process")
+                [Environment]::SetEnvironmentVariable($name, $value, [System.EnvironmentVariableTarget]::Process)
                 Write-Host "   Loaded: $name" -ForegroundColor Green
             }
         }
@@ -130,14 +130,14 @@ if (Test-Path ".env") {
 }
 
 # Set development environment variables with explicit Process scope
-[Environment]::SetEnvironmentVariable("NODE_ENV", "development", "Process")
-[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", "Process")
-[Environment]::SetEnvironmentVariable("HOST", "localhost", "Process")
-[Environment]::SetEnvironmentVariable("API_PORT", "3001", "Process")
-[Environment]::SetEnvironmentVariable("API_HOST", "localhost", "Process")
+[Environment]::SetEnvironmentVariable("NODE_ENV", "development", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("HOST", "localhost", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("API_PORT", "3001", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("API_HOST", "localhost", [System.EnvironmentVariableTarget]::Process)
 
 # Explicitly remove PORT to avoid conflicts
-[Environment]::SetEnvironmentVariable("PORT", $null, "Process")
+[Environment]::SetEnvironmentVariable("PORT", $null, [System.EnvironmentVariableTarget]::Process)
 
 # Validate critical environment variables
 Write-Host "[ENV] Validating critical environment variables..." -ForegroundColor Cyan
@@ -203,14 +203,14 @@ Write-Host 'Loading environment from parent process...' -ForegroundColor Cyan
 # Inherit all environment variables from parent
 `$parentEnv = [Environment]::GetEnvironmentVariables()
 foreach (`$kvp in `$parentEnv.GetEnumerator()) {
-    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, "Process")
+    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, [System.EnvironmentVariableTarget]::Process)
 }
 
 # Set API-specific overrides
-[Environment]::SetEnvironmentVariable("NODE_ENV", "development", "Process")
-[Environment]::SetEnvironmentVariable("API_PORT", "3001", "Process")
-[Environment]::SetEnvironmentVariable("API_HOST", "localhost", "Process")
-[Environment]::SetEnvironmentVariable("PORT", `$null, "Process")
+[Environment]::SetEnvironmentVariable("NODE_ENV", "development", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("API_PORT", "3001", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("API_HOST", "localhost", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("PORT", `$null, [System.EnvironmentVariableTarget]::Process)
 
 Write-Host "Environment variables:" -ForegroundColor Cyan
 Write-Host "  DATABASE_URL: `$([Environment]::GetEnvironmentVariable('DATABASE_URL') -replace ':[^@]*@', ':***@')" -ForegroundColor White
@@ -235,14 +235,14 @@ Write-Host 'Loading environment from parent process...' -ForegroundColor Cyan
 # Inherit all environment variables from parent
 `$parentEnv = [Environment]::GetEnvironmentVariables()
 foreach (`$kvp in `$parentEnv.GetEnumerator()) {
-    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, "Process")
+    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, [System.EnvironmentVariableTarget]::Process)
 }
 
 # Set Web-specific overrides
-[Environment]::SetEnvironmentVariable("NODE_ENV", "development", "Process")
-[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", "Process")
-[Environment]::SetEnvironmentVariable("HOST", "localhost", "Process")
-[Environment]::SetEnvironmentVariable("API_PORT", `$null, "Process")
+[Environment]::SetEnvironmentVariable("NODE_ENV", "development", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("HOST", "localhost", [System.EnvironmentVariableTarget]::Process)
+[Environment]::SetEnvironmentVariable("API_PORT", `$null, [System.EnvironmentVariableTarget]::Process)
 
 Write-Host "Environment variables:" -ForegroundColor Cyan
 Write-Host "  PUBLIC_API_URL: `$([Environment]::GetEnvironmentVariable('PUBLIC_API_URL'))" -ForegroundColor White
