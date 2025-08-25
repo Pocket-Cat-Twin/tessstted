@@ -6,6 +6,9 @@
   import Footer from '$lib/components/layout/Footer.svelte';
   import '../app.css';
 
+  // Импорт диагностики API в development режиме
+  import '$lib/utils/api-diagnostics';
+
   onMount(() => {
     // Initialize stores
     authStore.init();
