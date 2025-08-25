@@ -9,7 +9,7 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { users } from "./users.js";
+import { users } from "./users";
 
 // User subscription tier enum
 export const subscriptionTierEnum = pgEnum("subscription_tier", [

@@ -8,7 +8,7 @@ import {
   json,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { users } from "./users.js";
+import { users } from "./users";
 
 // Story status enum
 export const storyStatusEnum = pgEnum("story_status", [

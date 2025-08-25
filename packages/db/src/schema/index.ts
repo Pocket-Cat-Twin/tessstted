@@ -1,35 +1,35 @@
 // Export all tables and schemas
-export * from "./users.js";
-export * from "./customers.js";
-export * from "./orders.js";
-export * from "./stories.js";
-export * from "./config.js";
-export * from "./subscriptions.js";
-export * from "./blog.js";
-export * from "./verification.js";
-export * from "./notifications.js";
-export * from "./webhooks.js";
+export * from "./users";
+export * from "./customers";
+export * from "./orders";
+export * from "./stories";
+export * from "./config";
+export * from "./subscriptions";
+export * from "./blog";
+export * from "./verification";
+export * from "./notifications";
+export * from "./webhooks";
 
 // Export relations for Drizzle ORM
 import { relations } from "drizzle-orm";
-import { users, userSessions } from "./users.js";
-import { customers, customerAddresses } from "./customers.js";
-import { orders, orderGoods, orderStatusHistory } from "./orders.js";
-import { stories } from "./stories.js";
-import { uploads } from "./config.js";
-import { userSubscriptions, subscriptionHistory } from "./subscriptions.js";
+import { users, userSessions } from "./users";
+import { customers, customerAddresses } from "./customers";
+import { orders, orderGoods, orderStatusHistory } from "./orders";
+import { stories } from "./stories";
+import { uploads } from "./config";
+import { userSubscriptions, subscriptionHistory } from "./subscriptions";
 import {
   blogCategories,
   storyCategoryRelations,
   storyTags,
   storyTagRelations,
-} from "./blog.js";
-import { verificationTokens } from "./verification.js";
+} from "./blog";
+import { verificationTokens } from "./verification";
 import {
   notificationHistory,
   notificationPreferences,
-} from "./notifications.js";
-import { webhookSubscriptions, webhookLogs } from "./webhooks.js";
+} from "./notifications";
+import { webhookSubscriptions, webhookLogs } from "./webhooks";
 
 // User relations
 export const usersRelations = relations(users, ({ many, one }) => ({

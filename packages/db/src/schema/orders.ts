@@ -10,8 +10,8 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { users } from "./users.js";
-import { customers } from "./customers.js";
+import { users } from "./users";
+import { customers } from "./customers";
 
 // Order status enum
 export const orderStatusEnum = pgEnum("order_status", [

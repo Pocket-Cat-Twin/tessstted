@@ -1,8 +1,8 @@
--- ПОЛНАЯ КОНСОЛИДИРОВАННАЯ СХЕМА БД
--- Версия: 0000 (обновленная)
--- Создана: 2025-08-25
--- Описание: Полная схема базы данных со всеми таблицами, enum'ами и связями
--- Включает ВСЕ элементы схемы TypeScript
+-- Migration: Consolidated Database Schema
+-- Version: 0000
+-- Created: 2025-08-22
+-- Description: Complete database schema with all tables, enums, and relationships
+-- This consolidates migrations 0000, 0001, 0002 plus all missing schema tables
 
 -- ===============================================
 -- STEP 1: CREATE ALL ENUMS
@@ -23,13 +23,6 @@ END $$;
 
 DO $$ BEGIN
  CREATE TYPE "registration_method" AS ENUM('email', 'phone');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
--- КРИТИЧЕСКИ ВАЖНЫЙ ENUM (был пропущен в старой миграции!)
-DO $$ BEGIN
- CREATE TYPE "user_verification_status" AS ENUM('unverified', 'partial', 'full');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -117,7 +110,7 @@ END $$;
 -- STEP 2: CREATE CORE TABLES
 -- ===============================================
 
--- Users table с ПОЛНОЙ схемой (включая все недостающие поля)
+-- Users table with multi-auth support
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	
@@ -127,7 +120,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"password" varchar(255) NOT NULL,
 	
 	-- Registration method tracking
-	"registration_method" "registration_method" NOT NULL,
+	"registration_method" "registration_method" DEFAULT 'email' NOT NULL,
 	
 	-- User information
 	"name" varchar(100),
@@ -141,18 +134,9 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"role" "user_role" DEFAULT 'user' NOT NULL,
 	"status" "user_status" DEFAULT 'pending' NOT NULL,
 	
-	-- Enhanced verification status
+	-- Verification status
 	"email_verified" boolean DEFAULT false NOT NULL,
 	"phone_verified" boolean DEFAULT false NOT NULL,
-	
-	-- Overall verification status (КРИТИЧЕСКИ ВАЖНОЕ ПОЛЕ!)
-	"overall_verification_status" "user_verification_status" DEFAULT 'unverified' NOT NULL,
-	
-	-- Security enhancements (были пропущены в старой миграции!)
-	"failed_login_attempts" integer DEFAULT 0 NOT NULL,
-	"locked_until" timestamp,
-	"email_verified_at" timestamp,
-	"phone_verified_at" timestamp,
 	
 	-- Legacy verification tokens (deprecated - use verification_tokens table)
 	"email_verification_token" varchar(255),
@@ -178,32 +162,27 @@ CREATE TABLE IF NOT EXISTS "user_sessions" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 
--- Customers table (ОБНОВЛЕННАЯ СХЕМА со всеми полями)
+-- Customers table
 CREATE TABLE IF NOT EXISTS "customers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
-	"full_name" varchar(255),  -- Было пропущено!
 	"email" varchar(255),
 	"phone" varchar(50),
-	"contact_phone" varchar(50),  -- Было пропущено!
-	"notes" text,  -- Было пропущено!
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL  -- Было пропущено!
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 
--- Customer addresses table (ОБНОВЛЕННАЯ СХЕМА)
+-- Customer addresses table
 CREATE TABLE IF NOT EXISTS "customer_addresses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"customer_id" uuid NOT NULL,
 	"address_type" varchar(50) DEFAULT 'shipping' NOT NULL,
 	"full_address" text NOT NULL,
-	"city" varchar(100) NOT NULL,
+	"city" varchar(100),
 	"postal_code" varchar(20),
 	"country" varchar(100) DEFAULT 'Россия' NOT NULL,
-	"address_comments" text,  -- Было пропущено!
 	"is_default" boolean DEFAULT false NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL  -- Было пропущено!
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 
 -- ===============================================
@@ -344,7 +323,7 @@ CREATE TABLE IF NOT EXISTS "stories" (
 CREATE TABLE IF NOT EXISTS "blog_categories" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(100) NOT NULL,
-	"slug" varchar(100) NOT NULL,
+	"slug" varchar(100) NOT NULL UNIQUE,
 	"description" text,
 	"color" varchar(7) DEFAULT '#3B82F6' NOT NULL,
 	"meta_title" varchar(255),
@@ -353,8 +332,7 @@ CREATE TABLE IF NOT EXISTS "blog_categories" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"show_on_homepage" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "blog_categories_slug_unique" UNIQUE("slug")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 
 -- Story category relations
@@ -368,14 +346,12 @@ CREATE TABLE IF NOT EXISTS "story_category_relations" (
 -- Story tags table
 CREATE TABLE IF NOT EXISTS "story_tags" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(50) NOT NULL,
-	"slug" varchar(50) NOT NULL,
+	"name" varchar(50) NOT NULL UNIQUE,
+	"slug" varchar(50) NOT NULL UNIQUE,
 	"color" varchar(7) DEFAULT '#6B7280' NOT NULL,
 	"usage_count" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "story_tags_name_unique" UNIQUE("name"),
-	CONSTRAINT "story_tags_slug_unique" UNIQUE("slug")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 
 -- Story tag relations
@@ -398,7 +374,7 @@ CREATE TABLE IF NOT EXISTS "verification_tokens" (
 	"status" "verification_status" DEFAULT 'pending' NOT NULL,
 	"email" varchar(255),
 	"phone" varchar(50),
-	"token" varchar(255) NOT NULL,
+	"token" varchar(255) NOT NULL UNIQUE,
 	"code" varchar(10) NOT NULL,
 	"attempt_count" integer DEFAULT 0 NOT NULL,
 	"max_attempts" integer DEFAULT 3 NOT NULL,
@@ -407,8 +383,7 @@ CREATE TABLE IF NOT EXISTS "verification_tokens" (
 	"ip_address" varchar(45),
 	"user_agent" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "verification_tokens_token_unique" UNIQUE("token")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 
 -- SMS logs table
@@ -499,21 +474,6 @@ CREATE TABLE IF NOT EXISTS "notification_preferences" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 
--- Email templates table
-CREATE TABLE IF NOT EXISTS "email_templates" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" text NOT NULL,
-	"display_name" text,
-	"subject" text NOT NULL,
-	"html_content" text NOT NULL,
-	"text_content" text,
-	"variables" text,
-	"is_active" boolean DEFAULT true NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "email_templates_name_unique" UNIQUE("name")
-);
-
 -- ===============================================
 -- STEP 8: CREATE WEBHOOK TABLES
 -- ===============================================
@@ -571,17 +531,19 @@ CREATE TABLE IF NOT EXISTS "config" (
 	CONSTRAINT "config_key_unique" UNIQUE("key")
 );
 
--- FAQ Categories table (было ПОЛНОСТЬЮ пропущено в старой миграции!)
-CREATE TABLE IF NOT EXISTS "faq_categories" (
+-- Email templates table
+CREATE TABLE IF NOT EXISTS "email_templates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(100) NOT NULL,
-	"slug" varchar(100) NOT NULL,
-	"description" text,
-	"order" integer DEFAULT 0 NOT NULL,
+	"display_name" text,
+	"subject" varchar(255) NOT NULL,
+	"html_content" text NOT NULL,
+	"text_content" text,
+	"variables" text,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "faq_categories_slug_unique" UNIQUE("slug")
+	CONSTRAINT "email_templates_name_unique" UNIQUE("name")
 );
 
 -- FAQs table
@@ -771,13 +733,6 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
--- Notification history
-DO $$ BEGIN
- ALTER TABLE "notification_history" ADD CONSTRAINT "notification_history_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
 -- Webhook logs
 DO $$ BEGIN
  ALTER TABLE "webhook_logs" ADD CONSTRAINT "webhook_logs_subscription_id_webhook_subscriptions_id_fk" FOREIGN KEY ("subscription_id") REFERENCES "webhook_subscriptions"("id") ON DELETE cascade ON UPDATE no action;
@@ -798,7 +753,7 @@ END $$;
 
 -- Function to cleanup expired verification tokens
 CREATE OR REPLACE FUNCTION cleanup_expired_verification_tokens() 
-RETURNS void AS $
+RETURNS void AS $$
 BEGIN
     DELETE FROM "verification_tokens" 
     WHERE "expires_at" < NOW() 
@@ -807,16 +762,16 @@ BEGIN
     DELETE FROM "verification_rate_limit" 
     WHERE "window_start" < NOW() - INTERVAL '24 hours';
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Function to auto-update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Apply triggers for updated_at columns
 DROP TRIGGER IF EXISTS update_users_updated_at ON "users";
@@ -899,13 +854,8 @@ CREATE TRIGGER update_email_templates_updated_at
     BEFORE UPDATE ON "email_templates" 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_faq_categories_updated_at ON "faq_categories";
-CREATE TRIGGER update_faq_categories_updated_at 
-    BEFORE UPDATE ON "faq_categories" 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 -- ===============================================
--- STEP 13: COMPLETION LOG
+-- STEP 13: LOG MIGRATION COMPLETION
 -- ===============================================
 
 -- Mark migration as completed
@@ -914,23 +864,23 @@ VALUES (
     'migration_consolidated_completed', 
     'true', 
     'boolean', 
-    'Consolidated database schema migration completed on ' || NOW()::text || ' - ПОЛНАЯ СХЕМА СО ВСЕМИ ЭЛЕМЕНТАМИ',
+    'Consolidated database schema migration completed on ' || NOW()::text,
     NOW()
 ) ON CONFLICT ("key") DO UPDATE SET 
     "value" = 'true',
     "updated_at" = NOW();
 
--- ===============================================
--- MIGRATION COMPLETED SUCCESSFULLY
--- ===============================================
-
--- ✅ ПОЛНАЯ СХЕМА ВКЛЮЧАЕТ:
--- ✅ 28 таблиц со всеми колонками из TypeScript schema
--- ✅ 16 enum'ов включая user_verification_status
--- ✅ Все индексы и constraints
--- ✅ Все foreign key связи
--- ✅ Функции и triggers для updated_at
--- ✅ Критически важные поля: overall_verification_status, failed_login_attempts, etc.
--- ✅ Недостающие таблицы: faq_categories
--- ✅ Все недостающие колонки в users, customers, customer_addresses
--- ✅ Полная совместимость с TypeScript schema files
+-- Migration completed successfully
+-- Complete schema with all features:
+-- ✅ Multi-auth support (email OR phone registration)
+-- ✅ Order management with commission calculation
+-- ✅ Subscription system with tiers and features
+-- ✅ Content management (stories, blog, categories, tags)
+-- ✅ Verification system with SMS and email support
+-- ✅ Notification system with preferences
+-- ✅ Webhook system for integrations
+-- ✅ Configuration and template management
+-- ✅ Rate limiting and comprehensive logging
+-- ✅ Performance indexes and constraints
+-- ✅ Triggers for automatic timestamp updates
+-- ✅ Functions for cleanup and maintenance
