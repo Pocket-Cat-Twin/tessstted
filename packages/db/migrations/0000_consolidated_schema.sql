@@ -798,7 +798,7 @@ END $$;
 
 -- Function to cleanup expired verification tokens
 CREATE OR REPLACE FUNCTION cleanup_expired_verification_tokens() 
-RETURNS void AS $
+RETURNS void AS $$
 BEGIN
     DELETE FROM "verification_tokens" 
     WHERE "expires_at" < NOW() 
@@ -807,16 +807,16 @@ BEGIN
     DELETE FROM "verification_rate_limit" 
     WHERE "window_start" < NOW() - INTERVAL '24 hours';
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Function to auto-update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Apply triggers for updated_at columns
 DROP TRIGGER IF EXISTS update_users_updated_at ON "users";
