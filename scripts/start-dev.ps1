@@ -198,24 +198,19 @@ else {
     $apiCommand = @"
 cd '$projectRoot\apps\api'
 Write-Host '[API] Lolita Fashion API Server' -ForegroundColor Green
-Write-Host 'Loading environment from parent process...' -ForegroundColor Cyan
 
-# Inherit all environment variables from parent
-`$parentEnv = [Environment]::GetEnvironmentVariables()
-foreach (`$kvp in `$parentEnv.GetEnumerator()) {
-    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, [System.EnvironmentVariableTarget]::Process)
-}
-
-# Set API-specific overrides
-[Environment]::SetEnvironmentVariable("NODE_ENV", "development", [System.EnvironmentVariableTarget]::Process)
-[Environment]::SetEnvironmentVariable("API_PORT", "3001", [System.EnvironmentVariableTarget]::Process)
-[Environment]::SetEnvironmentVariable("API_HOST", "localhost", [System.EnvironmentVariableTarget]::Process)
-[Environment]::SetEnvironmentVariable("PORT", `$null, [System.EnvironmentVariableTarget]::Process)
+# Set environment variables using safer `$env: syntax
+`$env:NODE_ENV = 'development'
+`$env:API_PORT = '3001' 
+`$env:API_HOST = 'localhost'
+`$env:WEB_PORT = `$null
+`$env:HOST = `$null
+Remove-Item Env:PORT -ErrorAction SilentlyContinue
 
 Write-Host "Environment variables:" -ForegroundColor Cyan
-Write-Host "  DATABASE_URL: `$([Environment]::GetEnvironmentVariable('DATABASE_URL') -replace ':[^@]*@', ':***@')" -ForegroundColor White
-Write-Host "  API_PORT: `$([Environment]::GetEnvironmentVariable('API_PORT'))" -ForegroundColor White
-Write-Host "  NODE_ENV: `$([Environment]::GetEnvironmentVariable('NODE_ENV'))" -ForegroundColor White
+Write-Host "  NODE_ENV: `$env:NODE_ENV" -ForegroundColor White
+Write-Host "  API_PORT: `$env:API_PORT" -ForegroundColor White
+Write-Host "  API_HOST: `$env:API_HOST" -ForegroundColor White
 
 Write-Host 'Starting API server...' -ForegroundColor Green
 bun --hot src/index-db.ts
@@ -230,25 +225,18 @@ bun --hot src/index-db.ts
     $webCommand = @"
 cd '$projectRoot\apps\web'
 Write-Host '[WEB] Lolita Fashion Web App' -ForegroundColor Blue
-Write-Host 'Loading environment from parent process...' -ForegroundColor Cyan
 
-# Inherit all environment variables from parent
-`$parentEnv = [Environment]::GetEnvironmentVariables()
-foreach (`$kvp in `$parentEnv.GetEnumerator()) {
-    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, [System.EnvironmentVariableTarget]::Process)
-}
-
-# Set Web-specific overrides
-[Environment]::SetEnvironmentVariable("NODE_ENV", "development", [System.EnvironmentVariableTarget]::Process)
-[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", [System.EnvironmentVariableTarget]::Process)
-[Environment]::SetEnvironmentVariable("HOST", "localhost", [System.EnvironmentVariableTarget]::Process)
-[Environment]::SetEnvironmentVariable("API_PORT", `$null, [System.EnvironmentVariableTarget]::Process)
+# Set environment variables using safer `$env: syntax  
+`$env:NODE_ENV = 'development'
+`$env:WEB_PORT = '5173'
+`$env:HOST = 'localhost'
+`$env:API_PORT = `$null
+Remove-Item Env:API_PORT -ErrorAction SilentlyContinue
 
 Write-Host "Environment variables:" -ForegroundColor Cyan
-Write-Host "  PUBLIC_API_URL: `$([Environment]::GetEnvironmentVariable('PUBLIC_API_URL'))" -ForegroundColor White
-Write-Host "  WEB_PORT: `$([Environment]::GetEnvironmentVariable('WEB_PORT'))" -ForegroundColor White
-Write-Host "  HOST: `$([Environment]::GetEnvironmentVariable('HOST'))" -ForegroundColor White
-Write-Host "  NODE_ENV: `$([Environment]::GetEnvironmentVariable('NODE_ENV'))" -ForegroundColor White
+Write-Host "  NODE_ENV: `$env:NODE_ENV" -ForegroundColor White
+Write-Host "  WEB_PORT: `$env:WEB_PORT" -ForegroundColor White
+Write-Host "  HOST: `$env:HOST" -ForegroundColor White
 
 Write-Host 'Starting Web server...' -ForegroundColor Blue
 vite dev --host localhost
