@@ -833,6 +833,21 @@ new Elysia()
     }
   })
 
+  // 404 handler
+  .onError(({ code, error, set }) => {
+    if (code === "NOT_FOUND") {
+      set.status = 404;
+      return {
+        success: false,
+        error: "Endpoint not found",
+        message: "The requested resource does not exist",
+      };
+    }
+
+    // Let other errors propagate
+    throw error;
+  })
+
   // Initialize enhanced database system and seed test data
   .onStart(async () => {
     console.log("🔄 Initializing enhanced database system...");
