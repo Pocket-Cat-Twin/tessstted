@@ -83,11 +83,13 @@ export class ApiClient {
     return this.request<{ user: any }>("/auth/me");
   }
 
+  // Email verification removed - users are auto-activated
   async verifyEmail(token: string) {
-    return this.request("/auth/verify-email", {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    });
+    console.warn("⚠️ Email verification is deprecated - users are auto-activated");
+    return {
+      success: true,
+      message: "User already verified - no action needed"
+    };
   }
 
   async forgotPassword(email: string) {
@@ -297,18 +299,21 @@ export class ApiClient {
   }
 
   // Verification methods
+  // Phone verification removed - users are auto-activated
   async verifyPhone(data: { token: string; code: string }) {
-    return this.request("/auth/verify-phone", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    console.warn("⚠️ Phone verification is deprecated - users are auto-activated");
+    return {
+      success: true,
+      message: "User already verified - no action needed"
+    };
   }
 
   async resendPhoneVerification(data: { token: string }) {
-    return this.request("/auth/resend-phone-verification", {
-      method: "POST", 
-      body: JSON.stringify(data),
-    });
+    console.warn("⚠️ Phone verification is deprecated - users are auto-activated");
+    return {
+      success: true,
+      message: "No verification needed - user already active"
+    };
   }
 }
 

@@ -295,42 +295,108 @@ class ApiClient {
   }
 
   // Auth methods - с улучшенной валидацией и логированием
-  async login(email: string, password: string) {
-    console.log("🔐 Attempting login for:", email);
+  async login(loginData: {
+    loginMethod: 'email' | 'phone';
+    email?: string;
+    phone?: string;
+    password: string;
+  }) {
+    const { loginMethod, email, phone, password } = loginData;
+    const identifier = loginMethod === 'email' ? email : phone;
+    console.log("🔐 Attempting login with", loginMethod, "for:", identifier);
     
-    if (!email || !password) {
+    if (!password) {
       return {
         success: false,
         error: "VALIDATION_ERROR",
-        message: "Email and password are required",
+        message: "Password is required",
+      };
+    }
+    
+    if (loginMethod === 'email' && !email) {
+      return {
+        success: false,
+        error: "VALIDATION_ERROR",
+        message: "Email is required for email login",
+      };
+    }
+    
+    if (loginMethod === 'phone' && !phone) {
+      return {
+        success: false,
+        error: "VALIDATION_ERROR",
+        message: "Phone number is required for phone login",
       };
     }
     
     return this.request(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(loginData),
     });
   }
 
   async register(userData: {
-    email: string;
+    registrationMethod: 'email' | 'phone';
+    email?: string;
+    phone?: string;
     password: string;
     name: string;
-    phone?: string;
   }) {
-    console.log("📝 Attempting registration for:", userData.email);
+    const { registrationMethod, email, phone, password, name } = userData;
+    const identifier = registrationMethod === 'email' ? email : phone;
+    console.log("📝 Attempting registration with", registrationMethod, "for:", identifier);
     
-    if (!userData.email || !userData.password || !userData.name) {
+    if (!password || !name) {
       return {
         success: false,
         error: "VALIDATION_ERROR",
-        message: "Email, password, and name are required",
+        message: "Password and name are required",
+      };
+    }
+    
+    if (registrationMethod === 'email' && !email) {
+      return {
+        success: false,
+        error: "VALIDATION_ERROR",
+        message: "Email is required for email registration",
+      };
+    }
+    
+    if (registrationMethod === 'phone' && !phone) {
+      return {
+        success: false,
+        error: "VALIDATION_ERROR",
+        message: "Phone number is required for phone registration",
       };
     }
     
     return this.request(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
       method: "POST",
       body: JSON.stringify(userData),
+    });
+  }
+
+  // Legacy methods for backward compatibility
+  async loginLegacy(email: string, password: string) {
+    return this.login({
+      loginMethod: 'email',
+      email,
+      password
+    });
+  }
+
+  async registerLegacy(userData: {
+    email: string;
+    password: string;
+    name: string;
+    phone?: string;
+  }) {
+    return this.register({
+      registrationMethod: 'email',
+      email: userData.email,
+      password: userData.password,
+      name: userData.name,
+      phone: userData.phone,
     });
   }
 
@@ -832,39 +898,22 @@ class ApiClient {
     }
   }
 
-  // Verification methods - с валидацией параметров
+  // Verification methods removed - no verification required
+  // Legacy placeholders for backward compatibility
   async verifyPhone(data: { token: string; code: string }) {
-    console.log("📱 Verifying phone number");
-    
-    if (!data.token || !data.code) {
-      return {
-        success: false,
-        error: "VALIDATION_ERROR",
-        message: "Token and verification code are required",
-      };
-    }
-    
-    return this.request(API_CONFIG.ENDPOINTS.AUTH.VERIFY_PHONE, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    console.warn("⚠️ Verification methods are deprecated - users are auto-activated");
+    return {
+      success: true,
+      message: "User already verified - no action needed"
+    };
   }
 
   async resendPhoneVerification(data: { token: string }) {
-    console.log("🔄 Resending phone verification");
-    
-    if (!data.token) {
-      return {
-        success: false,
-        error: "VALIDATION_ERROR",
-        message: "Token is required",
-      };
-    }
-    
-    return this.request(API_CONFIG.ENDPOINTS.AUTH.RESEND_PHONE_VERIFICATION, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    console.warn("⚠️ Verification methods are deprecated - users are auto-activated");
+    return {
+      success: true,
+      message: "No verification needed - user already active"
+    };
   }
   
   // Методы для диагностики и валидации системы

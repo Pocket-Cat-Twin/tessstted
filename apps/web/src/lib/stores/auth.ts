@@ -55,11 +55,17 @@ function createAuthStore() {
     },
 
     // Login
-    login: async (email: string, password: string) => {
+    login: async (loginData: {
+      loginMethod: 'email' | 'phone';
+      email?: string;
+      phone?: string;
+      password: string;
+    }) => {
+      const { loginMethod, email, phone, password } = loginData;
       update((state) => ({ ...state, loading: true }));
 
       try {
-        const response = await api.login(email, password);
+        const response = await api.login({ loginMethod, email, phone, password });
         if (response.success && response.data) {
           // Store token
           if (browser && response.data.token) {
@@ -89,12 +95,22 @@ function createAuthStore() {
       }
     },
 
+    // Legacy login method for backward compatibility
+    loginLegacy: async (email: string, password: string) => {
+      return await authStore.login({
+        loginMethod: 'email',
+        email,
+        password
+      });
+    },
+
     // Register
     register: async (userData: {
-      email: string;
+      registrationMethod: 'email' | 'phone';
+      email?: string;
+      phone?: string;
       password: string;
       name: string;
-      phone?: string;
     }) => {
       update((state) => ({ ...state, loading: true }));
 

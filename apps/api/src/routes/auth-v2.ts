@@ -96,7 +96,7 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
         name,
         fullName,
         role: UserRole.USER,
-        status: UserStatus.PENDING,
+        status: UserStatus.ACTIVE,
         emailVerified: false,
         phoneVerified: false,
       };
@@ -217,22 +217,8 @@ export const authV2Routes = new Elysia({ prefix: "/auth/v2" })
         throw new UnauthorizedError("Account is blocked");
       }
 
-      // Check if user needs verification
-      const needsVerification =
-        loginMethod === "email" ? !user.emailVerified : !user.phoneVerified;
-
-      if (needsVerification && user.status === UserStatus.PENDING) {
-        return {
-          success: false,
-          needsVerification: true,
-          verificationType: loginMethod,
-          message: `Please verify your ${loginMethod} before logging in`,
-          data: {
-            userId: user.id,
-            [loginMethod]: loginMethod === "email" ? user.email : user.phone,
-          },
-        };
-      }
+      // No verification needed - users are auto-activated
+      // Verification logic removed for consistency with main auth routes
 
       // Generate JWT token
       const token = await jwtService.sign({

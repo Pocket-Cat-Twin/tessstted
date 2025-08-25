@@ -3,13 +3,21 @@
   import { authStore } from '$lib/stores/auth';
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
-  import { validateLoginForm, validateField } from '$lib/utils/validation';
+  import { 
+    validateLoginForm, 
+    validateField,
+    detectAuthMethod,
+    applyPhoneMask,
+    type AuthMethod
+  } from '$lib/utils/validation-enhanced';
 
-  let email = '';
+  let loginMethod: AuthMethod = 'email';
+  let loginContact = '';
   let password = '';
   let error = '';
   let loading = false;
   let fieldErrors: Record<string, string> = {};
+  let autoDetect = true; // Auto-detect login method from input
 
   $: user = $authStore.user;
 
@@ -18,9 +26,42 @@
     goto('/');
   }
 
+  // Auto-detect login method when typing
+  $: if (autoDetect && loginContact) {
+    const detected = detectAuthMethod(loginContact);
+    if (detected !== 'unknown' && detected !== loginMethod) {
+      loginMethod = detected;
+    }
+  }
+
+  // Handle login method change
+  function handleMethodChange(method: AuthMethod) {
+    loginMethod = method;
+    autoDetect = false;
+    loginContact = '';
+    fieldErrors = {};
+    error = '';
+  }
+
+  // Handle phone input masking
+  function handlePhoneInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const cursorPosition = target.selectionStart;
+    
+    if (loginMethod === 'phone') {
+      const masked = applyPhoneMask(target.value);
+      loginContact = masked;
+      
+      // Restore cursor position
+      setTimeout(() => {
+        target.setSelectionRange(cursorPosition, cursorPosition);
+      }, 0);
+    }
+  }
+
   // Real-time validation
   function validateFormField(field: string, value: string) {
-    const validation = validateField(field, value);
+    const validation = validateField(field, value, undefined, true);
     if (!validation.isValid && validation.error) {
       fieldErrors[field] = validation.error;
     } else {
@@ -35,7 +76,7 @@
     fieldErrors = {};
 
     // Validate form
-    const validation = validateLoginForm(email, password);
+    const validation = validateLoginForm(loginMethod, loginContact, password);
     if (!validation.isValid) {
       error = validation.errors.join('. ');
       return;
@@ -44,7 +85,19 @@
     loading = true;
 
     try {
-      const result = await authStore.login(email, password);
+      // Prepare login data
+      const loginData: any = {
+        loginMethod,
+        password,
+      };
+
+      if (loginMethod === 'email') {
+        loginData.email = loginContact;
+      } else {
+        loginData.phone = loginContact;
+      }
+
+      const result = await authStore.login(loginData);
       
       if (result.success) {
         goto('/');
@@ -83,6 +136,9 @@
         Вход в аккаунт
       </h2>
       <p class="mt-2 text-sm text-gray-600">
+        Ты мечтаешь — мы исполняем
+      </p>
+      <p class="mt-2 text-sm text-gray-600">
         Или 
         <a href="/register" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
           создайте новый аккаунт
@@ -90,24 +146,74 @@
       </p>
     </div>
 
+    <!-- Login Method Selection -->
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <h3 class="text-sm font-medium text-gray-900 mb-3">Способ входа</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          class="flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-colors {loginMethod === 'email' ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}"
+          on:click={() => handleMethodChange('email')}
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Email
+        </button>
+        <button
+          type="button"
+          class="flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-colors {loginMethod === 'phone' ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}"
+          on:click={() => handleMethodChange('phone')}
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          Телефон
+        </button>
+      </div>
+      {#if autoDetect}
+        <p class="text-xs text-gray-500 mt-2 text-center">
+          💡 Система автоматически определит способ входа при вводе
+        </p>
+      {/if}
+    </div>
+
     <!-- Form -->
     <form class="mt-8 space-y-6" on:submit|preventDefault={handleSubmit}>
       <div class="space-y-4">
-        <!-- Email -->
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          label="Email адрес"
-          placeholder="Введите ваш email"
-          bind:value={email}
-          required
-          autocomplete="email"
-          disabled={loading}
-          error={fieldErrors.email}
-          on:keydown={handleKeydown}
-          on:blur={() => validateFormField('email', email)}
-        />
+        <!-- Contact Input (Email or Phone) -->
+        {#if loginMethod === 'email'}
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            label="Email адрес"
+            placeholder="Введите ваш email"
+            bind:value={loginContact}
+            required
+            autocomplete="email"
+            disabled={loading}
+            error={fieldErrors.email}
+            on:keydown={handleKeydown}
+            on:blur={() => validateFormField('email', loginContact)}
+          />
+        {:else}
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            label="Номер телефона"
+            placeholder="+7 (999) 123-45-67"
+            bind:value={loginContact}
+            required
+            autocomplete="tel"
+            disabled={loading}
+            error={fieldErrors.phone}
+            on:keydown={handleKeydown}
+            on:input={handlePhoneInput}
+            on:blur={() => validateFormField('phone', loginContact)}
+          />
+        {/if}
 
         <!-- Password -->
         <Input
@@ -150,7 +256,7 @@
         size="lg"
         fullWidth
         {loading}
-        disabled={loading || !email || !password}
+        disabled={loading || !loginContact || !password}
       >
         {loading ? 'Вход...' : 'Войти'}
       </Button>
@@ -189,7 +295,7 @@
     <!-- Footer links -->
     <div class="text-center space-y-2">
       <p class="text-xs text-gray-500">
-        Продолжая, вы соглашаетесь с нашими
+        🔒 Ваши данные защищены и не передаются третьим лицам
       </p>
       <div class="flex justify-center space-x-4 text-xs">
         <a href="/terms" class="text-primary-600 hover:text-primary-500 transition-colors">

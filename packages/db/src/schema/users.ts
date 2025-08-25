@@ -55,7 +55,7 @@ export const users = pgTable("users", {
 
   // User role and status
   role: userRoleEnum("role").default("user").notNull(),
-  status: userStatusEnum("status").default("pending").notNull(),
+  status: userStatusEnum("status").default("active").notNull(),
 
   // Enhanced verification status
   emailVerified: boolean("email_verified").default(false).notNull(),

@@ -4,18 +4,32 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import PasswordStrength from '$lib/components/ui/PasswordStrength.svelte';
-  import { validateRegisterForm, validateField } from '$lib/utils/validation';
+  import { 
+    validateRegisterForm, 
+    normalizePhoneNumber,
+    applyPhoneMask,
+    createFormValidator,
+    type RegistrationMethod
+  } from '$lib/utils/validation-enhanced';
 
-  let email = '';
+  // Form state
+  let registrationMethod: RegistrationMethod = 'email';
+  let primaryContact = '';
+  let secondaryContact = '';
   let password = '';
   let confirmPassword = '';
   let name = '';
-  let phone = '';
+  let acceptTerms = false;
+
+  // UI state
   let error = '';
   let success = '';
   let loading = false;
-  let fieldErrors: Record<string, string> = {};
-  let acceptTerms = false;
+  let showAdvanced = false;
+
+  // Form validator
+  const validator = createFormValidator();
+  $: fieldErrors = validator.getErrors();
 
   $: user = $authStore.user;
 
@@ -24,22 +38,61 @@
     goto('/');
   }
 
-  // Real-time validation
-  function validateFormField(field: string, value: string, additionalValue?: string) {
-    const validation = validateField(field, value, additionalValue);
-    if (!validation.isValid && validation.error) {
-      fieldErrors[field] = validation.error;
-    } else {
-      delete fieldErrors[field];
-    }
-    fieldErrors = { ...fieldErrors };
+  // Handle registration method change
+  function handleMethodChange(method: RegistrationMethod) {
+    registrationMethod = method;
+    primaryContact = '';
+    secondaryContact = '';
+    validator.clearAllErrors();
+    error = '';
   }
 
+  // Real-time validation for primary contact
+  function validatePrimaryContact() {
+    const field = registrationMethod === 'email' ? 'email' : 'phone';
+    validator.validate(field, primaryContact, undefined, true);
+  }
+
+  // Real-time validation for secondary contact
+  function validateSecondaryContact() {
+    if (!secondaryContact) {
+      const field = registrationMethod === 'email' ? 'phone' : 'email';
+      validator.clearError(field);
+      return;
+    }
+    
+    const field = registrationMethod === 'email' ? 'phone' : 'email';
+    validator.validate(field, secondaryContact, undefined, false);
+  }
+
+  // Handle phone input masking
+  function handlePhoneInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const cursorPosition = target.selectionStart;
+    const masked = applyPhoneMask(target.value);
+    
+    if (registrationMethod === 'phone') {
+      primaryContact = masked;
+    } else {
+      secondaryContact = masked;
+    }
+    
+    // Restore cursor position
+    setTimeout(() => {
+      target.setSelectionRange(cursorPosition, cursorPosition);
+    }, 0);
+  }
+
+  // Form validation
+  function validateFormField(field: string, value: string, additionalValue?: string) {
+    validator.validate(field, value, additionalValue, true);
+  }
+
+  // Form submission
   async function handleSubmit() {
-    // Clear previous errors
     error = '';
     success = '';
-    fieldErrors = {};
+    validator.clearAllErrors();
 
     // Check terms acceptance
     if (!acceptTerms) {
@@ -48,7 +101,15 @@
     }
 
     // Validate form
-    const validation = validateRegisterForm(email, password, confirmPassword, name, phone);
+    const validation = validateRegisterForm(
+      registrationMethod,
+      primaryContact,
+      password,
+      confirmPassword,
+      name,
+      secondaryContact || undefined
+    );
+
     if (!validation.isValid) {
       error = validation.errors.join('. ');
       return;
@@ -57,26 +118,45 @@
     loading = true;
 
     try {
-      const result = await authStore.register({
-        email,
+      // Prepare registration data
+      const registrationData: any = {
+        registrationMethod,
         password,
         name,
-        phone: phone || undefined
-      });
+      };
+
+      if (registrationMethod === 'email') {
+        registrationData.email = primaryContact;
+        if (secondaryContact) {
+          registrationData.phone = normalizePhoneNumber(secondaryContact);
+        }
+      } else {
+        registrationData.phone = normalizePhoneNumber(primaryContact);
+        if (secondaryContact) {
+          registrationData.email = secondaryContact;
+        }
+      }
+
+      const result = await authStore.register(registrationData);
       
       if (result.success) {
-        success = result.message || 'Регистрация успешна! Проверьте вашу почту для подтверждения email.';
+        success = result.message || 'Регистрация успешна!';
+        
         // Clear form
-        email = '';
+        primaryContact = '';
+        secondaryContact = '';
         password = '';
         confirmPassword = '';
         name = '';
-        phone = '';
         acceptTerms = false;
+        
+        // Registration complete - redirect to login or auto-login
+        goto('/login?message=' + encodeURIComponent('Регистрация завершена! Войдите в систему'));
       } else {
         error = result.message || 'Ошибка регистрации';
       }
     } catch (err) {
+      console.error('Registration error:', err);
       error = 'Ошибка подключения к серверу';
     } finally {
       loading = false;
@@ -108,11 +188,41 @@
         Создание аккаунта
       </h2>
       <p class="mt-2 text-sm text-gray-600">
+        Ты мечтаешь — мы исполняем
+      </p>
+      <p class="mt-2 text-sm text-gray-600">
         Или 
         <a href="/login" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
           войдите в существующий аккаунт
         </a>
       </p>
+    </div>
+
+    <!-- Registration Method Selection -->
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <h3 class="text-sm font-medium text-gray-900 mb-3">Способ регистрации</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          class="flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-colors {registrationMethod === 'email' ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}"
+          on:click={() => handleMethodChange('email')}
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Email
+        </button>
+        <button
+          type="button"
+          class="flex items-center justify-center px-4 py-2 border rounded-md text-sm font-medium transition-colors {registrationMethod === 'phone' ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}"
+          on:click={() => handleMethodChange('phone')}
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          Телефон
+        </button>
+      </div>
     </div>
 
     <!-- Form -->
@@ -134,37 +244,93 @@
           on:blur={() => validateFormField('name', name)}
         />
 
-        <!-- Email -->
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          label="Email адрес"
-          placeholder="Введите ваш email"
-          bind:value={email}
-          required
-          autocomplete="email"
-          disabled={loading}
-          error={fieldErrors.email}
-          on:keydown={handleKeydown}
-          on:blur={() => validateFormField('email', email)}
-        />
+        <!-- Primary Contact (Email or Phone) -->
+        {#if registrationMethod === 'email'}
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            label="Email адрес"
+            placeholder="Введите ваш email"
+            bind:value={primaryContact}
+            required
+            autocomplete="email"
+            disabled={loading}
+            error={fieldErrors.email}
+            helperText="Основной способ связи и входа"
+            on:keydown={handleKeydown}
+            on:blur={validatePrimaryContact}
+          />
+        {:else}
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            label="Номер телефона"
+            placeholder="+7 (999) 123-45-67"
+            bind:value={primaryContact}
+            required
+            autocomplete="tel"
+            disabled={loading}
+            error={fieldErrors.phone}
+            helperText="Основной способ связи и входа"
+            on:keydown={handleKeydown}
+            on:input={handlePhoneInput}
+            on:blur={validatePrimaryContact}
+          />
+        {/if}
 
-        <!-- Phone -->
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          label="Телефон"
-          placeholder="Введите ваш телефон (необязательно)"
-          bind:value={phone}
-          autocomplete="tel"
-          disabled={loading}
-          helperText="Используется для связи по заказам"
-          error={fieldErrors.phone}
-          on:keydown={handleKeydown}
-          on:blur={() => validateFormField('phone', phone)}
-        />
+        <!-- Advanced Options Toggle -->
+        <div class="text-center">
+          <button
+            type="button"
+            class="text-sm text-primary-600 hover:text-primary-500 transition-colors"
+            on:click={() => showAdvanced = !showAdvanced}
+          >
+            {showAdvanced ? 'Скрыть' : 'Дополнительные контакты'}
+            <svg class="w-4 h-4 inline ml-1 transform transition-transform {showAdvanced ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Secondary Contact (Optional) -->
+        {#if showAdvanced}
+          <div class="bg-gray-50 p-4 rounded-lg border">
+            {#if registrationMethod === 'email'}
+              <Input
+                id="phone-secondary"
+                name="phone-secondary"
+                type="tel"
+                label="Телефон (необязательно)"
+                placeholder="+7 (999) 123-45-67"
+                bind:value={secondaryContact}
+                autocomplete="tel"
+                disabled={loading}
+                error={fieldErrors.phone}
+                helperText="Дополнительный способ связи для заказов"
+                on:keydown={handleKeydown}
+                on:input={handlePhoneInput}
+                on:blur={validateSecondaryContact}
+              />
+            {:else}
+              <Input
+                id="email-secondary"
+                name="email-secondary"
+                type="email"
+                label="Email (необязательно)"
+                placeholder="Введите email"
+                bind:value={secondaryContact}
+                autocomplete="email"
+                disabled={loading}
+                error={fieldErrors.email}
+                helperText="Дополнительный способ связи для уведомлений"
+                on:keydown={handleKeydown}
+                on:blur={validateSecondaryContact}
+              />
+            {/if}
+          </div>
+        {/if}
 
         <!-- Password -->
         <div>
@@ -173,7 +339,7 @@
             name="password"
             type="password"
             label="Пароль"
-            placeholder="Создайте пароль"
+            placeholder="Создайте надежный пароль"
             bind:value={password}
             required
             autocomplete="new-password"
@@ -252,7 +418,7 @@
         size="lg"
         fullWidth
         {loading}
-        disabled={loading || !email || !password || !confirmPassword || !name || !acceptTerms}
+        disabled={loading || !primaryContact || !password || !confirmPassword || !name || !acceptTerms}
       >
         {loading ? 'Создание аккаунта...' : 'Создать аккаунт'}
       </Button>

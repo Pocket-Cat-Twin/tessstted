@@ -150,16 +150,8 @@
         name = '';
         acceptTerms = false;
         
-        // Redirect based on verification method
-        if ((result as any).data?.requiresVerification) {
-          if ((result as any).data.verificationMethod === 'email') {
-            goto('/verify-email?message=' + encodeURIComponent('Проверьте почту для подтверждения регистрации'));
-          } else {
-            goto('/verify-phone?message=' + encodeURIComponent('Введите код из SMS для подтверждения регистрации'));
-          }
-        } else {
-          goto('/login?message=' + encodeURIComponent('Регистрация завершена! Войдите в систему'));
-        }
+        // Registration complete - redirect to login or auto-login
+        goto('/login?message=' + encodeURIComponent('Регистрация завершена! Войдите в систему'));
       } else {
         error = result.message || 'Ошибка регистрации';
       }
@@ -466,12 +458,9 @@
 
     <!-- Info note -->
     {#if !success}
-      <div class="text-center space-y-2">
+      <div class="text-center">
         <p class="text-xs text-gray-500">
           🔒 Ваши данные защищены и не передаются третьим лицам
-        </p>
-        <p class="text-xs text-gray-500">
-          {registrationMethod === 'email' ? 'После регистрации проверьте почту' : 'После регистрации введите код из SMS'}
         </p>
       </div>
     {/if}

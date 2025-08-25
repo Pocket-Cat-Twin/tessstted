@@ -8,7 +8,6 @@ import {
   userLoginSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
-  emailVerificationSchema,
   UserStatus,
   UserRole,
   generateRandomString,
@@ -20,7 +19,8 @@ import {
   DuplicateError,
 } from "../middleware/error";
 import { requireAuth } from "../middleware/auth";
-import { sendEmail, EmailType } from "../services/email";
+// Email service removed - no verification needed
+// import { sendEmail, EmailType } from "../services/email";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(
@@ -41,75 +41,93 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         throw new ValidationError("Invalid registration data");
       }
 
-      const { email, password, name, phone } = validation.data;
+      const userData = validation.data;
+      const { registrationMethod, password, name } = userData;
 
-      // Check if user already exists
-      const existingUser = email ? await db.query.users.findFirst({
-        where: eq(users.email, email),
-      }) : null;
+      // Get primary contact based on registration method
+      const primaryEmail = registrationMethod === 'email' ? userData.email : undefined;
+      const primaryPhone = registrationMethod === 'phone' ? userData.phone : undefined;
+      const secondaryEmail = registrationMethod === 'phone' ? userData.email : undefined;
+      const secondaryPhone = registrationMethod === 'email' ? userData.phone : undefined;
+
+      // Check if user already exists (check primary contact method)
+      let existingUser = null;
+      if (registrationMethod === 'email' && primaryEmail) {
+        existingUser = await db.query.users.findFirst({
+          where: eq(users.email, primaryEmail),
+        });
+      } else if (registrationMethod === 'phone' && primaryPhone) {
+        existingUser = await db.query.users.findFirst({
+          where: eq(users.phone, primaryPhone),
+        });
+      }
 
       if (existingUser) {
-        throw new DuplicateError("User with this email already exists");
+        const contactType = registrationMethod === 'email' ? 'email' : 'phone number';
+        throw new DuplicateError(`User with this ${contactType} already exists`);
       }
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
 
-      // Generate email verification token
-      const emailVerificationToken = generateRandomString(32);
-
-      // Create user
+      // Create user with ACTIVE status (no verification required)
       const [newUser] = await db
         .insert(users)
         .values({
-          email,
+          email: primaryEmail,
+          phone: primaryPhone,
           password: hashedPassword,
           name,
-          phone,
+          registrationMethod: registrationMethod,
           role: UserRole.USER,
-          status: UserStatus.PENDING,
+          status: UserStatus.ACTIVE,
           emailVerified: false,
-          emailVerificationToken,
-          registrationMethod: "email" as const,
+          phoneVerified: false,
+          // Set secondary contact info
+          contactEmail: secondaryEmail,
+          contactPhone: secondaryPhone,
         })
         .returning({
           id: users.id,
           email: users.email,
+          phone: users.phone,
           name: users.name,
+          registrationMethod: users.registrationMethod,
           role: users.role,
           status: users.status,
           emailVerified: users.emailVerified,
+          phoneVerified: users.phoneVerified,
           createdAt: users.createdAt,
         });
-
-      // Send verification email
-      try {
-        await sendEmail(EmailType.EMAIL_VERIFICATION, email!, {
-          name,
-          verificationToken: emailVerificationToken,
-        });
-      } catch (error) {
-        console.error("Failed to send verification email:", error);
-        // Don't fail registration if email fails
-      }
 
       set.status = 201;
       return {
         success: true,
-        message:
-          "User registered successfully. Please check your email for verification.",
+        message: "User registered successfully. You can now log in.",
         data: { user: newUser },
       };
     },
     {
-      body: t.Object({
-        email: t.String({ format: "email" }),
-        password: t.String({ minLength: 8 }),
-        name: t.String({ minLength: 1 }),
-        phone: t.Optional(t.String()),
-      }),
+      body: t.Union([
+        // Email registration
+        t.Object({
+          registrationMethod: t.Literal('email'),
+          email: t.String({ format: "email" }),
+          password: t.String({ minLength: 8 }),
+          name: t.String({ minLength: 1 }),
+          phone: t.Optional(t.String()), // Optional secondary contact
+        }),
+        // Phone registration  
+        t.Object({
+          registrationMethod: t.Literal('phone'),
+          phone: t.String({ minLength: 10 }),
+          password: t.String({ minLength: 8 }),
+          name: t.String({ minLength: 1 }),
+          email: t.Optional(t.String({ format: "email" })), // Optional secondary contact
+        }),
+      ]),
       detail: {
-        summary: "Register new user",
+        summary: "Register new user with email or phone",
         tags: ["Auth"],
       },
     },
@@ -125,17 +143,23 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       }
 
       const data = validation.data;
-      const email = 'email' in data ? data.email : undefined;
-      const password = data.password;
+      const { loginMethod, password } = data;
       
-      if (!email) {
-        throw new ValidationError("Email is required");
-      }
+      // Get login credential based on method
+      const loginEmail = loginMethod === 'email' ? data.email : undefined;
+      const loginPhone = loginMethod === 'phone' ? data.phone : undefined;
 
-      // Find user
-      const user = await db.query.users.findFirst({
-        where: eq(users.email, email),
-      });
+      // Find user based on login method
+      let user = null;
+      if (loginMethod === 'email' && loginEmail) {
+        user = await db.query.users.findFirst({
+          where: eq(users.email, loginEmail),
+        });
+      } else if (loginMethod === 'phone' && loginPhone) {
+        user = await db.query.users.findFirst({
+          where: eq(users.phone, loginPhone),
+        });
+      }
 
       if (!user) {
         throw new UnauthorizedError("Invalid credentials");
@@ -187,10 +211,13 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       const userResponse = {
         id: user.id,
         email: user.email,
+        phone: user.phone,
         name: user.name,
+        registrationMethod: user.registrationMethod,
         role: user.role,
         status: user.status,
         emailVerified: user.emailVerified,
+        phoneVerified: user.phoneVerified,
         avatar: user.avatar,
         createdAt: user.createdAt,
       };
@@ -205,12 +232,22 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       };
     },
     {
-      body: t.Object({
-        email: t.String({ format: "email" }),
-        password: t.String({ minLength: 1 }),
-      }),
+      body: t.Union([
+        // Email login
+        t.Object({
+          loginMethod: t.Literal('email'),
+          email: t.String({ format: "email" }),
+          password: t.String({ minLength: 1 }),
+        }),
+        // Phone login
+        t.Object({
+          loginMethod: t.Literal('phone'),
+          phone: t.String({ minLength: 10 }),
+          password: t.String({ minLength: 1 }),
+        }),
+      ]),
       detail: {
-        summary: "Login user",
+        summary: "Login user with email or phone",
         tags: ["Auth"],
       },
     },
@@ -261,52 +298,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     },
   )
 
-  // Verify email
-  .post(
-    "/verify-email",
-    async ({ body, set }) => {
-      const validation = emailVerificationSchema.safeParse(body);
-      if (!validation.success) {
-        throw new ValidationError("Invalid verification token");
-      }
-
-      const { token } = validation.data;
-
-      // Find user with this token
-      const user = await db.query.users.findFirst({
-        where: eq(users.emailVerificationToken, token),
-      });
-
-      if (!user) {
-        throw new NotFoundError("Invalid verification token");
-      }
-
-      // Update user
-      await db
-        .update(users)
-        .set({
-          emailVerified: true,
-          emailVerificationToken: null,
-          status: UserStatus.ACTIVE,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, user.id));
-
-      return {
-        success: true,
-        message: "Email verified successfully",
-      };
-    },
-    {
-      body: t.Object({
-        token: t.String(),
-      }),
-      detail: {
-        summary: "Verify email address",
-        tags: ["Auth"],
-      },
-    },
-  )
 
   // Request password reset
   .post(
@@ -441,61 +432,4 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     },
   )
 
-  // Resend verification email
-  .post(
-    "/resend-verification",
-    async ({ body, set }) => {
-      const { email } = body as { email: string };
-
-      // Find user
-      const user = await db.query.users.findFirst({
-        where: eq(users.email, email),
-      });
-
-      if (!user || user.emailVerified) {
-        return {
-          success: true,
-          message:
-            "If an unverified account with this email exists, a verification email has been sent.",
-        };
-      }
-
-      // Generate new verification token
-      const emailVerificationToken = generateRandomString(32);
-
-      // Update user
-      await db
-        .update(users)
-        .set({
-          emailVerificationToken,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, user.id));
-
-      // Send verification email
-      try {
-        await sendEmail(EmailType.EMAIL_VERIFICATION, email, {
-          name: user.name,
-          verificationToken: emailVerificationToken,
-        });
-      } catch (error) {
-        console.error("Failed to send verification email:", error);
-        throw new Error("Failed to send verification email");
-      }
-
-      return {
-        success: true,
-        message:
-          "If an unverified account with this email exists, a verification email has been sent.",
-      };
-    },
-    {
-      body: t.Object({
-        email: t.String({ format: "email" }),
-      }),
-      detail: {
-        summary: "Resend verification email",
-        tags: ["Auth"],
-      },
-    },
-  );
+;

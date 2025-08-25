@@ -53,9 +53,10 @@ export const API_CONFIG = {
       ME: "/auth/me",
       LOGOUT: "/auth/logout",
       REFRESH: "/auth/refresh",
-      VERIFY_EMAIL: "/auth/verify-email",
-      VERIFY_PHONE: "/auth/verify-phone",
-      RESEND_PHONE_VERIFICATION: "/auth/resend-phone-verification",
+      // Verification endpoints removed - no verification required
+      // VERIFY_EMAIL: "/auth/verify-email",
+      // VERIFY_PHONE: "/auth/verify-phone", 
+      // RESEND_PHONE_VERIFICATION: "/auth/resend-phone-verification",
       FORGOT_PASSWORD: "/auth/forgot-password",
       RESET_PASSWORD: "/auth/reset-password",
     },

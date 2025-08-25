@@ -1,3 +1,7 @@
+// DEPRECATED: Legacy form validation utilities
+// Use validation-enhanced.ts for new code with dual-method support
+// This file is kept for backward compatibility only
+
 // Form validation utilities
 
 export interface ValidationResult {
@@ -182,11 +186,13 @@ export function validatePhone(phone: string): FieldValidation {
   return result;
 }
 
-// Complete form validation
+// LEGACY: Complete form validation (email-only)
 export function validateLoginForm(
   email: string,
   password: string,
 ): ValidationResult {
+  console.warn('⚠️ validateLoginForm is deprecated. Use validation-enhanced.ts for dual-method support');
+  
   const errors: string[] = [];
 
   const emailValidation = validateEmail(email);
@@ -205,6 +211,40 @@ export function validateLoginForm(
   };
 }
 
+// LEGACY COMPATIBILITY: Dual-method login validation
+export function validateLoginFormDualMethod(
+  method: 'email' | 'phone',
+  contact: string,
+  password: string,
+): ValidationResult {
+  console.warn('⚠️ Use validation-enhanced.ts instead of legacy compatibility functions');
+  
+  const errors: string[] = [];
+
+  if (method === 'email') {
+    const emailValidation = validateEmail(contact);
+    if (!emailValidation.isValid && emailValidation.error) {
+      errors.push(emailValidation.error);
+    }
+  } else {
+    const phoneValidation = validatePhone(contact);
+    if (!phoneValidation.isValid && phoneValidation.error) {
+      errors.push(phoneValidation.error);
+    }
+  }
+
+  const passwordValidation = validatePassword(password);
+  if (!passwordValidation.isValid && passwordValidation.error) {
+    errors.push(passwordValidation.error);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+// LEGACY: Register form validation (email-only)
 export function validateRegisterForm(
   email: string,
   password: string,
@@ -212,6 +252,8 @@ export function validateRegisterForm(
   name: string,
   phone?: string,
 ): ValidationResult {
+  console.warn('⚠️ validateRegisterForm is deprecated. Use validation-enhanced.ts for dual-method support');
+  
   const errors: string[] = [];
 
   const emailValidation = validateEmail(email);
