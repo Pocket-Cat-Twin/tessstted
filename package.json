@@ -50,7 +50,19 @@
     
     "validate:enterprise": "bun run validate:powershell:strict && bun run validate:modules && bun run lint:check && bun run type-check",
     "validate:all": "bun run validate:powershell && bun run lint:check && bun run type-check",
-    "validate": "bun run lint:check && bun run type-check && bun run build"
+    "validate": "bun run lint:check && bun run type-check && bun run build",
+    
+    "validate:startup": "bun run --silent packages/db/src/startup-validator.ts",
+    "validate:environment": "bun run --silent packages/db/src/environment-diagnostics.ts",
+    "validate:config": "bun run --silent -e \"import { generateConfigurationReport } from './packages/db/src/config-manager.ts'; generateConfigurationReport();\"",
+    "health:check": "bun run --silent -e \"import { checkDatabaseHealth } from './packages/db/src/index.ts'; console.log(await checkDatabaseHealth());\"",
+    "health:report": "bun run --silent -e \"import { getHealthReport } from './packages/db/src/index.ts'; console.log(JSON.stringify(await getHealthReport(), null, 2));\"",
+    
+    "doctor:diagnose": "powershell -ExecutionPolicy Bypass -File scripts/db-doctor.ps1 -Diagnose",
+    "doctor:enterprise": "powershell -ExecutionPolicy Bypass -File scripts/db-doctor.ps1 -Enterprise",
+    "doctor:startup": "powershell -ExecutionPolicy Bypass -File scripts/db-doctor.ps1 -StartupCheck",
+    "doctor:health": "powershell -ExecutionPolicy Bypass -File scripts/db-doctor.ps1 -HealthCheck",
+    "doctor:fix": "powershell -ExecutionPolicy Bypass -File scripts/db-doctor.ps1 -Fix"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

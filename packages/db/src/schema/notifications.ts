@@ -8,7 +8,7 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { users } from "./users";
+import { users } from "./users.js";
 
 // Notification type enum
 export const notificationTypeEnum = pgEnum("notification_type", [

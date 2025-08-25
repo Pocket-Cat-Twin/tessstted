@@ -9,7 +9,7 @@ if (process.platform === "win32") {
 }
 
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { migrationClient, db, ensureDatabaseHealth } from "./connection";
+import { migrationClient, db, ensureDatabaseHealth } from "./connection.js";
 
 const isWindows = process.platform === "win32";
 

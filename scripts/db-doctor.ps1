@@ -14,6 +14,9 @@ param(
     [switch]$Report,
     [switch]$Test,
     [switch]$Setup,
+    [switch]$Enterprise,
+    [switch]$StartupCheck,
+    [switch]$HealthCheck,
     [string]$Action = "help"
 )
 
@@ -58,6 +61,22 @@ If you're using an older version, ensure PowerShell-Common.ps1 exists.
 "@
         exit 1
     }
+}
+
+# Import Advanced Database Diagnostics (Enterprise Features)
+$advancedDiagnosticsPath = Join-Path $PSScriptRoot "advanced-database-diagnostics.ps1"
+if (Test-Path $advancedDiagnosticsPath) {
+    Write-Host "[IMPORT] Loading Advanced Database Diagnostics..." -ForegroundColor Cyan
+    try {
+        . $advancedDiagnosticsPath
+        Write-Host "[SUCCESS] Advanced Database Diagnostics loaded" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "[WARNING] Failed to load Advanced Database Diagnostics: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "[INFO] Enterprise features will not be available" -ForegroundColor Cyan
+    }
+} else {
+    Write-Host "[WARNING] Advanced Database Diagnostics not found - enterprise features disabled" -ForegroundColor Yellow
 }
 
 Write-SafeHeader "Lolita Fashion Database Doctor v2.0" "="
@@ -536,22 +555,32 @@ function Show-DatabaseDoctorHelp {
     
     Write-SafeHeader "Database Doctor - PostgreSQL Diagnostic Tool"
     
-    Write-SafeOutput "USAGE:" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Diagnose    # Run comprehensive diagnostics" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Fix         # Attempt automatic fixes" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Emergency   # Emergency recovery mode" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Test        # Quick connection test" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Report      # Generate health report" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Setup       # Database setup" -Status Info
+    Write-SafeOutput "BASIC USAGE:" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Diagnose      # Run comprehensive diagnostics" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Fix           # Attempt automatic fixes" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Emergency     # Emergency recovery mode" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Test          # Quick connection test" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Report        # Generate health report" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Setup         # Database setup" -Status Info
+    
+    Write-Host ""
+    Write-SafeOutput "ENTERPRISE FEATURES:" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Enterprise    # Full enterprise diagnostics with TypeScript integration" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -StartupCheck  # Pre-startup system validation" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -HealthCheck   # Continuous health monitoring" -Status Info
     
     Write-Host ""
     Write-SafeOutput "EXAMPLES:" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Diagnose    # Check database health" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Fix         # Fix common issues" -Status Info
-    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Emergency   # Full recovery mode" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Diagnose      # Basic health check" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Fix           # Auto-fix common issues" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -Enterprise    # Full system analysis with auto-fix" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -StartupCheck  # Verify system ready for startup" -Status Info
+    Write-SafeOutput "  .\scripts\db-doctor.ps1 -HealthCheck   # Monitor system health continuously" -Status Info
     
     Write-Host ""
-    Write-SafeOutput "For additional help: bun run db:help" -Status Info
+    Write-SafeOutput "ADVANCED OPTIONS:" -Status Info
+    Write-SafeOutput "  -Enterprise combined with other switches for enhanced functionality" -Status Info
+    Write-SafeOutput "  For additional help: bun run db:help" -Status Info
 }
 
 # Main execution flow
@@ -581,6 +610,39 @@ switch ($true) {
     $Setup {
         Write-SafeHeader "Database Setup"
         Invoke-SafeCommand -Command "bun" -Arguments @("run", "db:setup") -Description "Running database setup"
+    }
+    
+    $Enterprise {
+        if (Get-Command "Invoke-EnterpriseDatabaseDiagnostics" -ErrorAction SilentlyContinue) {
+            Write-SafeHeader "Enterprise Database Diagnostics"
+            Invoke-EnterpriseDatabaseDiagnostics -Detailed -AutoFix -GenerateReport
+        } else {
+            Write-SafeOutput "Enterprise features not available - Advanced Database Diagnostics not loaded" -Status Warning
+            Write-SafeOutput "Falling back to standard diagnostics..." -Status Info
+            Invoke-ComprehensiveDiagnostics | Out-Null
+        }
+    }
+    
+    $StartupCheck {
+        if (Get-Command "Invoke-StartupSystemCheck" -ErrorAction SilentlyContinue) {
+            Invoke-StartupSystemCheck
+        } else {
+            Write-SafeOutput "Startup check not available - Advanced Database Diagnostics not loaded" -Status Warning
+            Write-SafeOutput "Running basic diagnostics instead..." -Status Info
+            Invoke-ComprehensiveDiagnostics | Out-Null
+        }
+    }
+    
+    $HealthCheck {
+        if (Get-Command "Invoke-ContinuousHealthCheck" -ErrorAction SilentlyContinue) {
+            Write-SafeOutput "Starting continuous health monitoring..." -Status Info
+            Write-SafeOutput "Press Ctrl+C to stop monitoring" -Status Info
+            Invoke-ContinuousHealthCheck -LogToFile
+        } else {
+            Write-SafeOutput "Health check not available - Advanced Database Diagnostics not loaded" -Status Warning
+            Write-SafeOutput "Running single health check instead..." -Status Info
+            Invoke-ComprehensiveDiagnostics | Out-Null
+        }
     }
     
     default { 

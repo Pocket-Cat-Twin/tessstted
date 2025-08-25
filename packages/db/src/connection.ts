@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as schema from "./schema";
+import * as schema from "./schema/index.js";
 
 // Windows-only database configuration with enhanced error handling
 // This project is designed exclusively for Windows environments

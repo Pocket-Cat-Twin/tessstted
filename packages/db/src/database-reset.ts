@@ -5,7 +5,7 @@ import {
   createDatabaseIfNotExists,
   migrationClient,
   queryClient,
-} from "./connection";
+} from "./connection.js";
 
 const execAsync = promisify(exec);
 

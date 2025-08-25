@@ -111,15 +111,61 @@ if (-not (Test-Path ".env")) {
     }
 }
 
-# Set development environment variables
-$env:NODE_ENV = "development"
-$env:WEB_PORT = "5173"
-$env:HOST = "localhost"
-$env:API_PORT = "3001"
-$env:API_HOST = "localhost"
+# Load and validate .env file variables into current session
+Write-Host "[ENV] Loading environment variables from .env..." -ForegroundColor Cyan
+if (Test-Path ".env") {
+    Get-Content ".env" | ForEach-Object {
+        if ($_ -match "^\s*([^#][^=]*)\s*=\s*(.*)\s*$") {
+            $name = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            if ($name -and $value) {
+                [Environment]::SetEnvironmentVariable($name, $value, "Process")
+                Write-Host "   Loaded: $name" -ForegroundColor Green
+            }
+        }
+    }
+    Write-Host "[SUCCESS] Environment variables loaded from .env" -ForegroundColor Green
+} else {
+    Write-Host "[WARNING] .env file not found, using defaults" -ForegroundColor Yellow
+}
+
+# Set development environment variables with explicit Process scope
+[Environment]::SetEnvironmentVariable("NODE_ENV", "development", "Process")
+[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", "Process")
+[Environment]::SetEnvironmentVariable("HOST", "localhost", "Process")
+[Environment]::SetEnvironmentVariable("API_PORT", "3001", "Process")
+[Environment]::SetEnvironmentVariable("API_HOST", "localhost", "Process")
 
 # Explicitly remove PORT to avoid conflicts
-$env:PORT = $null
+[Environment]::SetEnvironmentVariable("PORT", $null, "Process")
+
+# Validate critical environment variables
+Write-Host "[ENV] Validating critical environment variables..." -ForegroundColor Cyan
+$requiredVars = @("DATABASE_URL", "API_PORT", "WEB_PORT")
+$missingVars = @()
+
+foreach ($var in $requiredVars) {
+    $value = [Environment]::GetEnvironmentVariable($var)
+    if (-not $value) {
+        $missingVars += $var
+        Write-Host "   Missing: $var" -ForegroundColor Red
+    } else {
+        $maskedValue = if ($var -eq "DATABASE_URL") { 
+            $value -replace ":[^@]*@", ":***@" 
+        } else { 
+            $value 
+        }
+        Write-Host "   Valid: $var = $maskedValue" -ForegroundColor Green
+    }
+}
+
+if ($missingVars.Count -gt 0) {
+    Write-Host "[ERROR] Missing required environment variables: $($missingVars -join ', ')" -ForegroundColor Red
+    Write-Host "        Please check your .env file and ensure all required variables are set." -ForegroundColor White
+    exit 1
+}
+
+Write-Host "[SUCCESS] Environment validation completed" -ForegroundColor Green
 
 # Step 3: Run database migrations if needed
 Write-Host ""
@@ -147,16 +193,67 @@ if ($NoNewWindows) {
     bun --filter=@lolita-fashion/web dev
 }
 else {
-    # Start API server in new window
+    # Start API server in new window with full environment inheritance
     Write-Host "[API] Starting API server in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\api'; `$env:NODE_ENV='development'; `$env:API_PORT='3001'; `$env:API_HOST='localhost'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] Lolita Fashion API Server' -ForegroundColor Green; Write-Host 'Environment: API_PORT=3001, API_HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; bun --hot src/index-db.ts"
+    $apiCommand = @"
+cd '$projectRoot\apps\api'
+Write-Host '[API] Lolita Fashion API Server' -ForegroundColor Green
+Write-Host 'Loading environment from parent process...' -ForegroundColor Cyan
+
+# Inherit all environment variables from parent
+`$parentEnv = [Environment]::GetEnvironmentVariables()
+foreach (`$kvp in `$parentEnv.GetEnumerator()) {
+    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, "Process")
+}
+
+# Set API-specific overrides
+[Environment]::SetEnvironmentVariable("NODE_ENV", "development", "Process")
+[Environment]::SetEnvironmentVariable("API_PORT", "3001", "Process")
+[Environment]::SetEnvironmentVariable("API_HOST", "localhost", "Process")
+[Environment]::SetEnvironmentVariable("PORT", `$null, "Process")
+
+Write-Host "Environment variables:" -ForegroundColor Cyan
+Write-Host "  DATABASE_URL: `$([Environment]::GetEnvironmentVariable('DATABASE_URL') -replace ':[^@]*@', ':***@')" -ForegroundColor White
+Write-Host "  API_PORT: `$([Environment]::GetEnvironmentVariable('API_PORT'))" -ForegroundColor White
+Write-Host "  NODE_ENV: `$([Environment]::GetEnvironmentVariable('NODE_ENV'))" -ForegroundColor White
+
+Write-Host 'Starting API server...' -ForegroundColor Green
+bun --hot src/index-db.ts
+"@
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $apiCommand
     
     # Wait a moment for API to start
     Start-Sleep -Seconds 3
     
-    # Start Web app in new window
+    # Start Web app in new window with full environment inheritance
     Write-Host "[WEB] Starting Web app in new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot\apps\web'; `$env:NODE_ENV='development'; `$env:WEB_PORT='5173'; `$env:HOST='localhost'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] Lolita Fashion Web App' -ForegroundColor Blue; Write-Host 'Environment: WEB_PORT=5173, HOST=localhost' -ForegroundColor Cyan; `$env:NODE_ENV='development'; vite dev --host localhost"
+    $webCommand = @"
+cd '$projectRoot\apps\web'
+Write-Host '[WEB] Lolita Fashion Web App' -ForegroundColor Blue
+Write-Host 'Loading environment from parent process...' -ForegroundColor Cyan
+
+# Inherit all environment variables from parent
+`$parentEnv = [Environment]::GetEnvironmentVariables()
+foreach (`$kvp in `$parentEnv.GetEnumerator()) {
+    [Environment]::SetEnvironmentVariable(`$kvp.Key, `$kvp.Value, "Process")
+}
+
+# Set Web-specific overrides
+[Environment]::SetEnvironmentVariable("NODE_ENV", "development", "Process")
+[Environment]::SetEnvironmentVariable("WEB_PORT", "5173", "Process")
+[Environment]::SetEnvironmentVariable("HOST", "localhost", "Process")
+[Environment]::SetEnvironmentVariable("API_PORT", `$null, "Process")
+
+Write-Host "Environment variables:" -ForegroundColor Cyan
+Write-Host "  PUBLIC_API_URL: `$([Environment]::GetEnvironmentVariable('PUBLIC_API_URL'))" -ForegroundColor White
+Write-Host "  WEB_PORT: `$([Environment]::GetEnvironmentVariable('WEB_PORT'))" -ForegroundColor White
+Write-Host "  HOST: `$([Environment]::GetEnvironmentVariable('HOST'))" -ForegroundColor White
+Write-Host "  NODE_ENV: `$([Environment]::GetEnvironmentVariable('NODE_ENV'))" -ForegroundColor White
+
+Write-Host 'Starting Web server...' -ForegroundColor Blue
+vite dev --host localhost
+"@
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $webCommand
     
     # Wait for services to start
     Start-Sleep -Seconds 5

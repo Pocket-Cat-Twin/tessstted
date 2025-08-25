@@ -21,6 +21,22 @@ import {
   dbLogger
 } from "@lolita-fashion/db";
 
+// Import new enterprise systems
+import { 
+  loadConfiguration, 
+  getConfig,
+  generateConfigurationReport 
+} from "@lolita-fashion/db/src/config-manager";
+import { 
+  runEnvironmentDiagnostics, 
+  displayEnvironmentReport 
+} from "@lolita-fashion/db/src/environment-diagnostics";
+import { 
+  handleDatabaseError, 
+  attemptAutoRecovery,
+  displayErrorReport 
+} from "@lolita-fashion/db/src/database-error-handler";
+
 // Basic connection test without infinite loops
 async function testBasicConnection(): Promise<boolean> {
   try {
@@ -32,149 +48,166 @@ async function testBasicConnection(): Promise<boolean> {
   }
 }
 
-// Senior-level database initialization with comprehensive error handling and auto-recovery
+// Enterprise-grade database initialization with comprehensive diagnostics and recovery
 async function initializeDatabaseSystem() {
   try {
-    console.log("🔄 Running enhanced database initialization...");
+    console.log("🚀 Running Enterprise Database Initialization System v3.0");
+    console.log("=".repeat(80));
     
-    // Environment detection
-    const isWindows = process.platform === 'win32';
-    const isCodespace = process.env.CODESPACES === 'true' || process.env.USER === 'codespace';
-    const hasPostgreSQL = process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('undefined');
-    
-    console.log(`   Platform: ${process.platform}${isCodespace ? ' (GitHub Codespace)' : ''}`);
-    console.log(`   Database URL: ${process.env.DATABASE_URL?.replace(/\/\/[^@]+@/, '//***:***@') || 'Not configured'}`);
-    
-    if (!hasPostgreSQL) {
-      console.warn("⚠️  No valid PostgreSQL connection available");
-      console.warn("⚠️  API will start in limited mode without database features");
-      console.warn("⚠️  For full functionality, configure PostgreSQL connection in .env");
-      return false; // Return false but don't crash
-    }
-    
-    // Step 1: Basic connection test with timeout
-    console.log("🔄 Testing basic database connection...");
-    let connectionWorking = false;
-    
+    // Step 1: Load and validate configuration
+    console.log("📋 Loading configuration...");
+    let appConfig;
     try {
+      appConfig = await loadConfiguration();
+      console.log("✅ Configuration loaded successfully");
+    } catch (configError: any) {
+      console.error(`❌ Configuration loading failed: ${configError.message}`);
+      // Continue with basic initialization
+      appConfig = null;
+    }
+
+    // Step 2: Run comprehensive environment diagnostics
+    console.log("\n🔍 Running comprehensive environment diagnostics...");
+    let diagnostics;
+    try {
+      diagnostics = await runEnvironmentDiagnostics();
+      
+      if (!diagnostics.success) {
+        console.warn("⚠️  Environment issues detected:");
+        diagnostics.issues.forEach(issue => {
+          console.warn(`   • ${issue.message}`);
+        });
+      }
+    } catch (diagError: any) {
+      console.warn(`⚠️  Diagnostics failed: ${diagError.message}`);
+      diagnostics = null;
+    }
+
+    // Step 3: Test database connection with intelligent error handling
+    console.log("\n🔄 Testing database connection with error analysis...");
+    let connectionWorking = false;
+    let lastDatabaseError = null;
+
+    try {
+      // Use simple connection test
       await Promise.race([
-        db.select().from(users).limit(0), // Simple connection test
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 8000))
+        db.select().from(users).limit(0),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000))
       ]);
       connectionWorking = true;
-      console.log("✅ Basic database connection successful");
+      console.log("✅ Database connection successful");
     } catch (error: any) {
-      console.log(`⚠️  Basic connection test failed: ${error.message}`);
-    }
-    
-    // Step 2: Auto-recovery attempt for missing database/tables
-    if (!connectionWorking) {
-      console.log("🔄 Attempting database auto-recovery...");
+      console.log(`⚠️  Database connection failed: ${error.message}`);
       
+      // Use enterprise error handler
       try {
-        // Try to run setup-windows if available
-        const setupPath = './packages/db/src/setup-windows.ts';
-        if (require('fs').existsSync(setupPath)) {
-          console.log("🔄 Running database setup...");
-          const { setupWindows } = await import('@lolita-fashion/db');
-          await setupWindows();
-          console.log("✅ Database setup completed");
-          connectionWorking = true;
-        }
-      } catch (setupError: any) {
-        console.log(`⚠️  Auto-recovery failed: ${setupError.message}`);
-      }
-    }
-    
-    // Step 3: Test with config table (create if missing)
-    let configTableReady = false;
-    
-    if (connectionWorking) {
-      try {
-        await db.select().from(config).limit(1);
-        configTableReady = true;
-        console.log("✅ Config table is accessible");
-      } catch (configError: any) {
-        console.log(`⚠️  Config table test failed: ${configError.message}`);
+        lastDatabaseError = await handleDatabaseError(error, 'database-initialization', {
+          host: appConfig?.database?.host || 'localhost',
+          port: appConfig?.database?.port || 5432,
+          database: appConfig?.database?.name || 'yuyu_lolita',
+          user: appConfig?.database?.username || 'postgres'
+        });
+
+        // Display comprehensive error report
+        console.log("\n" + "=".repeat(60));
+        console.log("🚨 DATABASE ERROR ANALYSIS");
+        console.log("=".repeat(60));
+        displayErrorReport(lastDatabaseError);
         
-        // Try to create essential config data
-        if (configError.code === '42P01' || configError.message.includes('does not exist')) {
-          console.log("🔄 Attempting to initialize essential configuration...");
-          try {
-            // Create basic config entries without relying on existing table structure
-            console.log("   Creating minimal config structure...");
-            configTableReady = false; // Don't rely on config table for now
-          } catch (createError: any) {
-            console.log(`   Config creation failed: ${createError.message}`);
+        // Attempt auto-recovery if possible
+        if (lastDatabaseError.recovery.autoRecoverable) {
+          console.log("🔧 Attempting automatic recovery...");
+          const recoverySuccess = await attemptAutoRecovery(lastDatabaseError);
+          
+          if (recoverySuccess) {
+            console.log("✅ Auto-recovery successful! Testing connection again...");
+            try {
+              await db.select().from(users).limit(0);
+              connectionWorking = true;
+              console.log("✅ Database connection restored");
+            } catch (retryError) {
+              console.log("❌ Connection still failing after recovery attempt");
+            }
+          } else {
+            console.log("❌ Auto-recovery failed - manual intervention required");
           }
         }
+      } catch (errorHandlingError) {
+        console.error(`❌ Error during error analysis: ${errorHandlingError.message}`);
       }
     }
-    
-    // Step 4: Final status determination
-    if (connectionWorking && configTableReady) {
-      console.log("✅ Database system fully operational");
-      dbLogger.info('connection', 'Database system fully initialized', { 
-        platform: process.platform,
-        codespace: isCodespace,
-        configReady: true
-      });
-      return true;
-    } else if (connectionWorking) {
-      console.log("⚠️  Database connected but some tables missing - partial functionality");
-      dbLogger.warn('connection', 'Database partially initialized', { 
-        connection: true,
-        configTable: configTableReady
-      });
-      return true; // Allow API to start with limited functionality
+
+    // Step 4: Generate comprehensive status report
+    console.log("\n" + "=".repeat(80));
+    console.log("📊 INITIALIZATION SUMMARY");
+    console.log("=".repeat(80));
+
+    if (appConfig) {
+      console.log(`Configuration: ✅ Loaded (${appConfig.runtime.sources.length} sources)`);
+      if (appConfig.runtime.errors.length > 0) {
+        console.log(`   Errors: ${appConfig.runtime.errors.length} non-critical issues`);
+      }
     } else {
-      console.log("⚠️  Database connection failed - limited mode");
+      console.log(`Configuration: ❌ Failed to load`);
+    }
+
+    if (diagnostics) {
+      console.log(`Environment: ${diagnostics.success ? '✅' : '⚠️'} ${diagnostics.issues.length} issues found`);
+    } else {
+      console.log(`Environment: ❌ Diagnostics failed`);
+    }
+
+    console.log(`Database Connection: ${connectionWorking ? '✅' : '❌'} ${connectionWorking ? 'Healthy' : 'Failed'}`);
+    
+    if (lastDatabaseError) {
+      console.log(`Error Analysis: ✅ Completed (${lastDatabaseError.category}, ${lastDatabaseError.severity})`);
+      console.log(`Recovery: ${lastDatabaseError.recovery.autoRecoverable ? '🔧' : '🚨'} ${lastDatabaseError.recovery.autoRecoverable ? 'Auto-recoverable' : 'Manual intervention required'}`);
+    }
+
+    // Step 5: Final initialization status
+    if (connectionWorking) {
+      console.log("\n🎉 Database initialization completed successfully!");
+      console.log("   • Full database functionality available");
+      console.log("   • All systems operational");
+      
+      // Log success
+      dbLogger.info('initialization', 'Database system fully initialized', {
+        platform: process.platform,
+        configLoaded: !!appConfig,
+        diagnosticsRan: !!diagnostics,
+        connectionHealthy: true
+      });
+      
+      return true;
+    } else {
+      console.log("\n⚠️  Database initialization completed with limited functionality");
+      console.log("   • API will start but database features may be unavailable");
+      console.log("   • Review error analysis above for resolution steps");
+      
+      if (lastDatabaseError?.solutions?.length > 0) {
+        console.log("   • Auto-recovery solutions available - run diagnostics");
+      }
+      
+      // Display quick troubleshooting guide
+      console.log("\n🔧 Quick Troubleshooting:");
+      console.log("   1. Check PostgreSQL service is running");
+      console.log("   2. Verify DATABASE_URL in .env file");
+      console.log("   3. Run: .\\scripts\\db-doctor.ps1 -Diagnose");
+      console.log("   4. Or try: bun run db:setup");
+      
       return false;
     }
     
   } catch (error: any) {
-    console.error("❌ Database initialization encountered an error:", error.message);
+    console.error("\n❌ Critical error during database initialization:");
+    console.error(`   ${error.message}`);
     
-    // Comprehensive error diagnostics
-    const errorInfo = {
-      code: error?.code,
-      message: error?.message,
-      severity: error?.severity_local || error?.severity,
-      platform: process.platform,
-      dbUrl: process.env.DATABASE_URL?.replace(/\/\/[^@]+@/, '//***:***@')
-    };
-    
-    dbLogger.error('connection', 'Database initialization failed', errorInfo);
-    
-    // Provide helpful guidance based on error type
-    if (error?.code === '3D000' || error?.message?.includes('does not exist')) {
-      console.error("");
-      console.error("🔧 Database Connection Issue:");
-      console.error("   The target database doesn't exist or isn't accessible");
-      console.error("");
-      console.error("💡 Solutions:");
-      console.error("   1. Run database setup: node setup-database.js");
-      console.error("   2. Check PostgreSQL service is running");
-      console.error("   3. Verify DATABASE_URL in .env file");
-      console.error("   4. Ensure database exists: CREATE DATABASE yuyu_lolita");
-    } else if (error?.code === 'ECONNREFUSED') {
-      console.error("");
-      console.error("🔧 PostgreSQL Service Issue:");
-      console.error("   PostgreSQL server is not running or not accessible");
-      console.error("");
-      console.error("💡 Solutions:");
-      console.error("   1. Start PostgreSQL service");
-      console.error("   2. Check if port 5432 is available");
-      console.error("   3. Verify connection string in .env");
-    } else if (error?.code === '28P01') {
-      console.error("");
-      console.error("🔧 Authentication Issue:");
-      console.error("   Database user authentication failed");
-      console.error("");
-      console.error("💡 Solutions:");
-      console.error("   1. Check username/password in DATABASE_URL");
-      console.error("   2. Verify PostgreSQL user permissions");
-      console.error("   3. Update pg_hba.conf if necessary");
+    // Use error handler for critical initialization errors
+    try {
+      const criticalError = await handleDatabaseError(error, 'critical-initialization');
+      displayErrorReport(criticalError);
+    } catch (handlerError) {
+      console.error("❌ Error handler also failed:", handlerError.message);
     }
     
     return false;

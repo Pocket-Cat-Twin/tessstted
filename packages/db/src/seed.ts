@@ -1,4 +1,4 @@
-import { db } from "./connection";
+import { db } from "./connection.js";
 import {
   users,
   config,
@@ -15,7 +15,7 @@ import {
   storyCategoryRelations,
   storyTags,
   storyTagRelations,
-} from "./schema";
+} from "./schema/index.js";
 // Removed unused import: generateRandomString
 
 export async function seedDatabase() {

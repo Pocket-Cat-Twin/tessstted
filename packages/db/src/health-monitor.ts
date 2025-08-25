@@ -1,9 +1,9 @@
 // Database health monitoring system for Windows PostgreSQL
 // Provides continuous monitoring, automatic recovery, and detailed health reports
 
-import { testConnection, createDatabaseIfNotExists } from './connection';
-import { runWindowsDiagnostics, displayDiagnosticReport, autoFixWindowsIssues } from './windows-diagnostics';
-import { dbLogger, timeOperation } from './db-logger';
+import { testConnection, createDatabaseIfNotExists } from './connection.js';
+import { runWindowsDiagnostics, displayDiagnosticReport, autoFixWindowsIssues } from './windows-diagnostics.js';
+import { dbLogger, timeOperation } from './db-logger.js';
 
 export interface HealthStatus {
   overall: 'healthy' | 'degraded' | 'critical';

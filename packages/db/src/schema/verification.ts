@@ -8,7 +8,7 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { users } from "./users";
+import { users } from "./users.js";
 
 // Verification type enum
 export const verificationTypeEnum = pgEnum("verification_type", [
