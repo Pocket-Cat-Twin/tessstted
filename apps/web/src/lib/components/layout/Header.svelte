@@ -84,9 +84,9 @@
 
         <!-- Contact Links -->
         <div class="hidden sm:flex items-center space-x-3">
-          {#if config.telegram_link}
+          {#if config?.telegram_link}
             <a 
-              href={config.telegram_link} 
+              href={config?.telegram_link} 
               target="_blank"
               rel="noopener noreferrer"
               class="text-gray-300 hover:text-white transition-colors"
@@ -98,9 +98,9 @@
             </a>
           {/if}
           
-          {#if config.vk_link}
+          {#if config?.vk_link}
             <a 
-              href={config.vk_link} 
+              href={config?.vk_link} 
               target="_blank"
               rel="noopener noreferrer"
               class="text-gray-300 hover:text-white transition-colors"

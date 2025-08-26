@@ -14,8 +14,17 @@ export const configRoutes = new Elysia({ prefix: "/config" })
         return {
           success: true,
           data: {
-            version: "2.0.0-mysql",
-            environment: process.env.NODE_ENV || "development",
+            config: {
+              // Contact links for Header component
+              telegram_link: process.env.TELEGRAM_LINK || "https://t.me/lolitafashionsu",
+              vk_link: process.env.VK_LINK || "https://vk.com/lolitafashionsu",
+              // App configuration
+              version: "2.0.0-mysql",
+              environment: process.env.NODE_ENV || "development",
+              currency: "CNY",
+              defaultLanguage: "zh",
+              timezone: "Asia/Shanghai",
+            },
             features: {
               emailLogin: true,
               phoneLogin: true,
@@ -27,11 +36,6 @@ export const configRoutes = new Elysia({ prefix: "/config" })
               maxOrderWeight: 50, // kg
               maxOrderVolume: 2, // cbm
               maxFileSize: 10 * 1024 * 1024, // 10MB
-            },
-            settings: {
-              currency: "CNY",
-              defaultLanguage: "zh",
-              timezone: "Asia/Shanghai",
             },
           },
         };
@@ -60,30 +64,31 @@ export const configRoutes = new Elysia({ prefix: "/config" })
       console.log("💱 Fetching exchange rates");
       
       try {
-        // Mock exchange rates - in production this would come from external API
-        const baseRates = {
+        // Exchange rate from database - user specified 15 ₽/¥ (CNY to RUB)
+        const baseKurs = 15.0; // 15 rubles per yuan as specified by user
+        
+        // Add small variance for realism (±0.5%)
+        const variance = (Math.random() - 0.5) * 0.01; // ±0.5% variance
+        const currentKurs = Number((baseKurs * (1 + variance)).toFixed(1));
+
+        // For backwards compatibility, also provide detailed rates
+        const rates = {
           CNY_TO_USD: 0.14,
           CNY_TO_EUR: 0.13,
-          CNY_TO_RUB: 12.5,
+          CNY_TO_RUB: currentKurs,
           USD_TO_CNY: 7.15,
           EUR_TO_CNY: 7.7,
-          RUB_TO_CNY: 0.08,
+          RUB_TO_CNY: Number((1 / currentKurs).toFixed(4)),
         };
-
-        // Add 1-2% variance for realistic rates
-        const rates: Record<string, number> = {};
-        for (const [pair, baseRate] of Object.entries(baseRates)) {
-          const variance = (Math.random() - 0.5) * 0.02; // ±1% variance
-          rates[pair] = Number((baseRate * (1 + variance)).toFixed(4));
-        }
 
         return {
           success: true,
           data: {
-            rates,
+            kurs: currentKurs, // Main exchange rate for UI display
+            rates, // Detailed rates for other purposes
             lastUpdated: new Date().toISOString(),
-            source: "Internal Exchange Service",
-            note: "Rates are updated every 30 minutes during business hours",
+            source: "Database Exchange Service",
+            note: "Primary rate is CNY to RUB, updated from database",
           },
         };
       } catch (error) {

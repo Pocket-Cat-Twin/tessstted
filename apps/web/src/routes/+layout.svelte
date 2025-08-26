@@ -6,6 +6,9 @@
   import Footer from '$lib/components/layout/Footer.svelte';
   import '../app.css';
 
+  // Accept SvelteKit props to prevent warnings
+  export let data: any = undefined;
+
   // Импорт диагностики API в development режиме
   import '$lib/utils/api-diagnostics';
 

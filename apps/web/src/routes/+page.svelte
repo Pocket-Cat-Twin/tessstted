@@ -6,6 +6,9 @@
   import { configStore } from '$stores/config';
   import { fade, fly } from 'svelte/transition';
 
+  // Accept SvelteKit props to prevent warnings  
+  export let data: any = undefined;
+
   $: config = $configStore.config;
   $: currentKurs = $configStore.kurs;
 
