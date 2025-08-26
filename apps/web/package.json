@@ -32,10 +32,9 @@
     "vite": "^5.2.8"
   },
   "dependencies": {
-    "@lucia-auth/adapter-drizzle": "^1.0.7",
     "lucia": "^3.2.0",
     "zod": "^3.22.4",
-    "@lolita-fashion/shared": "workspace:*"
+    "@lolita-fashion/shared": "*"
   },
   "type": "module"
 }

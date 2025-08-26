@@ -2,9 +2,9 @@
 # Complete Windows environment setup
 
 param(
-    [switch]$SkipPostgreSQL = $false,
+    [switch]$SkipMySQL = $false,
     [switch]$SkipBun = $false,
-    [string]$PostgreSQLVersion = "15"
+    [string]$MySQLVersion = "8.0"
 )
 
 Write-Host "[SETUP] Lolita Fashion Shopping - Windows Setup" -ForegroundColor Green
@@ -45,59 +45,56 @@ if (-not $SkipBun) {
     }
 }
 
-# Step 2: Check/Install PostgreSQL
-if (-not $SkipPostgreSQL) {
+# Step 2: Check/Install MySQL8
+if (-not $SkipMySQL) {
     Write-Host ""
-    Write-Host "[STEP 2] Checking PostgreSQL installation..." -ForegroundColor Cyan
+    Write-Host "[STEP 2] Checking MySQL8 installation..." -ForegroundColor Cyan
     
-    # Check if PostgreSQL is installed (prioritize v16)
-    $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
-    $pgCommand = Get-Command psql -ErrorAction SilentlyContinue
+    # Check if MySQL is installed
+    $mysqlServices = Get-Service -Name "MySQL*" -ErrorAction SilentlyContinue
+    $mysqlCommand = Get-Command mysql -ErrorAction SilentlyContinue
     
-    # Prefer PostgreSQL 16, then 15, then others
+    # Look for MySQL service (prefer MySQL80)
     $targetService = $null
-    if ($pgServices) {
-        $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+    if ($mysqlServices) {
+        $targetService = $mysqlServices | Where-Object { $_.Name -like "*80*" } | Select-Object -First 1
         if (-not $targetService) {
-            $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
-        }
-        if (-not $targetService) {
-            $targetService = $pgServices | Select-Object -First 1
+            $targetService = $mysqlServices | Select-Object -First 1
         }
     }
     
-    if ($targetService -or $pgCommand) {
-        Write-Host "[SUCCESS] PostgreSQL is already installed" -ForegroundColor Green
+    if ($targetService -or $mysqlCommand) {
+        Write-Host "[SUCCESS] MySQL is already installed" -ForegroundColor Green
         if ($targetService) {
             Write-Host "          Using service: $($targetService.DisplayName)" -ForegroundColor White
         }
         
-        # Start PostgreSQL service if it's not running
+        # Start MySQL service if it's not running
         if ($targetService -and $targetService.Status -ne "Running") {
-            Write-Host "[INFO] Starting PostgreSQL service: $($targetService.Name)..." -ForegroundColor Yellow
+            Write-Host "[INFO] Starting MySQL service: $($targetService.Name)..." -ForegroundColor Yellow
             try {
                 Start-Service $targetService.Name -ErrorAction Stop
-                Write-Host "[SUCCESS] PostgreSQL service started" -ForegroundColor Green
+                Write-Host "[SUCCESS] MySQL service started" -ForegroundColor Green
             }
             catch {
-                Write-Host "[WARNING] Failed to start PostgreSQL service: $_" -ForegroundColor Yellow
-                Write-Host "          Please start PostgreSQL manually or run as Administrator" -ForegroundColor White
+                Write-Host "[WARNING] Failed to start MySQL service: $_" -ForegroundColor Yellow
+                Write-Host "          Please start MySQL manually or run as Administrator" -ForegroundColor White
             }
         }
         elseif ($targetService -and $targetService.Status -eq "Running") {
-            Write-Host "[INFO] PostgreSQL service is already running" -ForegroundColor Green
+            Write-Host "[INFO] MySQL service is already running" -ForegroundColor Green
         }
     }
     else {
-        Write-Host "[WARNING] PostgreSQL not found. Please install PostgreSQL:" -ForegroundColor Yellow
-        Write-Host "          1. Download from: https://www.postgresql.org/download/windows/" -ForegroundColor White
-        Write-Host "          2. Or use Chocolatey: choco install postgresql$PostgreSQLVersion" -ForegroundColor White
-        Write-Host "          3. Or use Scoop: scoop install postgresql" -ForegroundColor White
+        Write-Host "[WARNING] MySQL not found. Please install MySQL8:" -ForegroundColor Yellow
+        Write-Host "          1. Download from: https://dev.mysql.com/downloads/windows/" -ForegroundColor White
+        Write-Host "          2. Or use Chocolatey: choco install mysql" -ForegroundColor White
+        Write-Host "          3. Or use Scoop: scoop install mysql" -ForegroundColor White
         Write-Host ""
         
-        $response = Read-Host "Do you want to continue setup without PostgreSQL? (y/N)"
+        $response = Read-Host "Do you want to continue setup without MySQL? (y/N)"
         if ($response -ne "y" -and $response -ne "Y") {
-            Write-Host "[ERROR] Setup cancelled. Please install PostgreSQL and run again." -ForegroundColor Red
+            Write-Host "[ERROR] Setup cancelled. Please install MySQL8 and run again." -ForegroundColor Red
             exit 1
         }
     }
@@ -121,60 +118,58 @@ Write-Host ""
 Write-Host "[STEP 4] Setting up environment configuration..." -ForegroundColor Cyan
 
 $envFile = ".env"
-$envWindowsTemplate = ".env.windows"
+$envMySQLTemplate = ".env.mysql"
 
-if (Test-Path $envWindowsTemplate) {
-    Write-Host "[INFO] Using Windows environment template..." -ForegroundColor Yellow
-    Copy-Item $envWindowsTemplate $envFile -Force
-    Write-Host "[SUCCESS] Environment file created from Windows template" -ForegroundColor Green
+if (Test-Path $envMySQLTemplate) {
+    Write-Host "[INFO] Using MySQL environment template..." -ForegroundColor Yellow
+    Copy-Item $envMySQLTemplate $envFile -Force
+    Write-Host "[SUCCESS] Environment file created from MySQL template" -ForegroundColor Green
 }
 elseif (-not (Test-Path $envFile)) {
-    Write-Host "[INFO] Creating default environment file..." -ForegroundColor Yellow
+    Write-Host "[INFO] Creating default MySQL environment file..." -ForegroundColor Yellow
     
     # Create the environment file content as a string variable
     $envContent = @"
-# Database Configuration
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
-
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-
 # API Configuration
-API_PORT=3001
 API_HOST=localhost
+API_PORT=3001
+CORS_ORIGIN=http://localhost:5173
 
 # Web App Configuration
+WEB_PORT=5173
+HOST=0.0.0.0
 PUBLIC_API_URL=http://localhost:3001
 
-# Email Configuration (for user registration)
+# Database Configuration (MySQL8)
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=yuyu_lolita
+DB_USER=root
+DB_PASSWORD=
+
+# JWT Configuration
+JWT_SECRET=mysql-jwt-secret-change-in-production
+
+# Environment
+NODE_ENV=development
+SKIP_SEED=false
+
+# Email Configuration (optional for development)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
 SMTP_FROM=noreply@yuyulolita.com
 
-# File Upload Configuration
-MAX_FILE_SIZE=10485760
-UPLOAD_DIR=uploads
-ALLOWED_FILE_TYPES=image/jpeg,image/jpg,image/png,image/gif,image/webp
-
-# External APIs
-CURRENCY_API_KEY=your-currency-api-key
-CURRENCY_API_URL=https://api.exchangerate-api.com/v4/latest/CNY
-
-# Environment
-NODE_ENV=development
-CORS_ORIGIN=http://localhost:5173
-SKIP_SEED=false
-
-# Security
-BCRYPT_ROUNDS=12
-SESSION_SECRET=your-session-secret-change-this-in-production
+# SMS Configuration (optional for development)  
+SMS_PROVIDER=mock
+SMS_RU_API_ID=your-sms-ru-api-id
+SMS_RU_API_KEY=your-sms-ru-api-key
 "@
     
     # Write the content to file
     $envContent | Out-File -FilePath $envFile -Encoding UTF8
-    Write-Host "[SUCCESS] Default environment file created" -ForegroundColor Green
+    Write-Host "[SUCCESS] Default MySQL environment file created" -ForegroundColor Green
 }
 else {
     Write-Host "[SUCCESS] Environment file already exists" -ForegroundColor Green
@@ -182,14 +177,14 @@ else {
 
 # Step 5: Setup database
 Write-Host ""
-Write-Host "[STEP 5] Setting up database..." -ForegroundColor Cyan
+Write-Host "[STEP 5] Setting up MySQL database..." -ForegroundColor Cyan
 try {
-    bun run db:setup:windows
-    Write-Host "[SUCCESS] Database setup completed" -ForegroundColor Green
+    bun run db:setup:mysql
+    Write-Host "[SUCCESS] MySQL database setup completed" -ForegroundColor Green
 }
 catch {
-    Write-Host "[WARNING] Database setup failed or skipped" -ForegroundColor Yellow
-    Write-Host "          You may need to setup PostgreSQL manually and run: bun run db:migrate" -ForegroundColor White
+    Write-Host "[WARNING] MySQL database setup failed or skipped" -ForegroundColor Yellow
+    Write-Host "          You may need to setup MySQL manually and run: bun run db:migrate:mysql" -ForegroundColor White
 }
 
 # Step 6: Build packages
@@ -235,5 +230,6 @@ Write-Host "         API Docs: http://localhost:3001/swagger" -ForegroundColor W
 Write-Host ""
 Write-Host "[REMINDER] Remember to:" -ForegroundColor Yellow
 Write-Host "           1. Update .env file with your actual credentials" -ForegroundColor White
-Write-Host "           2. Configure PostgreSQL with proper password" -ForegroundColor White
-Write-Host "           3. Add project folder to Windows Defender exclusions" -ForegroundColor White
+Write-Host "           2. Configure MySQL8 with proper root password" -ForegroundColor White
+Write-Host "           3. Create 'yuyu_lolita' database in MySQL" -ForegroundColor White
+Write-Host "           4. Add project folder to Windows Defender exclusions" -ForegroundColor White

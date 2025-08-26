@@ -12,20 +12,17 @@ Write-Host "=================================================" -ForegroundColor 
 # Get the project root directory
 $projectRoot = Split-Path -Parent $PSScriptRoot
 
-# Function to check if PostgreSQL is running
-function Test-PostgreSQL {
+# Function to check if MySQL is running
+function Test-MySQL {
     try {
-        # Get all PostgreSQL services and prioritize v16
-        $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
+        # Get all MySQL services
+        $mysqlServices = Get-Service -Name "MySQL*" -ErrorAction SilentlyContinue
         $targetService = $null
         
-        if ($pgServices) {
-            $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+        if ($mysqlServices) {
+            $targetService = $mysqlServices | Where-Object { $_.Name -like "*80*" } | Select-Object -First 1
             if (-not $targetService) {
-                $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
-            }
-            if (-not $targetService) {
-                $targetService = $pgServices | Select-Object -First 1
+                $targetService = $mysqlServices | Select-Object -First 1
             }
         }
         
@@ -33,12 +30,11 @@ function Test-PostgreSQL {
             return $true
         }
         
-        # Alternative check using psql command
-        $null = psql --version 2>$null
+        # Alternative check using mysql command
+        $null = mysql --version 2>$null
         if ($LASTEXITCODE -eq 0) {
             # Try to connect to test if server is running
-            $env:PGPASSWORD = "password"
-            $testResult = psql -h localhost -U postgres -d postgres -c "SELECT 1;" 2>$null
+            $testResult = mysql -h localhost -u root -e "SELECT 1;" 2>$null
             return $LASTEXITCODE -eq 0
         }
         
@@ -49,48 +45,45 @@ function Test-PostgreSQL {
     }
 }
 
-# Function to get the target PostgreSQL service
-function Get-TargetPostgreSQLService {
-    $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
-    if ($pgServices) {
-        $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+# Function to get the target MySQL service
+function Get-TargetMySQLService {
+    $mysqlServices = Get-Service -Name "MySQL*" -ErrorAction SilentlyContinue
+    if ($mysqlServices) {
+        $targetService = $mysqlServices | Where-Object { $_.Name -like "*80*" } | Select-Object -First 1
         if (-not $targetService) {
-            $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
-        }
-        if (-not $targetService) {
-            $targetService = $pgServices | Select-Object -First 1
+            $targetService = $mysqlServices | Select-Object -First 1
         }
         return $targetService
     }
     return $null
 }
 
-# Step 1: Check PostgreSQL
-Write-Host "[DB] Checking PostgreSQL..." -ForegroundColor Cyan
-if (Test-PostgreSQL) {
-    Write-Host "[SUCCESS] PostgreSQL is running" -ForegroundColor Green
+# Step 1: Check MySQL8
+Write-Host "[DB] Checking MySQL8..." -ForegroundColor Cyan
+if (Test-MySQL) {
+    Write-Host "[SUCCESS] MySQL8 is running" -ForegroundColor Green
 }
 else {
-    Write-Host "[WARNING] PostgreSQL is not running or not accessible" -ForegroundColor Yellow
-    Write-Host "          Attempting to start PostgreSQL service..." -ForegroundColor Yellow
+    Write-Host "[WARNING] MySQL8 is not running or not accessible" -ForegroundColor Yellow
+    Write-Host "          Attempting to start MySQL service..." -ForegroundColor Yellow
     
     try {
-        $targetService = Get-TargetPostgreSQLService
+        $targetService = Get-TargetMySQLService
         if ($targetService) {
             Write-Host "          Attempting to start: $($targetService.DisplayName)" -ForegroundColor White
             Start-Service $targetService.Name -ErrorAction Stop
             Start-Sleep -Seconds 3
-            Write-Host "[SUCCESS] PostgreSQL service started" -ForegroundColor Green
+            Write-Host "[SUCCESS] MySQL service started" -ForegroundColor Green
         }
         else {
-            Write-Host "[ERROR] PostgreSQL service not found. Please ensure PostgreSQL is installed." -ForegroundColor Red
-            Write-Host "        Install from: https://www.postgresql.org/download/windows/" -ForegroundColor White
+            Write-Host "[ERROR] MySQL service not found. Please ensure MySQL8 is installed." -ForegroundColor Red
+            Write-Host "        Install from: https://dev.mysql.com/downloads/windows/" -ForegroundColor White
         }
     }
     catch {
-        Write-Host "[WARNING] Failed to start PostgreSQL service: $_" -ForegroundColor Yellow
-        Write-Host "          Please start PostgreSQL manually or run as Administrator" -ForegroundColor White
-        Write-Host "          You can also try: net start postgresql-x64-16" -ForegroundColor White
+        Write-Host "[WARNING] Failed to start MySQL service: $_" -ForegroundColor Yellow
+        Write-Host "          Please start MySQL manually or run as Administrator" -ForegroundColor White
+        Write-Host "          You can also try: net start MySQL80" -ForegroundColor White
     }
 }
 

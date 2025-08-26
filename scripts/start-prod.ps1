@@ -1,4 +1,4 @@
-# Lolita Fashion Shopping - Production Startup Script
+# Lolita Fashion Shopping - Production Startup Script (MySQL8)
 # Builds and starts the application in production mode
 
 param(
@@ -7,26 +7,26 @@ param(
     [string]$LogDir = "logs"
 )
 
-Write-Host "[PROD] Starting Lolita Fashion Shopping - Production Mode" -ForegroundColor Green
-Write-Host "=================================================" -ForegroundColor Green
+Write-Host "[PROD] Starting Lolita Fashion Shopping - Production Mode (MySQL8)" -ForegroundColor Green
+Write-Host "=============================================================" -ForegroundColor Green
 
 # Get the project root directory
 $projectRoot = Split-Path -Parent $PSScriptRoot
 
-# Function to check if PostgreSQL is running
-function Test-PostgreSQL {
+# Function to check if MySQL is running
+function Test-MySQL {
     try {
-        # Get all PostgreSQL services and prioritize v16
-        $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
+        # Get all MySQL services and prioritize v8.0
+        $mysqlServices = Get-Service -Name "MySQL*" -ErrorAction SilentlyContinue
         $targetService = $null
         
-        if ($pgServices) {
-            $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+        if ($mysqlServices) {
+            $targetService = $mysqlServices | Where-Object { $_.Name -like "*80*" } | Select-Object -First 1
             if (-not $targetService) {
-                $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
+                $targetService = $mysqlServices | Where-Object { $_.Name -like "*57*" } | Select-Object -First 1
             }
             if (-not $targetService) {
-                $targetService = $pgServices | Select-Object -First 1
+                $targetService = $mysqlServices | Select-Object -First 1
             }
         }
         
@@ -34,11 +34,10 @@ function Test-PostgreSQL {
             return $true
         }
         
-        # Alternative check using psql command
-        $null = psql --version 2>$null
+        # Alternative check using mysql command
+        $null = mysql --version 2>$null
         if ($LASTEXITCODE -eq 0) {
-            $env:PGPASSWORD = "password"
-            $testResult = psql -h localhost -U postgres -d postgres -c "SELECT 1;" 2>$null
+            $testResult = mysql -h localhost -u root -e "SELECT 1;" 2>$null
             return $LASTEXITCODE -eq 0
         }
         
@@ -49,46 +48,46 @@ function Test-PostgreSQL {
     }
 }
 
-# Function to get the target PostgreSQL service
-function Get-TargetPostgreSQLService {
-    $pgServices = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
-    if ($pgServices) {
-        $targetService = $pgServices | Where-Object { $_.Name -like "*16*" } | Select-Object -First 1
+# Function to get the target MySQL service
+function Get-TargetMySQLService {
+    $mysqlServices = Get-Service -Name "MySQL*" -ErrorAction SilentlyContinue
+    if ($mysqlServices) {
+        $targetService = $mysqlServices | Where-Object { $_.Name -like "*80*" } | Select-Object -First 1
         if (-not $targetService) {
-            $targetService = $pgServices | Where-Object { $_.Name -like "*15*" } | Select-Object -First 1
+            $targetService = $mysqlServices | Where-Object { $_.Name -like "*57*" } | Select-Object -First 1
         }
         if (-not $targetService) {
-            $targetService = $pgServices | Select-Object -First 1
+            $targetService = $mysqlServices | Select-Object -First 1
         }
         return $targetService
     }
     return $null
 }
 
-# Step 1: Check PostgreSQL
-Write-Host "[DB] Checking PostgreSQL..." -ForegroundColor Cyan
-if (Test-PostgreSQL) {
-    Write-Host "[SUCCESS] PostgreSQL is running" -ForegroundColor Green
+# Step 1: Check MySQL
+Write-Host "[DB] Checking MySQL8..." -ForegroundColor Cyan
+if (Test-MySQL) {
+    Write-Host "[SUCCESS] MySQL is running" -ForegroundColor Green
 }
 else {
-    Write-Host "[ERROR] PostgreSQL is not running. Starting service..." -ForegroundColor Red
+    Write-Host "[ERROR] MySQL is not running. Starting service..." -ForegroundColor Red
     try {
-        $targetService = Get-TargetPostgreSQLService
+        $targetService = Get-TargetMySQLService
         if ($targetService) {
             Write-Host "          Attempting to start: $($targetService.DisplayName)" -ForegroundColor White
             Start-Service $targetService.Name -ErrorAction Stop
             Start-Sleep -Seconds 3
-            Write-Host "[SUCCESS] PostgreSQL service started" -ForegroundColor Green
+            Write-Host "[SUCCESS] MySQL service started" -ForegroundColor Green
         }
         else {
-            Write-Host "[ERROR] PostgreSQL service not found. Cannot start production without database." -ForegroundColor Red
+            Write-Host "[ERROR] MySQL service not found. Cannot start production without database." -ForegroundColor Red
             exit 1
         }
     }
     catch {
-        Write-Host "[ERROR] Failed to start PostgreSQL service: $_" -ForegroundColor Red
-        Write-Host "        Please start PostgreSQL manually as Administrator" -ForegroundColor White
-        Write-Host "        You can try: net start postgresql-x64-16" -ForegroundColor White
+        Write-Host "[ERROR] Failed to start MySQL service: $_" -ForegroundColor Red
+        Write-Host "        Please start MySQL manually as Administrator" -ForegroundColor White
+        Write-Host "        You can try: net start MySQL80" -ForegroundColor White
         exit 1
     }
 }
@@ -135,13 +134,13 @@ $env:PORT = $null
 
 # Step 3: Run database migrations
 Write-Host ""
-Write-Host "[DB] Running database migrations..." -ForegroundColor Cyan
+Write-Host "[DB] Running MySQL database migrations..." -ForegroundColor Cyan
 try {
-    bun run db:migrate:windows
-    Write-Host "[SUCCESS] Database migrations completed" -ForegroundColor Green
+    bun run db:migrate:mysql
+    Write-Host "[SUCCESS] MySQL database migrations completed" -ForegroundColor Green
 }
 catch {
-    Write-Host "[ERROR] Database migrations failed" -ForegroundColor Red
+    Write-Host "[ERROR] MySQL database migrations failed" -ForegroundColor Red
     exit 1
 }
 
@@ -207,13 +206,13 @@ if ($Daemon) {
 else {
     # Start API server in new window
     Write-Host "[API] Starting API server..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] Lolita Fashion API Server - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: API_PORT=3001, API_HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@lolita-fashion/api start"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:API_PORT='3001'; `$env:API_HOST='0.0.0.0'; Remove-Item Env:PORT -ErrorAction SilentlyContinue; Write-Host '[API] Lolita Fashion API Server - PRODUCTION (MySQL8)' -ForegroundColor Red; Write-Host 'Environment: API_PORT=3001, API_HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@lolita-fashion/api start"
     
     Start-Sleep -Seconds 3
     
     # Start Web app in new window
     Write-Host "[WEB] Starting Web app..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] Lolita Fashion Web App - PRODUCTION' -ForegroundColor Red; Write-Host 'Environment: WEB_PORT=5173, HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@lolita-fashion/web start:windows"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; `$env:NODE_ENV='production'; `$env:WEB_PORT='5173'; `$env:HOST='0.0.0.0'; Remove-Item Env:API_PORT -ErrorAction SilentlyContinue; Write-Host '[WEB] Lolita Fashion Web App - PRODUCTION (MySQL8)' -ForegroundColor Red; Write-Host 'Environment: WEB_PORT=5173, HOST=0.0.0.0' -ForegroundColor Cyan; bun --filter=@lolita-fashion/web start:windows"
 }
 
 # Wait for services to start
@@ -273,6 +272,6 @@ else {
 Write-Host ""
 Write-Host "[SECURITY] Security reminders:" -ForegroundColor Red
 Write-Host "           - Update JWT_SECRET in .env" -ForegroundColor White
-Write-Host "           - Use strong PostgreSQL password" -ForegroundColor White
+Write-Host "           - Use strong MySQL root password" -ForegroundColor White
 Write-Host "           - Configure Windows Firewall properly" -ForegroundColor White
 Write-Host "           - Keep system and dependencies updated" -ForegroundColor White

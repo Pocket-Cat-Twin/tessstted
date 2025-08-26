@@ -1,46 +1,31 @@
 {
   "name": "@lolita-fashion/db",
   "version": "1.0.0",
-  "description": "Database schema and utilities for Lolita Fashion project",
+  "description": "Native MySQL8 database layer for Lolita Fashion project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "generate": "drizzle-kit generate:pg",
-    "migrate": "bun run src/migrate.ts",
-    "migrate:windows": "bun run src/migrate.ts",
-    "seed": "bun run src/seed.ts",
-    "seed:windows": "bun run src/seed.ts",
-    "validate-schema": "bun run src/schema-validator.ts",
-    "studio": "drizzle-kit studio",
-    "setup:windows": "bun run src/setup-windows.ts",
     "clean": "if exist dist rmdir /s /q dist",
     "clean:windows": "if exist dist rmdir /s /q dist",
+    "migrate": "bun run src/migrate.ts",
+    "migrate:mysql": "bun run src/migrate.ts",
+    "migrate:windows": "bun run src/migrate.ts", 
+    "setup": "bun run migrate",
+    "setup:mysql": "bun run migrate",
+    "setup:windows": "bun run migrate",
     "test": "bun run src/connection.ts",
-    "health": "node -e \"import('./src/health-monitor.js').then(m => m.checkDatabaseHealth()).then(console.log)\"",
-    "diagnose": "node -e \"import('./src/windows-diagnostics.js').then(m => m.runWindowsDiagnostics()).then(m.displayDiagnosticReport)\"",
-    "monitor": "node -e \"import('./src/health-monitor.js').then(m => m.startHealthMonitoring(30000))\"",
-    "doctor": "powershell -File ../../scripts/db-doctor.ps1",
-    "emergency": "node -e \"import('./src/health-monitor.js').then(m => m.runEmergencyRecovery()).then(console.log)\"",
-    "reset": "bun run src/database-reset.ts",
-    "reset:full": "bun run src/database-reset.ts",
-    "validate": "bun run src/schema-validator.ts",
-    "validate:schema": "bun run src/schema-validator.ts",
-    "fix": "bun run reset && bun run validate",
-    "setup:complete": "bun run reset && bun run validate && echo \"[OK] База данных полностью настроена!\"",
-    "troubleshoot": "bun run validate && bun run test"
+    "test:mysql": "bun run src/connection.ts",
+    "health": "node -e \"console.log('MySQL health check not implemented yet')\"",
+    "health:mysql": "node -e \"console.log('MySQL health check not implemented yet')\""
   },
   "dependencies": {
-    "drizzle-orm": "^0.29.3",
-    "drizzle-zod": "^0.5.1",
-    "postgres": "^3.4.3",
-    "@lolita-fashion/shared": "workspace:*"
+    "mysql2": "^3.11.0",
+    "@lolita-fashion/shared": "*"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.20.8",
-    "typescript": "^5.4.2",
-    "@types/pg": "^8.10.9"
+    "typescript": "^5.4.2"
   }
 }

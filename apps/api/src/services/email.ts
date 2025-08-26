@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { db, emailTemplates, eq, and } from "@lolita-fashion/db";
 
 export enum EmailType {
   WELCOME = "welcome",
@@ -41,16 +40,83 @@ function processTemplate(
   return processed;
 }
 
-// Get email template from database
+// Get email template from hardcoded templates (simplified for MySQL migration)
 async function getEmailTemplate(templateName: string) {
-  const template = await db.query.emailTemplates.findFirst({
-    where: and(
-      eq(emailTemplates.name, templateName),
-      eq(emailTemplates.isActive, true),
-    ),
-  });
+  const templates: Record<string, { name: string, subject: string, htmlContent: string, textContent?: string }> = {
+    [EmailType.WELCOME]: {
+      name: "welcome",
+      subject: "Welcome to YuYu Lolita Shopping - {{name}}!",
+      htmlContent: `
+        <h1>Welcome {{name}}!</h1>
+        <p>Thank you for joining YuYu Lolita Shopping.</p>
+        <p>Please verify your email by clicking this link: <a href="{{verificationUrl}}">Verify Email</a></p>
+      `,
+      textContent: "Welcome {{name}}! Please verify your email: {{verificationUrl}}"
+    },
+    [EmailType.EMAIL_VERIFICATION]: {
+      name: "email_verification",
+      subject: "Verify Your Email - YuYu Lolita",
+      htmlContent: `
+        <h1>Email Verification</h1>
+        <p>Please verify your email by clicking this link: <a href="{{verificationUrl}}">Verify Email</a></p>
+      `,
+    },
+    [EmailType.PASSWORD_RESET]: {
+      name: "password_reset",
+      subject: "Reset Your Password - YuYu Lolita",
+      htmlContent: `
+        <h1>Password Reset</h1>
+        <p>Hi {{name}}, click this link to reset your password: <a href="{{resetUrl}}">Reset Password</a></p>
+      `,
+    },
+    [EmailType.ORDER_CREATED]: {
+      name: "order_created",
+      subject: "Order Created #{{orderNumber}} - YuYu Lolita",
+      htmlContent: `
+        <h1>Order Created</h1>
+        <p>Hi {{customerName}}, your order #{{orderNumber}} has been created successfully.</p>
+        <p>Total: ¥{{totalAmount}}</p>
+        <p><a href="{{orderUrl}}">View Order</a></p>
+      `,
+    },
+    [EmailType.ORDER_STATUS_UPDATED]: {
+      name: "order_status_updated",
+      subject: "Order Update #{{orderNumber}} - YuYu Lolita",
+      htmlContent: `
+        <h1>Order Status Update</h1>
+        <p>Hi {{customerName}}, your order #{{orderNumber}} status has been updated to: {{newStatus}}</p>
+        <p><a href="{{orderUrl}}">View Order</a></p>
+      `,
+    },
+    [EmailType.SUBSCRIPTION_EXPIRING]: {
+      name: "subscription_expiring",
+      subject: "Subscription Expiring Soon - YuYu Lolita",
+      htmlContent: `
+        <h1>Subscription Expiring</h1>
+        <p>Hi {{name}}, your {{tier}} subscription will expire in {{daysRemaining}} days.</p>
+        <p><a href="{{subscriptionsUrl}}">Renew Subscription</a></p>
+      `,
+    },
+    [EmailType.SUBSCRIPTION_EXPIRED]: {
+      name: "subscription_expired",
+      subject: "Subscription Expired - YuYu Lolita",
+      htmlContent: `
+        <h1>Subscription Expired</h1>
+        <p>Hi {{name}}, your {{tier}} subscription has expired.</p>
+        <p><a href="{{subscriptionsUrl}}">Renew Subscription</a></p>
+      `,
+    },
+    [EmailType.SUBSCRIPTION_RENEWED]: {
+      name: "subscription_renewed",
+      subject: "Subscription Renewed - YuYu Lolita",
+      htmlContent: `
+        <h1>Subscription Renewed</h1>
+        <p>Hi {{name}}, your {{tier}} subscription has been renewed until {{nextExpirationDate}}.</p>
+      `,
+    },
+  };
 
-  return template;
+  return templates[templateName] || null;
 }
 
 // Build email URLs

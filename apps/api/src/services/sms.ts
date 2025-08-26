@@ -86,13 +86,22 @@ class SmsRuProvider implements SmsProvider {
         body: params.toString(),
       });
 
-      const data = await response.json();
+      const data = await response.json() as {
+        status: string;
+        status_text?: string;
+        sms?: Record<string, {
+          status: string;
+          status_text?: string;
+          sms_id?: string;
+          cost?: string;
+        }>;
+      };
 
       if (data.status === "OK") {
         // Get the first phone number's result
-        const phoneResult = Object.values(data.sms)[0] as any;
+        const phoneResult = data.sms ? Object.values(data.sms)[0] : null;
 
-        if (phoneResult.status === "OK") {
+        if (phoneResult && phoneResult.status === "OK") {
           return {
             success: true,
             messageId: phoneResult.sms_id,
@@ -101,7 +110,7 @@ class SmsRuProvider implements SmsProvider {
         } else {
           return {
             success: false,
-            error: `SMS.ru error: ${phoneResult.status_text}`,
+            error: `SMS.ru error: ${phoneResult?.status_text || 'Unknown error'}`,
           };
         }
       } else {
@@ -113,7 +122,7 @@ class SmsRuProvider implements SmsProvider {
     } catch (error) {
       return {
         success: false,
-        error: `SMS.ru request failed: ${error.message}`,
+        error: `SMS.ru request failed: ${(error as Error).message}`,
       };
     }
   }

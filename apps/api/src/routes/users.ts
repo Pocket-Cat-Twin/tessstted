@@ -1,583 +1,223 @@
 import { Elysia, t } from "elysia";
-import bcrypt from "bcryptjs";
-import { db, users, userSessions, eq, and, desc, sql } from "@lolita-fashion/db";
-import { userProfileUpdateSchema, UserRole, UserStatus } from "@lolita-fashion/shared";
-import { requireAuth, requireAdmin } from "../middleware/auth";
-import {
-  NotFoundError,
-  ValidationError,
-  ForbiddenError,
-} from "../middleware/error";
+import { jwt } from "@elysiajs/jwt";
+import { cookie } from "@elysiajs/cookie";
+import { getPool, QueryBuilder } from "@lolita-fashion/db";
+import type { User } from "@lolita-fashion/db";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
+  .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET || "mysql-jwt-secret-change-in-production",
+      exp: "7d",
+    }),
+  )
+  .use(cookie())
 
-  // User profile routes (authenticated users)
-  .use(requireAuth)
-
-  // Get current user profile
+  // Get User Profile
   .get(
     "/profile",
-    ({ store }) => {
-      return {
-        success: true,
-        data: { user: store.user },
-      };
-    },
-    {
-      detail: {
-        summary: "Get current user profile",
-        tags: ["Users"],
-      },
-    },
-  )
+    async ({ jwt, cookie: { auth } }) => {
+      try {
+        if (!auth.value) {
+          return {
+            success: false,
+            error: "Authentication required",
+          };
+        }
 
-  // Update current user profile
-  .put(
-    "/profile",
-    async ({ body, store, set }) => {
-      const validation = userProfileUpdateSchema.safeParse(body);
-      if (!validation.success) {
-        throw new ValidationError("Invalid profile data");
-      }
+        const payload = await jwt.verify(auth.value);
+        if (!payload) {
+          return {
+            success: false,
+            error: "Invalid token",
+          };
+        }
 
-      const updateData = validation.data;
+        const pool = await getPool();
+        const queryBuilder = new QueryBuilder(pool);
+        const user = await queryBuilder.getUserById(payload.userId as string);
 
-      // Update user
-      const [updatedUser] = await db
-        .update(users)
-        .set({
-          ...updateData,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, store.user!.id))
-        .returning({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          phone: users.phone,
-          role: users.role,
-          status: users.status,
-          emailVerified: users.emailVerified,
-          avatar: users.avatar,
-          updatedAt: users.updatedAt,
-        });
+        if (!user) {
+          return {
+            success: false,
+            error: "User not found",
+          };
+        }
 
-      return {
-        success: true,
-        message: "Profile updated successfully",
-        data: { user: updatedUser },
-      };
-    },
-    {
-      body: t.Object({
-        name: t.Optional(t.String({ minLength: 1 })),
-        phone: t.Optional(t.String()),
-        avatar: t.Optional(t.String()),
-      }),
-      detail: {
-        summary: "Update current user profile",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Change password
-  .put(
-    "/profile/password",
-    async ({ body, user }) => {
-      const { currentPassword, newPassword } = body as {
-        currentPassword: string;
-        newPassword: string;
-      };
-
-      // Get user with password
-      const userWithPassword = await db.query.users.findFirst({
-        where: eq(users.id, store.user!.id),
-      });
-
-      if (!userWithPassword) {
-        throw new NotFoundError("User not found");
-      }
-
-      // Verify current password
-      const isCurrentPasswordValid = await bcrypt.compare(
-        currentPassword,
-        userWithPassword.password,
-      );
-      if (!isCurrentPasswordValid) {
-        throw new ValidationError("Current password is incorrect");
-      }
-
-      // Hash new password
-      const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-
-      // Update password
-      await db
-        .update(users)
-        .set({
-          password: hashedNewPassword,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, store.user!.id));
-
-      // Clear all sessions except current
-      await db.delete(userSessions).where(eq(userSessions.userId, store.user!.id));
-
-      return {
-        success: true,
-        message: "Password changed successfully",
-      };
-    },
-    {
-      body: t.Object({
-        currentPassword: t.String({ minLength: 1 }),
-        newPassword: t.String({ minLength: 8 }),
-      }),
-      detail: {
-        summary: "Change user password",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Get user's orders
-  .get(
-    "/profile/orders",
-    async ({ store, query }) => {
-      const page = parseInt(query.page || "1") || 1;
-      const limit = parseInt(query.limit || "10") || 10;
-      const offset = (page - 1) * limit;
-
-      // Get user's orders
-      const userOrders = await db.query.orders.findMany({
-        where: eq(db.orders.userId, store.user!.id),
-        with: {
-          goods: true,
-        },
-        orderBy: desc(db.orders.createdAt),
-        limit,
-        offset,
-      });
-
-      // Get total count
-      const [{ count }] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(db.orders)
-        .where(eq(db.orders.userId, store.user!.id));
-
-      const totalPages = Math.ceil(count / limit);
-
-      return {
-        success: true,
-        data: userOrders,
-        pagination: {
-          page,
-          limit,
-          total: count,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1,
-        },
-      };
-    },
-    {
-      query: t.Object({
-        page: t.Optional(t.String()),
-        limit: t.Optional(t.String()),
-      }),
-      detail: {
-        summary: "Get current user orders",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Admin routes
-  .use(requireAdmin)
-
-  // Get all users with pagination and filtering
-  .get(
-    "/",
-    async ({ query }) => {
-      const page = parseInt(query.page || "1") || 1;
-      const limit = parseInt(query.limit || "10") || 10;
-      const role = query.role as UserRole;
-      const status = query.status as UserStatus;
-      const search = query.search;
-      const offset = (page - 1) * limit;
-
-      // Build where conditions
-      const conditions = [];
-      if (role) {
-        conditions.push(eq(users.role, role));
-      }
-      if (status) {
-        conditions.push(eq(users.status, status));
-      }
-      if (search) {
-        conditions.push(
-          sql`(${users.name} ILIKE ${`%${search}%`} OR ${users.email} ILIKE ${`%${search}%`})`,
-        );
-      }
-
-      const whereClause =
-        conditions.length > 0 ? and(...conditions) : undefined;
-
-      // Get users
-      const usersResult = await db.query.users.findMany({
-        where: whereClause,
-        columns: {
-          password: false, // Exclude password
-          passwordResetToken: false,
-          emailVerificationToken: false,
-        },
-        orderBy: desc(users.createdAt),
-        limit,
-        offset,
-      });
-
-      // Get total count
-      const [{ count }] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(users)
-        .where(whereClause);
-
-      const totalPages = Math.ceil(count / limit);
-
-      return {
-        success: true,
-        data: usersResult,
-        pagination: {
-          page,
-          limit,
-          total: count,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1,
-        },
-      };
-    },
-    {
-      query: t.Object({
-        page: t.Optional(t.String()),
-        limit: t.Optional(t.String()),
-        role: t.Optional(t.String()),
-        status: t.Optional(t.String()),
-        search: t.Optional(t.String()),
-      }),
-      detail: {
-        summary: "Get all users (Admin)",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Get user by ID
-  .get(
-    "/:id",
-    async ({ params: { id } }) => {
-      const user = await db.query.users.findFirst({
-        where: eq(users.id, id),
-        columns: {
-          password: false, // Exclude password
-          passwordResetToken: false,
-          emailVerificationToken: false,
-        },
-        with: {
-          orders: {
-            columns: {
-              id: true,
-              nomerok: true,
-              status: true,
-              totalRuble: true,
-              createdAt: true,
-            },
-            orderBy: desc(db.orders.createdAt),
-            limit: 5, // Last 5 orders
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            fullName: user.full_name,
+            phone: user.phone,
+            role: user.role,
+            status: user.status,
+            emailVerified: user.email_verified,
+            phoneVerified: user.phone_verified,
+            avatar: user.avatar,
+            contactEmail: user.contact_email,
+            contactPhone: user.contact_phone,
+            createdAt: user.created_at,
+            updatedAt: user.updated_at,
           },
-        },
-      });
-
-      if (!user) {
-        throw new NotFoundError("User not found");
+        };
+      } catch (error) {
+        console.error("Get profile error:", error);
+        return {
+          success: false,
+          error: "Failed to get user profile",
+        };
       }
-
-      return {
-        success: true,
-        data: { user: store.user },
-      };
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
       detail: {
-        summary: "Get user by ID (Admin)",
         tags: ["Users"],
+        summary: "Get user profile",
+        description: "Get the current user's profile information",
       },
     },
   )
 
-  // Update user
+  // Update User Profile
   .put(
-    "/:id",
-    async ({ params: { id }, body, user: currentUser }) => {
-      const { role, status, name, phone, avatar } = body as {
-        role?: UserRole;
-        status?: UserStatus;
-        name?: string;
-        phone?: string;
-        avatar?: string;
-      };
+    "/profile",
+    async ({ body, jwt, cookie: { auth } }) => {
+      try {
+        if (!auth.value) {
+          return {
+            success: false,
+            error: "Authentication required",
+          };
+        }
 
-      // Find user
-      const existingUser = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
+        const payload = await jwt.verify(auth.value);
+        if (!payload) {
+          return {
+            success: false,
+            error: "Invalid token",
+          };
+        }
 
-      if (!existingUser) {
-        throw new NotFoundError("User not found");
+        const pool = await getPool();
+        
+        // Update user profile (simple UPDATE query)
+        const sql = `
+          UPDATE users 
+          SET name = ?, full_name = ?, phone = ?, contact_email = ?, contact_phone = ?, updated_at = NOW()
+          WHERE id = ?
+        `;
+        
+        await pool.execute(sql, [
+          body.name,
+          body.fullName,
+          body.phone,
+          body.contactEmail,
+          body.contactPhone,
+          payload.userId as string,
+        ]);
+
+        return {
+          success: true,
+          message: "Profile updated successfully",
+        };
+      } catch (error) {
+        console.error("Update profile error:", error);
+        return {
+          success: false,
+          error: "Failed to update profile",
+        };
       }
-
-      // Prevent self-demotion from admin
-      if (currentUser.id === id && role && role !== UserRole.ADMIN) {
-        throw new ForbiddenError("Cannot change your own admin role");
-      }
-
-      // Update user
-      const [updatedUser] = await db
-        .update(users)
-        .set({
-          ...(role && { role }),
-          ...(status && { status }),
-          ...(name && { name }),
-          ...(phone && { phone }),
-          ...(avatar && { avatar }),
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, id))
-        .returning({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          phone: users.phone,
-          role: users.role,
-          status: users.status,
-          emailVerified: users.emailVerified,
-          avatar: users.avatar,
-          updatedAt: users.updatedAt,
-        });
-
-      return {
-        success: true,
-        message: "User updated successfully",
-        data: { user: updatedUser },
-      };
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
       body: t.Object({
-        role: t.Optional(t.String()),
-        status: t.Optional(t.String()),
-        name: t.Optional(t.String()),
+        name: t.String({ minLength: 1 }),
+        fullName: t.Optional(t.String()),
         phone: t.Optional(t.String()),
-        avatar: t.Optional(t.String()),
+        contactEmail: t.Optional(t.String({ format: "email" })),
+        contactPhone: t.Optional(t.String()),
       }),
       detail: {
-        summary: "Update user (Admin)",
         tags: ["Users"],
+        summary: "Update user profile",
+        description: "Update the current user's profile information",
       },
     },
   )
 
-  // Block user
-  .post(
-    "/:id/block",
-    async ({ params: { id }, body, user: currentUser }) => {
-      const { reason: _reason } = body as { reason?: string };
-
-      // Find user
-      const existingUser = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
-
-      if (!existingUser) {
-        throw new NotFoundError("User not found");
-      }
-
-      // Prevent self-blocking
-      if (currentUser.id === id) {
-        throw new ForbiddenError("Cannot block yourself");
-      }
-
-      // Update user status
-      await db
-        .update(users)
-        .set({
-          status: UserStatus.BLOCKED,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, id));
-
-      // Clear user sessions
-      await db.delete(userSessions).where(eq(userSessions.userId, id));
-
-      return {
-        success: true,
-        message: "User blocked successfully",
-      };
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-      body: t.Object({
-        reason: t.Optional(t.String()),
-      }),
-      detail: {
-        summary: "Block user (Admin)",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Unblock user
-  .post(
-    "/:id/unblock",
-    async ({ params: { id }, user: _currentUser }) => {
-      // Find user
-      const existingUser = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
-
-      if (!existingUser) {
-        throw new NotFoundError("User not found");
-      }
-
-      // Update user status
-      await db
-        .update(users)
-        .set({
-          status: UserStatus.ACTIVE,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, id));
-
-      return {
-        success: true,
-        message: "User unblocked successfully",
-      };
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-      detail: {
-        summary: "Unblock user (Admin)",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Delete user
-  .delete(
-    "/:id",
-    async ({ params: { id }, user: currentUser }) => {
-      // Find user
-      const existingUser = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
-
-      if (!existingUser) {
-        throw new NotFoundError("User not found");
-      }
-
-      // Prevent self-deletion
-      if (currentUser.id === id) {
-        throw new ForbiddenError("Cannot delete yourself");
-      }
-
-      // Delete user (this will cascade to sessions, but orders will have userId set to null)
-      await db.delete(users).where(eq(users.id, id));
-
-      return {
-        success: true,
-        message: "User deleted successfully",
-      };
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-      detail: {
-        summary: "Delete user (Admin)",
-        tags: ["Users"],
-      },
-    },
-  )
-
-  // Get user statistics
+  // Get User Statistics
   .get(
-    "/stats/overview",
-    async () => {
-      // Get user counts by role
-      const roleCounts = await db
-        .select({
-          role: users.role,
-          count: sql<number>`count(*)`,
-        })
-        .from(users)
-        .groupBy(users.role);
+    "/stats",
+    async ({ jwt, cookie: { auth } }) => {
+      try {
+        if (!auth.value) {
+          return {
+            success: false,
+            error: "Authentication required",
+          };
+        }
 
-      // Get user counts by status
-      const statusCounts = await db
-        .select({
-          status: users.status,
-          count: sql<number>`count(*)`,
-        })
-        .from(users)
-        .groupBy(users.status);
+        const payload = await jwt.verify(auth.value);
+        if (!payload) {
+          return {
+            success: false,
+            error: "Invalid token",
+          };
+        }
 
-      // Get new users in last 30 days
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const [{ newUsersCount }] = await db
-        .select({
-          newUsersCount: sql<number>`count(*)`,
-        })
-        .from(users)
-        .where(sql`${users.createdAt} >= ${thirtyDaysAgo}`);
+        const pool = await getPool();
+        
+        // Get user statistics with direct SQL
+        const orderStatsSQL = `
+          SELECT 
+            COUNT(*) as total_orders,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_orders,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_orders,
+            SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing_orders,
+            SUM(total_price_cny) as total_spent,
+            SUM(commission_amount) as total_commission
+          FROM orders 
+          WHERE user_id = ?
+        `;
+        
+        const [statsRows] = await pool.execute(orderStatsSQL, [payload.userId as string]);
+        const stats = (statsRows as any[])[0];
 
-      // Get email verification stats
-      const [{ verifiedUsersCount }] = await db
-        .select({
-          verifiedUsersCount: sql<number>`count(*)`,
-        })
-        .from(users)
-        .where(eq(users.emailVerified, true));
+        // Get active subscription
+        const queryBuilder = new QueryBuilder(pool);
+        const subscription = await queryBuilder.getActiveSubscription(payload.userId as string);
 
-      const [{ totalUsersCount }] = await db
-        .select({
-          totalUsersCount: sql<number>`count(*)`,
-        })
-        .from(users);
-
-      return {
-        success: true,
-        data: {
-          roleCounts,
-          statusCounts,
-          newUsersCount: newUsersCount || 0,
-          verifiedUsersCount: verifiedUsersCount || 0,
-          totalUsersCount: totalUsersCount || 0,
-        },
-      };
+        return {
+          success: true,
+          stats: {
+            totalOrders: Number(stats.total_orders) || 0,
+            completedOrders: Number(stats.completed_orders) || 0,
+            pendingOrders: Number(stats.pending_orders) || 0,
+            processingOrders: Number(stats.processing_orders) || 0,
+            totalSpent: Number(stats.total_spent) || 0,
+            totalCommission: Number(stats.total_commission) || 0,
+            subscription: subscription ? {
+              tier: subscription.tier,
+              status: subscription.status,
+              expiresAt: subscription.expires_at,
+            } : null,
+          },
+        };
+      } catch (error) {
+        console.error("Get user stats error:", error);
+        return {
+          success: false,
+          error: "Failed to get user statistics",
+        };
+      }
     },
     {
       detail: {
-        summary: "Get user statistics (Admin)",
         tags: ["Users"],
+        summary: "Get user statistics",
+        description: "Get order statistics and subscription info for the current user",
       },
     },
   );

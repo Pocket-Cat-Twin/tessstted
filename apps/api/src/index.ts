@@ -1,224 +1,118 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
-import { staticPlugin } from "@elysiajs/static";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
+import bcrypt from "bcryptjs";
+
+// MySQL8 Native Database
+import { createConnection, getPool } from "@lolita-fashion/db";
+import type { DatabaseConfig } from "@lolita-fashion/db";
 
 // Import routes
 import { authRoutes } from "./routes/auth";
-import { authV2Routes } from "./routes/auth-v2";
 import { userRoutes } from "./routes/users";
-import { profileRoutes } from "./routes/profile";
 import { orderRoutes } from "./routes/orders";
 import { subscriptionRoutes } from "./routes/subscriptions";
-import { notificationRoutes } from "./routes/notifications";
-import { storageRoutes } from "./routes/storage";
-import { schedulerRoutes } from "./routes/scheduler";
-import { storyRoutes } from "./routes/stories";
-import { blogRoutes } from "./routes/blog";
-import { faqRoutes } from "./routes/faq";
-import { adminStatsRoutes } from "./routes/admin-stats";
-import { configRoutes } from "./routes/config";
-import { uploadRoutes } from "./routes/uploads";
-import { monitoringRoutes } from "./routes/monitoring";
-import { cleanupRoutes } from "./routes/cleanup";
-import { backupRoutes } from "./routes/backup";
+import { healthRoutes } from "./routes/health";
 
-// Import middleware
-import { errorHandler } from "./middleware/error";
-import { rateLimiter } from "./middleware/rateLimit";
-import { loggingMiddleware } from "./middleware/logging";
+// Configuration with MySQL8
+console.log("🚀 YuYu Lolita Shopping API - MySQL8 Native");
+console.log("====================================================");
+console.log("🐬 Running with Native MySQL8 Database");
+console.log("✅ No ORM - Pure MySQL2 implementation");
+console.log("====================================================");
 
-// Import utils
-import { testConnection } from "@lolita-fashion/db";
-import { startMetricsMonitoring } from "./services/monitoring";
-import { scheduleCleanup } from "./services/cleanup";
-import { scheduleBackups } from "./services/backup";
+// Database configuration
+const dbConfig: DatabaseConfig = {
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "3306"),
+  database: process.env.DB_NAME || "yuyu_lolita",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || ""
+};
+
+// Initialize MySQL connection
+const connection = createConnection(dbConfig);
 
 const app = new Elysia()
-  // Basic setup
+  .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET || "mysql-jwt-secret-key-change-in-production",
+      exp: "7d",
+    }),
+  )
+  .use(cookie())
   .use(
     swagger({
       documentation: {
         info: {
-          title: "YuYu Lolita Shopping API",
-          version: "1.0.0",
-          description: "API для системы заказов YuYu Lolita Shopping",
+          title: "YuYu Lolita Shopping API (MySQL8)",
+          version: "2.0.0-mysql",
+          description: "Native MySQL8 API without ORM - Pure SQL implementation"
         },
         tags: [
-          { name: "Auth", description: "Аутентификация и авторизация" },
-          {
-            name: "Auth V2",
-            description: "Расширенная аутентификация (email/phone)",
-          },
-          { name: "Users", description: "Управление пользователями" },
-          { name: "Profile", description: "Профиль пользователя и адреса" },
-          { name: "Orders", description: "Управление заказами" },
-          { name: "Subscriptions", description: "Управление подписками" },
-          { name: "Notifications", description: "Управление уведомлениями" },
-          { name: "Storage", description: "Управление хранением товаров" },
-          { name: "Scheduler", description: "Планировщик задач" },
-          { name: "Stories", description: "Управление историями" },
-          { name: "Blog", description: "Блог - категории и теги" },
-          { name: "FAQ", description: "Часто задаваемые вопросы" },
-          { name: "Admin", description: "Административная панель" },
-          { name: "Statistics", description: "Статистика и аналитика" },
-          { name: "Config", description: "Конфигурация системы" },
-          { name: "Uploads", description: "Загрузка файлов" },
+          { name: "Auth", description: "Authentication endpoints" },
+          { name: "Orders", description: "Order management" },
+          { name: "Users", description: "User management" },
+          { name: "Subscriptions", description: "Subscription management" },
+          { name: "Health", description: "Health check endpoints" }
         ],
       },
     }),
   )
   .use(
     cors({
-      origin: process.env.CORS_ORIGIN 
-        ? process.env.CORS_ORIGIN.split(',').map(url => url.trim()) 
-        : ["http://localhost:5173", "https://yuyu.su", "http://yuyu.su"],
+      origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     }),
   )
-  .use(
-    jwt({
-      name: "jwt",
-      secret: process.env.JWT_SECRET || "your-jwt-secret-key",
-      exp: "7d",
-    }),
-  )
-  .use(cookie())
-  .use(
-    staticPlugin({
-      assets: "public",
-      prefix: "/static",
-    }),
-  )
+  
+  // API routes
+  .use(authRoutes)
+  .use(userRoutes)
+  .use(orderRoutes)
+  .use(subscriptionRoutes)
+  .use(healthRoutes)
 
-  // Global middleware (order matters!)
-  .use(loggingMiddleware) // Must be first to capture all requests
-  .use(errorHandler)
-  .use(rateLimiter)
-
-  // Health check
-  .get("/", () => ({
-    success: true,
-    message: "YuYu Lolita Shopping API is running",
-    version: "1.0.0",
-    timestamp: new Date().toISOString(),
-  }))
-
-  .get("/health", async () => {
-    const dbStatus = await testConnection();
-    return {
-      success: true,
-      status: "healthy",
-      database: dbStatus ? "connected" : "disconnected",
-      timestamp: new Date().toISOString(),
-    };
+  // Initialize database connection on startup
+  .onStart(async () => {
+    try {
+      const pool = await connection.connect();
+      console.log("✅ MySQL8 connection established successfully");
+      
+      // Test connection
+      await pool.execute("SELECT 1");
+      console.log("✅ MySQL8 database connectivity verified");
+    } catch (error) {
+      console.error("❌ Failed to connect to MySQL8:", error);
+      process.exit(1);
+    }
   })
 
-  // API routes
-  .group("/api/v1", (apiGroup) =>
-    apiGroup
-      .use(authRoutes)
-      .use(authV2Routes)
-      .use(userRoutes)
-      .use(profileRoutes)
-      .use(orderRoutes)
-      .use(subscriptionRoutes)
-      .use(notificationRoutes)
-      .use(storageRoutes)
-      .use(schedulerRoutes)
-      .use(storyRoutes)
-      .use(blogRoutes)
-      .use(faqRoutes)
-      .use(adminStatsRoutes)
-      .use(configRoutes)
-      .use(uploadRoutes)
-      .use(monitoringRoutes)
-      .use(cleanupRoutes)
-      .use(backupRoutes),
-  )
-
-  // 404 handler
-  .onError(({ code, error, set }) => {
-    if (code === "NOT_FOUND") {
-      set.status = 404;
-      return {
-        success: false,
-        error: "Endpoint not found",
-        message: "The requested resource does not exist",
-      };
+  .onStop(async () => {
+    try {
+      await connection.disconnect();
+      console.log("✅ MySQL8 connection closed gracefully");
+    } catch (error) {
+      console.error("❌ Error closing MySQL8 connection:", error);
     }
-
-    // Let error handler middleware handle other errors
-    throw error;
   });
 
 // Start server only if not in test mode
 if (process.env.NODE_ENV !== "test") {
-  // Port configuration with explicit validation and fallbacks
-  const rawApiPort = process.env.API_PORT;
-  const rawPort = process.env.PORT;
-  
-  // Priority: API_PORT > 3001 (ignore generic PORT for API server)
-  let port = 3001; // Default API port
-  
-  if (rawApiPort) {
-    const parsedApiPort = parseInt(rawApiPort, 10);
-    if (!isNaN(parsedApiPort) && parsedApiPort > 0 && parsedApiPort <= 65535) {
-      port = parsedApiPort;
-    } else {
-      console.warn(`⚠️  Invalid API_PORT value: ${rawApiPort}, using default: 3001`);
-    }
-  }
-  
-  // Ensure we never use web ports (5173, 3000, 4173, etc.)
-  const webPorts = [5173, 3000, 4173, 5000, 8080];
-  if (webPorts.includes(port)) {
-    console.error(`❌ ERROR: API server cannot use web port ${port}. This port is reserved for web applications.`);
-    console.error(`   API_PORT environment variable: ${rawApiPort}`);
-    console.error(`   PORT environment variable: ${rawPort}`);
-    console.error(`   Using default API port: 3001 instead`);
-    port = 3001;
-  }
-
-  const host = process.env.API_HOST || "0.0.0.0";
-
-  // Additional validation
-  if (typeof port !== 'number' || port < 1 || port > 65535) {
-    console.error(`❌ ERROR: Invalid port number: ${port}`);
-    console.error(`   Setting port to default: 3001`);
-    port = 3001;
-  }
-
-  console.log(`🔧 API Server Configuration:`);
-  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
-  console.log(`   API_PORT env: ${rawApiPort || 'undefined'}`);
-  console.log(`   PORT env: ${rawPort || 'undefined'}`);
-  console.log(`   Selected port: ${port}`);
-  console.log(`   Host: ${host}`);
-  console.log('');
+  const port = parseInt(process.env.API_PORT || "3001");
+  const host = process.env.API_HOST || "localhost";
 
   app.listen(port, () => {
-    console.log(
-      `🚀 YuYu Lolita Shopping API is running on http://${host}:${port}`,
-    );
-    console.log(`📚 Swagger documentation: http://${host}:${port}/swagger`);
-    console.log(
-      `📊 Monitoring endpoints: http://${host}:${port}/api/v1/monitoring`,
-    );
-    console.log(`🧹 Cleanup endpoints: http://${host}:${port}/api/v1/cleanup`);
-    console.log(`💾 Backup endpoints: http://${host}:${port}/api/v1/backup`);
-
-    // Start metrics monitoring
-    startMetricsMonitoring();
-
-    // Start automatic cleanup scheduling
-    scheduleCleanup();
-
-    // Start automatic backup scheduling
-    scheduleBackups();
+    console.log(`🚀 YuYu API Server running on http://${host}:${port}`);
+    console.log(`📚 API Documentation: http://${host}:${port}/swagger`);
+    console.log(`🐬 Database: MySQL8 Native (No ORM)`);
   });
 }
 
 export default app;
+export type App = typeof app;

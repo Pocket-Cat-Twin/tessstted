@@ -1,14 +1,15 @@
 {
   "database": {
     "host": "localhost",
-    "port": 5432,
+    "port": 3306,
     "defaultDatabase": "yuyu_lolita",
-    "adminDatabase": "postgres",
-    "windowsServiceName": "postgresql-x64-15",
-    "defaultUser": "postgres",
+    "adminDatabase": "mysql",
+    "windowsServiceName": "MySQL80",
+    "defaultUser": "root",
     "connectionTimeout": 10000,
     "retryAttempts": 5,
-    "retryDelay": 2000
+    "retryDelay": 2000,
+    "charset": "utf8mb4"
   },
   "api": {
     "host": "localhost",
@@ -28,11 +29,11 @@
   "windows": {
     "powershellExecutionPolicy": "RemoteSigned",
     "requiredServices": [
-      "postgresql-x64-15",
-      "postgresql-x64-14",
-      "postgresql"
+      "MySQL80",
+      "MySQL57",
+      "MySQL"
     ],
-    "firewallPorts": [3001, 5173, 5432],
+    "firewallPorts": [3001, 5173, 3306],
     "recommendedExclusions": [
       "node_modules",
       "dist",
@@ -44,7 +45,8 @@
       "logs": "logs",
       "uploads": "uploads",
       "temp": "%TEMP%\\yuyu-lolita",
-      "data": "%APPDATA%\\yuyu-lolita"
+      "data": "%APPDATA%\\yuyu-lolita",
+      "mysql": "%PROGRAMFILES%\\MySQL\\MySQL Server 8.0"
     }
   },
   "security": {

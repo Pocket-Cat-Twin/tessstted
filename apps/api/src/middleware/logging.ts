@@ -4,7 +4,6 @@ import {
   logApiMetrics,
   logSecurityEvent,
 } from "../services/logger";
-import { recordRequest, recordError } from "../services/monitoring";
 import { randomUUID } from "crypto";
 
 // Request logging middleware
@@ -86,9 +85,6 @@ export const loggingMiddleware = new Elysia({ name: "logging" })
       // Log API metrics
       logApiMetrics(method, path, statusCode, duration);
 
-      // Record metrics for monitoring
-      recordRequest(method, path, statusCode, duration);
-
       // Log slow requests
       if (duration > 1000) {
         requestLogger.warn(
@@ -144,10 +140,6 @@ export const loggingMiddleware = new Elysia({ name: "logging" })
 
     // Log API metrics for errors
     logApiMetrics(method, path, statusCode, duration);
-
-    // Record error metrics for monitoring
-    recordError(String(code), path, errorMessage);
-    recordRequest(method, path, statusCode, duration);
 
     // Log security events for suspicious patterns
     if (statusCode === 401 || statusCode === 403) {

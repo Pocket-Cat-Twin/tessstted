@@ -1,8 +1,7 @@
 import { Elysia } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
-import { db, users, eq } from "@lolita-fashion/db";
-import { UserRole } from "@lolita-fashion/shared";
+import { getPool, QueryBuilder } from "@lolita-fashion/db";
 
 // User type for auth context
 interface AuthUser {
@@ -20,97 +19,58 @@ export const authMiddleware = new Elysia({ name: "auth" })
   .use(
     jwt({
       name: "jwt",
-      secret: process.env.JWT_SECRET || "your-jwt-secret-key",
+      secret: process.env.JWT_SECRET || "mysql-jwt-secret-change-in-production",
+      exp: "7d",
     }),
   )
   .use(cookie())
-  .state("user", null as AuthUser | null)
-  .onBeforeHandle(async ({ jwt: jwtInstance, cookie: cookieInstance, headers, store }) => {
-    // Try to get token from Authorization header or cookie
-    const authHeader = headers.authorization;
-    const token = authHeader?.startsWith("Bearer ")
-      ? authHeader.slice(7)
-      : cookieInstance.token;
-
-    if (!token) {
-      store.user = null;
-      return;
-    }
+  .derive(async ({ jwt, cookie: { auth } }) => {
+    if (!auth.value) return { user: null };
 
     try {
-      const payload = await jwtInstance.verify(token);
-      if (!payload || typeof payload !== "object" || !("userId" in payload)) {
-        store.user = null;
-        return;
-      }
+      const payload = await jwt.verify(auth.value);
+      if (!payload) return { user: null };
 
-      // Get user from database
-      const user = await db.query.users.findFirst({
-        where: eq(users.id, payload.userId as string),
-        columns: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          status: true,
-          emailVerified: true,
-          avatar: true,
-          createdAt: true,
-        },
-      });
+      const pool = await getPool();
+      const queryBuilder = new QueryBuilder(pool);
+      const user = await queryBuilder.getUserById(payload.userId as string);
 
-      if (!user || user.status === "blocked") {
-        store.user = null;
-        return;
-      }
+      if (!user) return { user: null };
 
-      store.user = user as AuthUser;
+      return {
+        user: {
+          id: user.id,
+          email: user.email || "",
+          name: user.name,
+          role: user.role,
+          status: user.status,
+          emailVerified: user.email_verified,
+          avatar: user.avatar,
+          createdAt: user.created_at,
+        } as AuthUser,
+      };
     } catch (error) {
       console.error("Auth middleware error:", error);
-      store.user = null;
+      return { user: null };
     }
   });
 
-// Require authentication
-export const requireAuth = new Elysia({ name: "requireAuth" })
+// Require authentication  
+export const requireAuth = new Elysia({ name: "require-auth" })
   .use(authMiddleware)
-  .onBeforeHandle(({ store, set }) => {
-    if (!store.user) {
-      set.status = 401;
-      return {
-        success: false,
-        error: "AUTHENTICATION_ERROR",
-        message: "Authentication required",
-      };
+  .onBeforeHandle(({ ...context }) => {
+    const user = (context as any).user;
+    if (!user) {
+      throw new Error("Authentication required");
     }
   });
 
 // Require admin role
-export const requireAdmin = new Elysia({ name: "requireAdmin" })
-  .use(requireAuth)
-  .onBeforeHandle(({ store, set }) => {
-    if (store.user?.role !== UserRole.ADMIN) {
-      set.status = 403;
-      return {
-        success: false,
-        error: "AUTHORIZATION_ERROR",
-        message: "Admin access required",
-      };
-    }
-  });
-
-// Require email verification
-export const requireEmailVerification = new Elysia({
-  name: "requireEmailVerification",
-})
-  .use(requireAuth)
-  .onBeforeHandle(({ store, set }) => {
-    if (!store.user?.emailVerified) {
-      set.status = 403;
-      return {
-        success: false,
-        error: "EMAIL_NOT_VERIFIED",
-        message: "Email verification required",
-      };
+export const requireAdmin = new Elysia({ name: "require-admin" })
+  .use(authMiddleware)
+  .onBeforeHandle(({ ...context }) => {
+    const user = (context as any).user;
+    if (!user || user.role !== "admin") {
+      throw new Error("Admin access required");
     }
   });
