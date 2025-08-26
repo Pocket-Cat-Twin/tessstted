@@ -115,3 +115,24 @@ export class QueryBuilder {
     return rows[0] as Subscription || null;
   }
 }
+
+// Export convenience functions for standalone use
+import { getPool } from "./connection.js";
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const pool = await getPool();
+  const builder = new QueryBuilder(pool);
+  return builder.getUserByEmail(email);
+}
+
+export async function getUserById(id: string): Promise<User | null> {
+  const pool = await getPool();
+  const builder = new QueryBuilder(pool);
+  return builder.getUserById(id);
+}
+
+export async function getUserByPhone(phone: string): Promise<User | null> {
+  const pool = await getPool();
+  const builder = new QueryBuilder(pool);
+  return builder.getUserByPhone(phone);
+}
