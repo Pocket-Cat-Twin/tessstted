@@ -35,14 +35,11 @@
     "type-check": "(cd apps/web && npm run check) && (cd apps/api && npm run type-check)",
     "validate:powershell": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1",
     "fix:powershell": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Fix",
-    
     "validate:powershell:strict": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Strict",
     "validate:powershell:report": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Report",
     "validate:modules": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Path scripts",
     "validate:modules:fix": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Path scripts -Fix",
-    
     "test:powershell": "powershell -ExecutionPolicy Bypass -Command \"Write-Host '[TEST] Testing PowerShell module system...' -ForegroundColor Cyan; Import-Module ./scripts/PowerShell-Common.psd1 -Force; Write-Host '[SUCCESS] PowerShell module system working correctly!' -ForegroundColor Green\"",
-    
     "validate:enterprise": "bun run validate:powershell:strict && bun run validate:modules && bun run lint:check && bun run type-check",
     "validate:all": "bun run validate:powershell && bun run lint:check && bun run type-check",
     "validate": "bun run lint:check && bun run type-check && bun run build"
@@ -61,5 +58,9 @@
   "engines": {
     "bun": ">=1.0.0",
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "mysql2": "^3.14.3"
   }
 }

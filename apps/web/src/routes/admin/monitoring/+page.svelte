@@ -26,8 +26,8 @@
   async function loadMonitoringData() {
     try {
       const [metricsResponse, healthResponse] = await Promise.all([
-        fetch('/api/v1/monitoring/metrics'),
-        fetch('/api/v1/monitoring/health')
+        fetch('/monitoring/metrics'),
+        fetch('/monitoring/health')
       ]);
 
       const [metricsData, healthResponseData] = await Promise.all([

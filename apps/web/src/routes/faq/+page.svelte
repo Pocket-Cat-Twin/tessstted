@@ -20,7 +20,7 @@
     error = '';
     
     try {
-      const response = await fetch('http://127.0.0.1:3001/api/v1/config/faq');
+      const response = await fetch('http://127.0.0.1:3001/config/faq');
       const data = await response.json();
       
       if (data.success) {

@@ -63,8 +63,8 @@ export function checkQuickConfig(): void {
   // Простые проверки
   const issues: string[] = [];
   
-  if (!API_CONFIG.BASE_URL.includes('/api/v1')) {
-    issues.push("BASE_URL не содержит '/api/v1'");
+  if (API_CONFIG.BASE_URL.endsWith('/')) {
+    issues.push("BASE_URL не должен заканчиваться слэшем");
   }
   
   if (!API_CONFIG.BASE_URL.startsWith('http')) {
@@ -95,10 +95,10 @@ export function suggestConfigFixes(): void {
   
   console.log("📝 Для исправления проблем с API endpoints:");
   console.log("1. Убедитесь что файл apps/web/.env содержит:");
-  console.log("   PUBLIC_API_URL=http://localhost:3001/api/v1");
+  console.log("   PUBLIC_API_URL=http://localhost:3001");
   console.log("");
   console.log("2. Проверьте файл .env.windows:");
-  console.log("   PUBLIC_API_URL=http://localhost:3001/api/v1");
+  console.log("   PUBLIC_API_URL=http://localhost:3001");
   console.log("");
   console.log("3. Перезапустите веб-приложение после изменения .env:");
   console.log("   cd apps/web && bun run dev");

@@ -67,7 +67,7 @@
     error = '';
     
     try {
-      const response = await fetch('http://127.0.0.1:3001/api/v1/admin/orders', {
+      const response = await fetch('http://127.0.0.1:3001/admin/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'

@@ -971,9 +971,9 @@ class ApiClient {
       issues.push("Base URL is not configured");
     } else if (!this.baseUrl.startsWith('http')) {
       issues.push("Base URL must start with http:// or https://");
-    } else if (!this.baseUrl.includes('/api/v1')) {
-      issues.push("Base URL should include /api/v1 suffix");
-      recommendations.push("Add /api/v1 to your PUBLIC_API_URL environment variable");
+    } else if (this.baseUrl.endsWith('/')) {
+      issues.push("Base URL should not end with trailing slash");
+      recommendations.push("Remove trailing slash from your PUBLIC_API_URL environment variable");
     }
     
     // Проверка тайм-аутов

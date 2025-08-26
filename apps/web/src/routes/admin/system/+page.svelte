@@ -21,8 +21,8 @@
     loading = true;
     try {
       const [backupResponse, cleanupResponse] = await Promise.all([
-        fetch('/api/v1/backup/status'),
-        fetch('/api/v1/cleanup/statistics')
+        fetch('/backup/status'),
+        fetch('/cleanup/statistics')
       ]);
 
       const [backupData, cleanupData] = await Promise.all([
@@ -48,7 +48,7 @@
   async function createBackup(type: string) {
     actionLoading = `backup-${type}`;
     try {
-      const response = await fetch(`/api/v1/backup/create/${type}`, {
+      const response = await fetch(`/backup/create/${type}`, {
         method: 'POST'
       });
       const result = await response.json();
@@ -69,7 +69,7 @@
   async function runCleanup() {
     actionLoading = 'cleanup';
     try {
-      const response = await fetch('/api/v1/cleanup/run', {
+      const response = await fetch('/cleanup/run', {
         method: 'POST'
       });
       const result = await response.json();

@@ -17,22 +17,14 @@ export const API_CONFIG = {
     console.log("  Environment keys:", Object.keys(env).filter(key => key.startsWith('PUBLIC')));
     
     if (envUrl) {
-      // Убираем trailing slashes
+      // Убираем trailing slashes и используем URL как есть
       const cleanUrl = envUrl.replace(/\/+$/, '');
-      
-      // Гарантируем что URL заканчивается на /api/v1
-      if (cleanUrl.endsWith('/api/v1')) {
-        console.log("✅ Using configured API URL:", cleanUrl);
-        return cleanUrl;
-      } else {
-        const correctedUrl = `${cleanUrl}/api/v1`;
-        console.log("⚠️  Correcting API URL from", cleanUrl, "to", correctedUrl);
-        return correctedUrl;
-      }
+      console.log("✅ Using configured API URL:", cleanUrl);
+      return cleanUrl;
     }
     
-    // Fallback значение с предупреждением
-    const fallbackUrl = "http://localhost:3001/api/v1";
+    // Fallback значение без /api/v1 префикса
+    const fallbackUrl = "http://localhost:3001";
     console.warn("⚠️  PUBLIC_API_URL not configured, using fallback:", fallbackUrl);
     console.warn("   Check your .env files for PUBLIC_API_URL setting");
     
@@ -43,7 +35,7 @@ export const API_CONFIG = {
    * Централизованные endpoint пути
    */
   ENDPOINTS: {
-    // Health check (без /api/v1 префикса)
+    // Health check endpoint
     HEALTH: "/health",
     
     // Authentication endpoints
@@ -137,7 +129,7 @@ export const API_CONFIG = {
    */
   async validateConnection(): Promise<boolean> {
     try {
-      const healthUrl = this.BASE_URL.replace('/api/v1', '') + this.ENDPOINTS.HEALTH;
+      const healthUrl = this.BASE_URL + this.ENDPOINTS.HEALTH;
       console.log("🔍 Validating API connection:", healthUrl);
       
       const response = await fetch(healthUrl, {
@@ -167,10 +159,10 @@ export const API_CONFIG = {
   },
 
   /**
-   * Создание URL для health check (без /api/v1)
+   * Создание URL для health check
    */
   buildHealthUrl(): string {
-    return this.BASE_URL.replace('/api/v1', '') + this.ENDPOINTS.HEALTH;
+    return this.BASE_URL + this.ENDPOINTS.HEALTH;
   }
 };
 

@@ -104,7 +104,7 @@
 
   async function fetchSystemHealth() {
     try {
-      const response = await fetch('/api/v1/monitoring/health');
+      const response = await fetch('/monitoring/health');
       return await response.json();
     } catch (err) {
       return { success: false, error: err };
