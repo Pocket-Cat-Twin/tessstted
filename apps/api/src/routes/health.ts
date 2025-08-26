@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { getPool } from "@lolita-fashion/db";
+import { getPool, checkMySQLHealth } from "@lolita-fashion/db";
 
 export const healthRoutes = new Elysia({ prefix: "/health" })
 
@@ -79,6 +79,28 @@ export const healthRoutes = new Elysia({ prefix: "/health" })
         tags: ["Health"],
         summary: "Database health check",
         description: "Detailed MySQL8 database health information",
+      },
+    },
+  )
+
+  // Detailed Health Check
+  .get(
+    "/detailed",
+    async () => {
+      const healthResult = await checkMySQLHealth();
+      return {
+        api: {
+          status: "healthy",
+          timestamp: new Date().toISOString(),
+        },
+        database: healthResult,
+      };
+    },
+    {
+      detail: {
+        tags: ["Health"],
+        summary: "Detailed health check", 
+        description: "Comprehensive health check including MySQL8 database details",
       },
     },
   );

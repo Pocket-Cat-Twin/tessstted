@@ -1,6 +1,6 @@
 # 🪟 Windows Setup Guide for YuYu Lolita Shopping
 
-Complete guide for setting up and running YuYu Lolita Shopping on Windows 10/11 with native PostgreSQL.
+Complete guide for setting up and running YuYu Lolita Shopping on Windows 10/11 with native MySQL8.
 
 ## 📋 Prerequisites
 
@@ -18,22 +18,22 @@ The setup script will automatically install missing dependencies, but you can in
 irm bun.sh/install.ps1 | iex
 ```
 
-#### 2. PostgreSQL 15
-Download from [postgresql.org](https://www.postgresql.org/download/windows/) or use package managers:
+#### 2. MySQL8
+Download from [mysql.com](https://dev.mysql.com/downloads/mysql/) or use package managers:
 
 **Using Chocolatey:**
 ```powershell
-choco install postgresql15
+choco install mysql
 ```
 
 **Using Scoop:**
 ```powershell
-scoop install postgresql
+scoop install mysql
 ```
 
 **Using winget:**
 ```powershell
-winget install PostgreSQL.PostgreSQL
+winget install Oracle.MySQL
 ```
 
 ---
@@ -52,7 +52,7 @@ bun run setup:windows
 
 This command will:
 - ✅ Check and install Bun if needed
-- ✅ Verify PostgreSQL installation
+- ✅ Verify MySQL8 installation
 - ✅ Create and configure database
 - ✅ Install all dependencies
 - ✅ Run database migrations
@@ -84,12 +84,11 @@ notepad .env
 
 ### Step 3: Database Setup
 ```powershell
-# Setup PostgreSQL database
+# Setup MySQL8 database
 bun run db:setup:windows
 
 # Or manually:
 bun run db:migrate:windows
-bun run db:seed:windows
 ```
 
 ### Step 4: Build Packages
@@ -158,28 +157,28 @@ bun run db:migrate:windows
 # Seed database with test data
 bun run db:seed:windows
 
-# Open Drizzle Studio (Database UI)
-bun run db:studio
+# Connect to MySQL directly
+mysql -u root -p yuyu_lolita
 ```
 
-### PostgreSQL Service Management
+### MySQL Service Management
 ```powershell
-# Start PostgreSQL service
-net start postgresql-x64-15
+# Start MySQL service
+net start MySQL80
 
-# Stop PostgreSQL service  
-net stop postgresql-x64-15
+# Stop MySQL service  
+net stop MySQL80
 
 # Check service status
-sc query postgresql-x64-15
+sc query MySQL80
 ```
 
 ### Database Connection
 - **Host**: localhost
-- **Port**: 5432
+- **Port**: 3306
 - **Database**: yuyu_lolita
-- **Username**: postgres
-- **Password**: postgres
+- **Username**: root
+- **Password**: (empty by default)
 
 ---
 
@@ -218,7 +217,11 @@ bun run type-check            # Type checking
 ### Environment Variables (.env)
 ```env
 # Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/yuyu_lolita
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=yuyu_lolita
+DB_USER=root
+DB_PASSWORD=
 
 # API
 API_HOST=localhost
@@ -244,11 +247,11 @@ SESSION_SECRET=your-session-secret
 
 ### Common Issues
 
-#### "PostgreSQL service not found"
+#### "MySQL service not found"
 **Solution:**
-1. Install PostgreSQL from [postgresql.org](https://www.postgresql.org/download/windows/)
+1. Install MySQL8 from [mysql.com](https://dev.mysql.com/downloads/mysql/)
 2. Ensure it's installed as a Windows service
-3. Start the service: `net start postgresql-x64-15`
+3. Start the service: `net start MySQL80`
 
 #### "Port already in use" (3001 or 5173)
 **Solution:**
@@ -263,11 +266,11 @@ taskkill /PID <process_id> /F
 
 #### "Database connection failed"
 **Solutions:**
-1. Check PostgreSQL service: `sc query postgresql-x64-15`
+1. Check MySQL service: `sc query MySQL80`
 2. Verify password in .env file
 3. Test connection manually:
    ```powershell
-   psql -h localhost -U postgres -d yuyu_lolita
+   mysql -u root -p -h localhost yuyu_lolita
    ```
 
 #### "Bun command not found"
@@ -322,15 +325,15 @@ Add these folders to Windows Defender exclusions for better performance:
 ## 🔐 Security Considerations
 
 ### Production Deployment
-- Change default PostgreSQL password
+- Change default MySQL root password
 - Update JWT_SECRET and SESSION_SECRET in .env
 - Configure proper firewall rules
 - Use HTTPS in production
 - Regular security updates
 
 ### Default Credentials (CHANGE IN PRODUCTION)
-- PostgreSQL User: `postgres`
-- PostgreSQL Password: `postgres`
+- MySQL User: `root`
+- MySQL Password: (empty by default)
 - JWT Secret: `your-super-secret-jwt-key`
 
 ---
@@ -342,10 +345,10 @@ Logs are stored in the `logs/` directory:
 - `api.log` - API server logs
 - `web.log` - Web application logs
 
-### PostgreSQL Logs
-Windows PostgreSQL logs are typically in:
+### MySQL Logs
+Windows MySQL logs are typically in:
 ```
-C:\Program Files\PostgreSQL\15\data\log\
+C:\ProgramData\MySQL\MySQL Server 8.0\Data\
 ```
 
 ### Performance Monitoring
@@ -358,8 +361,8 @@ Get-Process node
 netstat -ano | findstr :3001
 netstat -ano | findstr :5173
 
-# Check PostgreSQL status
-sc query postgresql-x64-15
+# Check MySQL status
+sc query MySQL80
 ```
 
 ---
@@ -375,7 +378,7 @@ systeminfo > system-info.txt
 copy logs\*.log support-logs\
 
 # Check service status
-sc query postgresql-x64-15 > service-status.txt
+sc query MySQL80 > service-status.txt
 
 # Export environment
 set > environment.txt
@@ -384,7 +387,7 @@ set > environment.txt
 ### Useful Commands for Debugging
 ```powershell
 # Check installed software
-Get-WmiObject -Class Win32_Product | Where-Object {$_.Name -like "*postgres*"}
+Get-WmiObject -Class Win32_Product | Where-Object {$_.Name -like "*MySQL*"}
 
 # Check network connections
 netstat -an | findstr LISTEN

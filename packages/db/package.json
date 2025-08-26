@@ -18,8 +18,8 @@
     "setup:windows": "bun run migrate",
     "test": "bun run src/connection.ts",
     "test:mysql": "bun run src/connection.ts",
-    "health": "node -e \"console.log('MySQL health check not implemented yet')\"",
-    "health:mysql": "node -e \"console.log('MySQL health check not implemented yet')\""
+    "health": "bun run src/health-check.ts",
+    "health:mysql": "bun run src/health-check.ts"
   },
   "dependencies": {
     "mysql2": "^3.11.0",

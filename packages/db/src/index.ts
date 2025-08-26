@@ -5,3 +5,4 @@ export * from "./connection";
 export * from "./schema";
 export * from "./migrate";
 export * from "./query-builders";
+export * from "./health-check";

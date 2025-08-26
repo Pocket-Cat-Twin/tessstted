@@ -3,8 +3,15 @@ export const generateId = (): string => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };
 
-export const formatDate = (date: Date): string => {
-  return date.toISOString();
+export const formatDate = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('ru-RU', {
+    year: 'numeric',
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 // Currency formatting
@@ -20,42 +27,38 @@ export const formatCurrency = (amount: number, currency = 'RUB'): string => {
 // Order calculations
 export interface OrderTotals {
   subtotal: number;
+  subtotalYuan: number;
   commission: number;
+  totalCommission: number;
   total: number;
+  totalYuan: number;
+  totalRuble: number;
   commissionRate: number;
 }
 
 export const calculateOrderTotals = (
-  totalPriceCny: number,
-  tier: 'basic' | 'premium' | 'vip' | 'elite' | null = null
+  goods: any[],
+  exchangeRate: number,
+  commissionRateOverride?: number
 ): OrderTotals => {
-  // Commission rates by subscription tier
-  let commissionRate = 0.10; // Default 10%
+  // Calculate subtotal from goods
+  const subtotalYuan = goods.reduce((sum, item) => sum + (item.quantity * item.priceYuan || 0), 0);
   
-  if (tier) {
-    switch (tier) {
-      case 'basic':
-        commissionRate = 0.08; // 8%
-        break;
-      case 'premium':
-        commissionRate = 0.06; // 6%
-        break;
-      case 'vip':
-        commissionRate = 0.04; // 4%
-        break;
-      case 'elite':
-        commissionRate = 0.02; // 2%
-        break;
-    }
-  }
+  // Use override commission rate or default
+  const commissionRate = commissionRateOverride || 0.10; // Default 10%
   
-  const commission = totalPriceCny * commissionRate;
-  const total = totalPriceCny + commission;
+  const totalCommission = subtotalYuan * commissionRate;
+  const totalYuan = subtotalYuan + totalCommission;
+  const totalRuble = totalYuan * exchangeRate;
   
   return {
-    subtotal: totalPriceCny,
-    commission,
-    total,
+    subtotal: subtotalYuan,
+    subtotalYuan,
+    commission: totalCommission,
+    totalCommission,
+    total: totalYuan,
+    totalYuan,
+    totalRuble,
     commissionRate,
   };
 };

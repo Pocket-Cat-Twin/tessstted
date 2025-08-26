@@ -409,8 +409,8 @@ Write-SafeOutput "Message" -Status Success|Error|Warning|Info|Processing|Complet
 Write-SafeHeader "Title"
 Write-SafeSectionHeader "Section Name" 1
 Invoke-SafeCommand -Command "cmd" -Arguments @("param1", "param2") -Description "What it does"
-Test-ServiceSafely -ServiceName "postgresql*" -PreferredVersions @("16", "15")
-Test-NetworkPortSafely -HostName "localhost" -Port 5432
+Test-ServiceSafely -ServiceName "MySQL*" -PreferredVersions @("80")
+Test-NetworkPortSafely -HostName "localhost" -Port 3306
 ```
 
 ### Common Library Functions

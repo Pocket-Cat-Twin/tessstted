@@ -10,7 +10,7 @@ Modern e-commerce platform designed **exclusively for Windows environments**.
 
 ### Prerequisites (Windows)
 - **Bun** runtime (latest version)
-- **PostgreSQL** (Windows installation) 
+- **MySQL8** (Windows installation) 
 - **PowerShell** 5.1+ (included with Windows)
 
 ### Installation
@@ -34,7 +34,7 @@ bun run dev
 
 ```
 ├── apps/
-│   ├── api/          # Backend API (Elysia + PostgreSQL)
+│   ├── api/          # Backend API (Elysia + MySQL8)
 │   └── web/          # Frontend (SvelteKit)
 ├── packages/
 │   ├── db/           # Database schema and migrations
@@ -70,9 +70,9 @@ bun run type-check   # TypeScript type checking
 ## 🔧 Tech Stack
 
 - **Runtime**: Bun (Windows builds)
-- **Backend**: Elysia.js + PostgreSQL + Drizzle ORM
+- **Backend**: Elysia.js + Native MySQL8 (no ORM)
 - **Frontend**: SvelteKit + TailwindCSS
-- **Database**: Native PostgreSQL on Windows (port 5432)
+- **Database**: Native MySQL8 on Windows (port 3306)
 - **Scripts**: PowerShell automation
 
 ## 📖 Documentation
@@ -84,10 +84,10 @@ bun run type-check   # TypeScript type checking
 
 Common Windows issues and solutions:
 
-- **Database connection**: Ensure PostgreSQL service is running (`net start postgresql-x64-15`)
-- **Port conflicts**: Check Windows Firewall for ports 3001, 5173, 5432
+- **Database connection**: Ensure MySQL service is running (`net start MySQL80`)
+- **Port conflicts**: Check Windows Firewall for ports 3001, 5173, 3306
 - **PowerShell errors**: Run as Administrator or set execution policy
-- **Service issues**: Use `sc query postgresql*` to check PostgreSQL status
+- **Service issues**: Use `sc query MySQL*` to check MySQL status
 
 ## 🤝 Support
 
