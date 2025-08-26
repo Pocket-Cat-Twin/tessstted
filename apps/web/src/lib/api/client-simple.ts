@@ -1012,7 +1012,7 @@ class ApiClient {
   /**
    * Полная диагностика системы
    */
-  async runFullDiagnostics(): Promise<{
+  async runFullDiagnostics(this: ApiClient): Promise<{
     configuration: Awaited<ReturnType<typeof this.validateConfiguration>>;
     health: ApiResponse;
     summary: {

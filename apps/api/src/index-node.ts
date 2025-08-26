@@ -1,4 +1,5 @@
-import { serve } from "@elysiajs/node";
+const elysiaNode = require("@elysiajs/node");
+const serve = elysiaNode.default || elysiaNode.serve;
 import app from "./index";
 
 const port = parseInt(process.env.API_PORT || "3001");

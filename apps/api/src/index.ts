@@ -124,17 +124,29 @@ if (process.env.NODE_ENV !== "test") {
   } catch (error) {
     // Fallback to Node.js adapter
     console.log("💡 Falling back to Node.js adapter...");
-    const { serve } = require("@elysiajs/node");
-    
-    serve({
-      fetch: app.fetch,
-      port,
-      hostname: host,
-    });
-    
-    console.log(`🚀 YuYu API Server running on http://${host}:${port}`);
-    console.log(`📚 API Documentation: http://${host}:${port}/swagger`);
-    console.log(`🐬 Database: MySQL8 Native (No ORM)`);
+    try {
+      const elysiaNode = require("@elysiajs/node");
+      const serve = elysiaNode.default || elysiaNode.serve;
+      
+      if (typeof serve === 'function') {
+        serve({
+          fetch: app.fetch,
+          port,
+          hostname: host,
+        });
+        
+        console.log(`🚀 YuYu API Server running on http://${host}:${port}`);
+        console.log(`📚 API Documentation: http://${host}:${port}/swagger`);
+        console.log(`🐬 Database: MySQL8 Native (No ORM)`);
+      } else {
+        console.error("❌ Node.js adapter not available. Please use the standalone index-node.ts file");
+        process.exit(1);
+      }
+    } catch (nodeError) {
+      console.error("❌ Failed to load Node.js adapter:", nodeError);
+      console.log("💡 Please run: npx tsx src/index-node.ts");
+      process.exit(1);
+    }
   }
 }
 

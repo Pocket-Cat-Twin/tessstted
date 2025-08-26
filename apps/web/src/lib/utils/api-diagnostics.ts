@@ -20,14 +20,14 @@ export async function runApiDiagnostics(): Promise<void> {
     
     if (diagnostics.configuration.issues.length > 0) {
       console.log("\n🚨 КРИТИЧЕСКИЕ ПРОБЛЕМЫ КОНФИГУРАЦИИ:");
-      diagnostics.configuration.issues.forEach((issue, index) => {
+      diagnostics.configuration.issues.forEach((issue: string, index: number) => {
         console.log(`   ${index + 1}. ${issue}`);
       });
     }
     
     if (diagnostics.configuration.recommendations.length > 0) {
       console.log("\n💡 РЕКОМЕНДАЦИИ:");
-      diagnostics.configuration.recommendations.forEach((rec, index) => {
+      diagnostics.configuration.recommendations.forEach((rec: string, index: number) => {
         console.log(`   ${index + 1}. ${rec}`);
       });
     }
