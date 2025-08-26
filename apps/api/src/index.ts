@@ -15,6 +15,9 @@ import { userRoutes } from "./routes/users";
 import { orderRoutes } from "./routes/orders";
 import { subscriptionRoutes } from "./routes/subscriptions";
 import { healthRoutes } from "./routes/health";
+import { configRoutes } from "./routes/config";
+import { errorHandler } from "./middleware/error";
+import { enhancedRequestLogger } from "./middleware/request-logger";
 
 // Configuration with MySQL8
 console.log("🚀 YuYu Lolita Shopping API - MySQL8 Native");
@@ -36,6 +39,8 @@ const dbConfig: DatabaseConfig = {
 const connection = createConnection(dbConfig);
 
 const app = new Elysia()
+  .use(enhancedRequestLogger)
+  .use(errorHandler)
   .use(
     jwt({
       name: "jwt",
@@ -54,6 +59,7 @@ const app = new Elysia()
         },
         tags: [
           { name: "Auth", description: "Authentication endpoints" },
+          { name: "Config", description: "Configuration and settings endpoints" },
           { name: "Orders", description: "Order management" },
           { name: "Users", description: "User management" },
           { name: "Subscriptions", description: "Subscription management" },
@@ -77,6 +83,7 @@ const app = new Elysia()
   .use(orderRoutes)
   .use(subscriptionRoutes)
   .use(healthRoutes)
+  .use(configRoutes)
 
   // Initialize database connection on startup
   .onStart(async () => {

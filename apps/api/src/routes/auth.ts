@@ -4,6 +4,14 @@ import { cookie } from "@elysiajs/cookie";
 import bcrypt from "bcryptjs";
 import { getPool, QueryBuilder } from "@lolita-fashion/db";
 import type { User } from "@lolita-fashion/db";
+import { 
+  loginRequestSchema, 
+  loginResponseSchema, 
+  registrationRequestSchema,
+  type LoginRequest,
+  type LoginResponse,
+  type RegistrationRequest 
+} from "@lolita-fashion/shared";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(
@@ -90,7 +98,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     },
   )
 
-  // User Login
+  // User Login - Enhanced with email/phone support
   .post(
     "/login",
     async ({ body, jwt, cookie: { auth } }) => {
@@ -98,9 +106,21 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         const pool = await getPool();
         const queryBuilder = new QueryBuilder(pool);
 
-        // Find user by email
-        const user = await queryBuilder.getUserByEmail(body.email);
+        // Validate request body
+        const validatedBody = loginRequestSchema.parse(body);
+        console.log("🔐 Login attempt:", {
+          method: validatedBody.loginMethod,
+          identifier: validatedBody.loginMethod === 'email' ? validatedBody.email : validatedBody.phone
+        });
+
+        // Find user by email or phone
+        const user = await queryBuilder.getUserByEmailOrPhone(
+          validatedBody.email, 
+          validatedBody.phone
+        );
+        
         if (!user) {
+          console.warn("❌ Login failed: User not found");
           return {
             success: false,
             error: "Invalid credentials",
@@ -108,8 +128,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         }
 
         // Check password
-        const isValid = await bcrypt.compare(body.password, user.password_hash);
+        const isValid = await bcrypt.compare(validatedBody.password, user.password_hash);
         if (!isValid) {
+          console.warn("❌ Login failed: Invalid password for user:", user.id);
           return {
             success: false,
             error: "Invalid credentials",
@@ -118,6 +139,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
         // Check if user is active
         if (user.status !== "active") {
+          console.warn("❌ Login failed: Account not active for user:", user.id);
           return {
             success: false,
             error: "Account is not active",
@@ -125,40 +147,68 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         }
 
         // Generate JWT token
-        const token = await jwt.sign({ userId: user.id, email: user.email });
+        const token = await jwt.sign({ 
+          userId: user.id, 
+          email: user.email, 
+          phone: user.phone 
+        });
+
+        // Set httpOnly cookie for security
         auth.set({
           value: token,
           httpOnly: true,
           maxAge: 7 * 24 * 60 * 60, // 7 days
         });
 
+        console.log("✅ Login successful for user:", user.id);
+
+        // Return token in response body for client compatibility
         return {
           success: true,
           message: "Login successful",
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
+          data: {
+            token: token,
+            user: {
+              id: user.id,
+              email: user.email,
+              phone: user.phone,
+              name: user.name,
+              role: user.role,
+              status: user.status,
+            },
           },
         };
-      } catch (error) {
-        console.error("Login error:", error);
+      } catch (error: any) {
+        console.error("❌ Login error:", error);
+        
+        // Handle validation errors
+        if (error.name === 'ZodError') {
+          return {
+            success: false,
+            error: "VALIDATION_ERROR",
+            message: "Invalid request format",
+            data: { validationErrors: error.errors },
+          };
+        }
+
         return {
           success: false,
-          error: "Login failed",
+          error: "LOGIN_FAILED",
+          message: "Login failed due to server error",
         };
       }
     },
     {
       body: t.Object({
-        email: t.String({ format: "email" }),
+        loginMethod: t.Union([t.Literal("email"), t.Literal("phone")]),
+        email: t.Optional(t.String({ format: "email" })),
+        phone: t.Optional(t.String()),
         password: t.String({ minLength: 1 }),
       }),
       detail: {
         tags: ["Auth"],
-        summary: "User login",
-        description: "Authenticate user with email and password",
+        summary: "User login with email or phone",
+        description: "Authenticate user with email/phone and password. Supports both email and phone login methods.",
       },
     },
   )

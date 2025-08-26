@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { ErrorCode } from "@lolita-fashion/shared";
 import { logError } from "../services/logger";
+import { ZodError } from "zod";
 
 export const errorHandler = new Elysia({ name: "errorHandler" }).onError(
   ({ code, error, set, request }) => {
@@ -17,6 +18,23 @@ export const errorHandler = new Elysia({ name: "errorHandler" }).onError(
         path: url.pathname,
         method: request.method,
       });
+    }
+
+    // Handle Zod validation errors specifically
+    if (error instanceof ZodError) {
+      set.status = 400;
+      return {
+        success: false,
+        error: ErrorCode.VALIDATION_ERROR,
+        message: "Request validation failed",
+        data: {
+          validationErrors: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message,
+            code: err.code,
+          })),
+        },
+      };
     }
 
     // Handle different error types

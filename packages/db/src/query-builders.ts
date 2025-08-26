@@ -47,6 +47,21 @@ export class QueryBuilder {
     return rows[0] as User || null;
   }
 
+  async getUserByPhone(phone: string): Promise<User | null> {
+    const sql = "SELECT * FROM users WHERE phone = ?";
+    const [rows] = await this.pool.execute<RowDataPacket[]>(sql, [phone]);
+    return rows[0] as User || null;
+  }
+
+  async getUserByEmailOrPhone(email?: string, phone?: string): Promise<User | null> {
+    if (email) {
+      return this.getUserByEmail(email);
+    } else if (phone) {
+      return this.getUserByPhone(phone);
+    }
+    return null;
+  }
+
   // Order queries
   async createOrder(orderData: Omit<Order, "id" | "created_at" | "updated_at">): Promise<string> {
     const sql = `

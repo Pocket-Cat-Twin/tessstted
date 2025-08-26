@@ -46,6 +46,68 @@ export const authTokenSchema = z.object({
   user: z.any(), // Will be typed as User in implementation
 });
 
+// Login request schema
+export const loginRequestSchema = z.object({
+  loginMethod: z.enum(["email", "phone"]),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  password: z.string().min(1),
+}).refine(
+  (data) => {
+    if (data.loginMethod === "email") {
+      return !!data.email;
+    } else if (data.loginMethod === "phone") {
+      return !!data.phone;
+    }
+    return false;
+  },
+  {
+    message: "Email is required for email login, phone is required for phone login",
+    path: ["loginMethod"],
+  }
+);
+
+// Login response schema
+export const loginResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string().optional(),
+  error: z.string().optional(),
+  data: z.object({
+    token: z.string(),
+    user: z.object({
+      id: z.string(),
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      name: z.string(),
+      role: z.string(),
+      status: z.string(),
+    }),
+  }).optional(),
+});
+
+// Registration request schema  
+export const registrationRequestSchema = z.object({
+  registrationMethod: z.enum(["email", "phone"]),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  password: z.string().min(6),
+  name: z.string().min(1),
+  fullName: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.registrationMethod === "email") {
+      return !!data.email;
+    } else if (data.registrationMethod === "phone") {
+      return !!data.phone;
+    }
+    return false;
+  },
+  {
+    message: "Email is required for email registration, phone is required for phone registration",
+    path: ["registrationMethod"],
+  }
+);
+
 // Error codes enum
 export enum ErrorCode {
   VALIDATION_ERROR = "VALIDATION_ERROR",
@@ -99,3 +161,8 @@ export type AuthToken = z.infer<typeof authTokenSchema>;
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type Search = z.infer<typeof searchSchema>;
 export type BulkOperation = z.infer<typeof bulkOperationSchema>;
+
+// Auth types
+export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export type LoginResponse = z.infer<typeof loginResponseSchema>;
+export type RegistrationRequest = z.infer<typeof registrationRequestSchema>;
