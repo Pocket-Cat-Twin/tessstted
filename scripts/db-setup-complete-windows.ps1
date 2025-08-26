@@ -115,88 +115,9 @@ function Invoke-UserSeed {
         # Проверим, есть ли скрипт seed
         $seedScript = Join-Path $dbPackagePath "src\seed-users.ts"
         if (-not (Test-Path $seedScript)) {
-            Write-Host "⚠️ [WARNING] Скрипт создания пользователей не найден" -ForegroundColor Yellow
-            Write-Host "💡 [INFO] Создаем скрипт seed-users.ts..." -ForegroundColor Blue
-            
-            # Создаем скрипт seed пользователей
-            $seedContent = @"
-// Автоматическое создание начальных пользователей для Windows
-import { getPool } from "./connection.js";
-import { getUserByEmail } from "./query-builders.js";
-
-async function hashPassword(password: string): Promise<string> {
-  // Простой hash для demo - в продакшене используйте bcrypt
-  const crypto = await import('crypto');
-  return crypto.createHash('sha256').update(password + 'yuyulolita_salt').digest('hex');
-}
-
-async function createUser(email: string, password: string, role: 'admin' | 'user' = 'user', name: string = ''): Promise<void> {
-  const pool = await getPool();
-  
-  try {
-    // Проверяем, существует ли пользователь
-    const existing = await getUserByEmail(email);
-    if (existing) {
-      console.log(`⚠️ Пользователь \${email} уже существует, пропускаем`);
-      return;
-    }
-    
-    const hashedPassword = await hashPassword(password);
-    const userName = name || email.split('@')[0];
-    
-    await pool.execute(`
-      INSERT INTO users (
-        email, password_hash, name, registration_method, 
-        role, status, email_verified, created_at
-      ) VALUES (?, ?, ?, 'email', ?, 'active', true, NOW())
-    `, [email, hashedPassword, userName, role]);
-    
-    console.log(`✅ Пользователь \${email} создан успешно (роль: \${role})`);
-    
-  } catch (error) {
-    console.error(`❌ Ошибка создания пользователя \${email}:`, error);
-    throw error;
-  }
-}
-
-async function seedUsers(): Promise<void> {
-  console.log('🌱 Запуск создания начальных пользователей...');
-  
-  try {
-    // Создаем главного администратора
-    const adminPassword = 'Admin123!' + Math.random().toString(36).substring(7);
-    await createUser('admin@yuyulolita.com', adminPassword, 'admin', 'Главный Администратор');
-    
-    console.log('🔐 ВАЖНО! Пароль администратора: ' + adminPassword);
-    console.log('📝 Сохраните этот пароль в безопасном месте!');
-    
-    // Создаем тестовых пользователей (только для development)
-    if (process.env.NODE_ENV !== 'production') {
-      await createUser('test1@yuyulolita.com', 'Test123!', 'user', 'Тестовый Пользователь 1');
-      await createUser('test2@yuyulolita.com', 'Test123!', 'user', 'Тестовый Пользователь 2');
-      await createUser('test3@yuyulolita.com', 'Test123!', 'user', 'Тестовый Пользователь 3');
-      
-      console.log('👥 Созданы тестовые пользователи с паролем: Test123!');
-    }
-    
-    console.log('🎉 Создание пользователей завершено успешно!');
-    
-  } catch (error) {
-    console.error('❌ Ошибка при создании пользователей:', error);
-    throw error;
-  }
-}
-
-// Запуск если файл вызван напрямую
-if (import.meta.url === `file://\${process.argv[1]}`) {
-  seedUsers().catch(console.error);
-}
-
-export { seedUsers, createUser };
-"@
-            
-            $seedContent | Out-File -FilePath $seedScript -Encoding utf8
-            Write-Host "✅ [SUCCESS] Создан скрипт seed-users.ts" -ForegroundColor Green
+            Write-Host "❌ [ERROR] Скрипт создания пользователей не найден по пути: $seedScript" -ForegroundColor Red
+            Write-Host "💡 [SOLUTION] Убедитесь, что файл packages/db/src/seed-users.ts существует" -ForegroundColor Yellow
+            return $false
         }
         
         Write-Host "▶️ [EXECUTE] bun run src/seed-users.ts" -ForegroundColor Green

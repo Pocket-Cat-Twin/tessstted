@@ -38,6 +38,7 @@
     "db:setup:full:windows": "powershell -ExecutionPolicy Bypass -File scripts/db-setup-complete-windows.ps1",
     "db:check:windows": "powershell -ExecutionPolicy Bypass -File scripts/db-environment-check-windows.ps1",
     "db:check:fix:windows": "powershell -ExecutionPolicy Bypass -File scripts/db-environment-check-windows.ps1 -Fix",
+    "test:powershell:syntax": "powershell -ExecutionPolicy Bypass -File scripts/test-windows-syntax.ps1",
     "db:test": "cd packages/db && bun run test",
     "db:test:mysql": "cd packages/db && bun run test:mysql",
     "db:health": "cd packages/db && bun run health",
