@@ -281,7 +281,7 @@ cd ../..
 # Запуск обеих служб в отдельных окнах
 .\scripts\start-dev.ps1
 
-# Или через npm скрипт
+# Или через bun скрипт
 bun run dev:windows
 ```
 
@@ -308,7 +308,7 @@ bun run build:windows
 # Запуск продакшен серверов
 .\scripts\start-prod.ps1
 
-# Или через npm скрипт
+# Или через bun скрипт
 bun run start:windows
 ```
 

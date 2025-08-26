@@ -108,7 +108,7 @@ bun run build:windows
 # Start both API and Web app in separate windows
 .\scripts\start-dev.ps1
 
-# Or using npm script
+# Or using bun script
 bun run dev:windows
 ```
 
@@ -128,7 +128,7 @@ bun run dev:windows
 # Build and start production servers
 .\scripts\start-prod.ps1
 
-# Or using npm script
+# Or using bun script
 bun run start:windows
 ```
 

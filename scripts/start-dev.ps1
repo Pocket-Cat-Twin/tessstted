@@ -206,7 +206,7 @@ Write-Host "  API_PORT: `$env:API_PORT" -ForegroundColor White
 Write-Host "  API_HOST: `$env:API_HOST" -ForegroundColor White
 
 Write-Host 'Starting API server...' -ForegroundColor Green
-bun --hot src/index-db.ts
+bun --hot src/index.ts
 "@
     Start-Process powershell -ArgumentList "-NoExit", "-Command", $apiCommand
     

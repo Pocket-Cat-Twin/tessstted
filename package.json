@@ -32,7 +32,7 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts,.js,.svelte --fix",
     "lint:check": "eslint . --ext .ts,.js,.svelte",
-    "type-check": "(cd apps/web && npm run check) && (cd apps/api && npm run type-check)",
+    "type-check": "(cd apps/web && bun run check) && (cd apps/api && bun run type-check)",
     "validate:powershell": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1",
     "fix:powershell": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Fix",
     "validate:powershell:strict": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Strict",
