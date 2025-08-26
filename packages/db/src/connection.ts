@@ -70,4 +70,44 @@ export const getPool = async (): Promise<Pool> => {
   return await dbConnection.connect();
 };
 
+// System-level MySQL connection (without database specified) for migrations
+export const getSystemPool = async (config: Omit<DatabaseConfig, 'database'>): Promise<Pool> => {
+  console.log("[DB] 🔌 Connecting to MySQL server...");
+  console.log(`[DB] 📍 Host: ${config.host}:${config.port}`);
+  console.log(`[DB] 👤 User: ${config.user}`);
+  
+  const poolOptions: PoolOptions = {
+    host: config.host,
+    port: config.port,
+    // No database specified - connect to MySQL server directly
+    user: config.user,
+    password: config.password,
+    waitForConnections: true,
+    connectionLimit: 5, // Smaller pool for system operations
+    queueLimit: 0,
+    charset: "utf8mb4",
+    multipleStatements: true // Enable multiple SQL statements for migrations
+  };
+
+  try {
+    const pool = mysql.createPool(poolOptions);
+    
+    // Test the connection
+    console.log("[DB] 🧪 Testing MySQL server connection...");
+    const connection = await pool.getConnection();
+    const [rows] = await connection.execute('SELECT VERSION() as version, DATABASE() as current_db');
+    const versionInfo = rows as any[];
+    
+    console.log(`[DB] ✅ Connected to MySQL server successfully!`);
+    console.log(`[DB] 🗄️ MySQL Version: ${versionInfo[0].version}`);
+    console.log(`[DB] 📂 Current Database: ${versionInfo[0].current_db || 'none (system level)'}`);
+    
+    connection.release();
+    return pool;
+  } catch (error) {
+    console.error("[DB] ❌ Failed to connect to MySQL server:", error);
+    throw new Error(`System database connection failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+};
+
 export type { DatabaseConfig, Pool };
