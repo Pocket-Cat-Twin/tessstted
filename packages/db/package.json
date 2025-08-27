@@ -10,28 +10,29 @@
     "dev": "tsc --watch",
     "clean": "if exist dist rmdir /s /q dist",
     "clean:windows": "if exist dist rmdir /s /q dist",
-    "migrate": "bun run src/migrate.ts",
-    "migrate:mysql": "bun run src/migrate.ts",
-    "migrate:windows": "bun run src/migrate.ts", 
-    "setup": "bun run migrate",
-    "setup:mysql": "bun run migrate",
-    "setup:windows": "bun run migrate",
-    "seed": "bun run src/seed-users.ts",
-    "seed:users": "bun run src/seed-users.ts", 
-    "seed:windows": "bun run src/seed-users.ts",
-    "setup:complete": "bun run migrate && bun run seed:users",
-    "setup:complete:windows": "bun run migrate:windows && bun run seed:windows",
-    "test": "bun run src/connection.ts",
-    "test:mysql": "bun run src/connection.ts",
-    "health": "bun run src/health-check.ts",
-    "health:mysql": "bun run src/health-check.ts"
+    "migrate": "npx tsx src/migrate.ts",
+    "migrate:mysql": "npx tsx src/migrate.ts",
+    "migrate:windows": "npx tsx src/migrate.ts",
+    "setup": "npm run migrate",
+    "setup:mysql": "npm run migrate",
+    "setup:windows": "npm run migrate",
+    "seed": "npx tsx src/seed-users.ts",
+    "seed:users": "npx tsx src/seed-users.ts",
+    "seed:windows": "npx tsx src/seed-users.ts",
+    "setup:complete": "npm run migrate && npm run seed:users",
+    "setup:complete:windows": "npm run migrate:windows && npm run seed:windows",
+    "test": "npx tsx src/connection.ts",
+    "test:mysql": "npx tsx src/connection.ts",
+    "health": "npx tsx src/health-check.ts",
+    "health:mysql": "npx tsx src/health-check.ts"
   },
   "dependencies": {
-    "mysql2": "^3.11.0",
     "@lolita-fashion/shared": "*",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "mysql2": "^3.11.0"
   },
   "devDependencies": {
+    "tsx": "^4.20.5",
     "typescript": "^5.4.2"
   }
 }

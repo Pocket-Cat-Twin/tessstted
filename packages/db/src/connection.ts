@@ -49,12 +49,12 @@ class MySQLConnection {
       // Test the pool with a simple query
       console.log(`[CONNECTION] 🧪 Testing database connection...`);
       const connection = await this.pool.getConnection();
-      const [rows] = await connection.execute('SELECT 1 as test, DATABASE() as current_db, USER() as current_user');
+      const [rows] = await connection.execute('SELECT 1 as test, DATABASE() as current_db, USER() as current_user_name');
       const testResult = (rows as any[])[0];
       
       console.log(`[CONNECTION] ✅ Database connection successful!`);
       console.log(`[CONNECTION] 📂 Current Database: ${testResult.current_db}`);
-      console.log(`[CONNECTION] 👤 Current User: ${testResult.current_user}`);
+      console.log(`[CONNECTION] 👤 Current User: ${testResult.current_user_name}`);
       
       connection.release();
       return this.pool;
@@ -209,13 +209,13 @@ export const getSystemPool = async (): Promise<Pool> => {
     // Test the connection
     console.log("[SYSTEM] 🧪 Testing MySQL server connection...");
     const connection = await pool.getConnection();
-    const [rows] = await connection.execute('SELECT VERSION() as version, DATABASE() as current_db, USER() as current_user');
+    const [rows] = await connection.execute('SELECT VERSION() as version, DATABASE() as current_db, USER() as current_user_name');
     const versionInfo = (rows as any[])[0];
     
     console.log(`[SYSTEM] ✅ Connected to MySQL server successfully!`);
     console.log(`[SYSTEM] 🗄️ MySQL Version: ${versionInfo.version}`);
     console.log(`[SYSTEM] 📂 Current Database: ${versionInfo.current_db || 'none (system level)'}`);
-    console.log(`[SYSTEM] 👤 Current User: ${versionInfo.current_user}`);
+    console.log(`[SYSTEM] 👤 Current User: ${versionInfo.current_user_name}`);
     
     connection.release();
     return pool;
