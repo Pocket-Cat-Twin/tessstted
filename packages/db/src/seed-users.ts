@@ -1,6 +1,6 @@
 // Автоматическое создание начальных пользователей для Windows
 // YuYu Lolita Shopping System
-import { getPool } from "./connection.js";
+import { getPool, createConnection, type DatabaseConfig } from "./connection.js";
 import { getUserByEmail } from "./query-builders.js";
 
 async function hashPassword(password: string): Promise<string> {
@@ -72,6 +72,24 @@ export async function seedUsers(): Promise<void> {
   console.log('🌱 YuYu Lolita Shopping System');
   console.log('🌱 ========================================');
   console.log('');
+  
+  // Initialize database connection
+  const dbConfig: DatabaseConfig = {
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "3306"),
+    database: process.env.DB_NAME || "yuyu_lolita",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || ""
+  };
+  
+  console.log(`🔧 Database config:`);
+  console.log(`📍 Host: ${dbConfig.host}:${dbConfig.port}`);
+  console.log(`📂 Database: ${dbConfig.database}`);
+  console.log(`👤 User: ${dbConfig.user}`);
+  console.log('');
+  
+  // Create database connection
+  createConnection(dbConfig);
   
   try {
     console.log('👑 Создаем главного администратора...');
