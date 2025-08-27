@@ -29,14 +29,17 @@ function createAuthStore() {
 
       try {
         const response = await api.getCurrentUser();
-        if (response.success && response.data?.user) {
+        console.log('🔍 Auth init response:', response);
+        if (response.success && response.user) {
+          console.log('✅ Auth init successful, user:', response.user);
           update((state) => ({
             ...state,
-            user: response.data.user,
+            user: response.user,
             loading: false,
             initialized: true,
           }));
         } else {
+          console.log('❌ Auth init failed:', response.error || 'No user data');
           update((state) => ({
             ...state,
             user: null,

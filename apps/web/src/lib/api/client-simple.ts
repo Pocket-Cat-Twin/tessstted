@@ -127,6 +127,7 @@ class ApiClient {
           },
           body: options.body,
           signal: options.signal || controller.signal,
+          credentials: 'include', // Important: send cookies with requests
           ...options,
         });
         
@@ -401,30 +402,38 @@ class ApiClient {
   }
 
   async getCurrentUser() {
-    const token = this.getToken();
-    if (!token) {
-      console.warn("⚠️ No auth token found for getCurrentUser");
-      return {
-        success: false,
-        error: "NO_TOKEN",
-        message: "No authentication token",
-      };
-    }
-
+    // Backend uses cookies for auth, no need for Authorization header
+    // Cookies are sent automatically with credentials: 'include'
+    console.log('🔍 Getting current user via cookie-based auth');
+    
     return this.request(API_CONFIG.ENDPOINTS.AUTH.ME, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      // No Authorization header needed - backend uses httpOnly cookies
     });
   }
 
   async logout() {
     console.log("💪 Logging out user");
-    this.removeToken();
-    return { 
-      success: true, 
-      message: "Logged out successfully" 
-    };
+    
+    try {
+      // Call backend logout to clear httpOnly cookie
+      const response = await this.request(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {
+        method: 'POST'
+      });
+      
+      // Also clear localStorage token (if any)
+      this.removeToken();
+      
+      console.log("✅ Logout successful");
+      return response;
+    } catch (error) {
+      console.log("⚠️ Logout API call failed, clearing local state anyway");
+      // Even if logout fails on server, clear local state
+      this.removeToken();
+      return { 
+        success: true, 
+        message: "Logged out successfully" 
+      };
+    }
   }
 
   // Order methods - с валидацией параметров

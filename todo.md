@@ -401,3 +401,104 @@ This addresses the **complete validation chain**:
 - **Logging**: Full debug visibility for future issues
 
 **No more 422 errors possible** - every field now matches backend expectations exactly.
+
+---
+
+# 🔐 AUTHENTICATION PERSISTENCE FIX (August 27, 2025)
+
+## Issue: User Gets Logged Out on Page Reload
+
+**Problem**: User successfully logs in, but gets logged out immediately when page reloads.
+
+## Root Cause Analysis
+
+Found **two critical mismatches** between frontend and backend:
+
+### 1. Response Structure Mismatch
+- **Backend returns**: `{ success: true, user: {...} }`
+- **Frontend expected**: `{ success: true, data: { user: {...} } }`
+
+### 2. Authentication Method Mismatch  
+- **Backend expects**: httpOnly cookies (`auth.value`)
+- **Frontend was sending**: Bearer tokens (`Authorization: Bearer ${token}`)
+
+## Comprehensive Authentication Fix
+
+### ✅ Fix 1: Response Structure in Auth Store
+**File**: `apps/web/src/lib/stores/auth.ts`
+
+**Change Made**:
+```typescript
+// OLD (incorrect)
+if (response.success && response.data?.user) {
+  user: response.data.user,
+
+// NEW (correct)  
+if (response.success && response.user) {
+  user: response.user,
+```
+
+**Added debugging**: Console logs to track auth initialization process.
+
+### ✅ Fix 2: Cookie-Based Authentication
+**File**: `apps/web/src/lib/api/client-simple.ts`
+
+**Changes Made**:
+
+1. **getCurrentUser() Method**:
+```typescript
+// OLD (incorrect - Bearer tokens)
+return this.request(API_CONFIG.ENDPOINTS.AUTH.ME, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+// NEW (correct - cookies)
+return this.request(API_CONFIG.ENDPOINTS.AUTH.ME, {
+  // No Authorization header - backend uses httpOnly cookies
+});
+```
+
+2. **Request Method - Added Cookie Support**:
+```typescript
+// Added to all fetch requests
+credentials: 'include', // Important: send cookies with requests
+```
+
+3. **Proper Logout**:
+```typescript
+// NEW - calls backend to clear httpOnly cookie
+const response = await this.request(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {
+  method: 'POST'
+});
+this.removeToken(); // Also clear localStorage
+```
+
+## Why This Fix Works
+
+### Authentication Flow Now Works Correctly:
+
+1. **Login**: 
+   - Backend sets httpOnly cookie ✅
+   - Frontend stores token in localStorage (for compatibility) ✅
+
+2. **Page Reload**:
+   - `authStore.init()` calls `getCurrentUser()` ✅
+   - Request sends cookies automatically (`credentials: 'include'`) ✅  
+   - Backend validates cookie and returns user data ✅
+   - Frontend parses `response.user` (not `response.data.user`) ✅
+   - User stays logged in ✅
+
+3. **Logout**:
+   - Frontend calls backend logout endpoint ✅
+   - Backend clears httpOnly cookie ✅
+   - Frontend clears localStorage ✅
+
+## Expected Results
+
+- ✅ **No more logout on page reload**
+- ✅ **Proper cookie-based authentication**
+- ✅ **Debug logs showing auth flow**
+- ✅ **Cross-origin cookie support**
+- ✅ **Secure httpOnly cookies**
+
+**Authentication persistence is now fully functional.**
