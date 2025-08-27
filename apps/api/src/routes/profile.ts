@@ -2,9 +2,8 @@ import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
 import { getPool, QueryBuilder } from "@lolita-fashion/db";
-import type { User } from "@lolita-fashion/db";
 
-export const userRoutes = new Elysia({ prefix: "/users" })
+export const profileRoutes = new Elysia({ prefix: "/profile" })
   .use(
     jwt({
       name: "jwt",
@@ -16,7 +15,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
   // Get User Profile
   .get(
-    "/profile",
+    "/",
     async ({ jwt, cookie: { auth } }) => {
       try {
         if (!auth.value) {
@@ -74,7 +73,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       detail: {
-        tags: ["Users"],
+        tags: ["Profile"],
         summary: "Get user profile",
         description: "Get the current user's profile information",
       },
@@ -83,7 +82,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
   // Update User Profile
   .put(
-    "/profile",
+    "/",
     async ({ body, jwt, cookie: { auth } }) => {
       try {
         if (!auth.value) {
@@ -103,7 +102,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
         const pool = await getPool();
         
-        // Update user profile (simple UPDATE query)
+        // Update user profile
         const sql = `
           UPDATE users 
           SET name = ?, full_name = ?, phone = ?, contact_email = ?, contact_phone = ?, updated_at = NOW()
@@ -140,91 +139,16 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         contactPhone: t.Optional(t.String()),
       }),
       detail: {
-        tags: ["Users"],
+        tags: ["Profile"],
         summary: "Update user profile",
         description: "Update the current user's profile information",
       },
     },
   )
 
-  // Get User Statistics
-  .get(
-    "/stats",
-    async ({ jwt, cookie: { auth } }) => {
-      try {
-        if (!auth.value) {
-          return {
-            success: false,
-            error: "Authentication required",
-          };
-        }
-
-        const payload = await jwt.verify(auth.value);
-        if (!payload) {
-          return {
-            success: false,
-            error: "Invalid token",
-          };
-        }
-
-        const pool = await getPool();
-        
-        // Get user statistics with direct SQL
-        const orderStatsSQL = `
-          SELECT 
-            COUNT(*) as total_orders,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_orders,
-            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_orders,
-            SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing_orders,
-            SUM(total_price_cny) as total_spent,
-            SUM(commission_amount) as total_commission
-          FROM orders 
-          WHERE user_id = ?
-        `;
-        
-        const [statsRows] = await pool.execute(orderStatsSQL, [payload.userId as string]);
-        const stats = (statsRows as any[])[0];
-
-        // Get active subscription
-        const queryBuilder = new QueryBuilder(pool);
-        const subscription = await queryBuilder.getActiveSubscription(payload.userId as string);
-
-        return {
-          success: true,
-          stats: {
-            totalOrders: Number(stats.total_orders) || 0,
-            completedOrders: Number(stats.completed_orders) || 0,
-            pendingOrders: Number(stats.pending_orders) || 0,
-            processingOrders: Number(stats.processing_orders) || 0,
-            totalSpent: Number(stats.total_spent) || 0,
-            totalCommission: Number(stats.total_commission) || 0,
-            subscription: subscription ? {
-              tier: subscription.tier,
-              status: subscription.status,
-              expiresAt: subscription.expires_at,
-            } : null,
-          },
-        };
-      } catch (error) {
-        console.error("Get user stats error:", error);
-        return {
-          success: false,
-          error: "Failed to get user statistics",
-        };
-      }
-    },
-    {
-      detail: {
-        tags: ["Users"],
-        summary: "Get user statistics",
-        description: "Get order statistics and subscription info for the current user",
-      },
-    },
-  )
-
   // Get User Addresses
   .get(
-    "/profile/addresses",
+    "/addresses",
     async ({ jwt, cookie: { auth } }) => {
       try {
         if (!auth.value) {
@@ -270,7 +194,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       detail: {
-        tags: ["Users"],
+        tags: ["Profile"],
         summary: "Get user addresses",
         description: "Get all addresses for the current user",
       },
@@ -279,7 +203,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
   // Add User Address
   .post(
-    "/profile/addresses",
+    "/addresses",
     async ({ body, jwt, cookie: { auth } }) => {
       try {
         if (!auth.value) {
@@ -333,7 +257,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         isDefault: t.Optional(t.Boolean()),
       }),
       detail: {
-        tags: ["Users"],
+        tags: ["Profile"],
         summary: "Add user address",
         description: "Add a new address for the current user",
       },
@@ -342,7 +266,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
   // Update User Address
   .put(
-    "/profile/addresses/:addressId",
+    "/addresses/:addressId",
     async ({ params, body, jwt, cookie: { auth } }) => {
       try {
         if (!auth.value) {
@@ -413,7 +337,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         isDefault: t.Optional(t.Boolean()),
       }),
       detail: {
-        tags: ["Users"],
+        tags: ["Profile"],
         summary: "Update user address",
         description: "Update an existing address for the current user",
       },
@@ -422,7 +346,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
   // Delete User Address
   .delete(
-    "/profile/addresses/:addressId",
+    "/addresses/:addressId",
     async ({ params, jwt, cookie: { auth } }) => {
       try {
         if (!auth.value) {
@@ -478,7 +402,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         addressId: t.String(),
       }),
       detail: {
-        tags: ["Users"],
+        tags: ["Profile"],
         summary: "Delete user address",
         description: "Delete an address for the current user",
       },

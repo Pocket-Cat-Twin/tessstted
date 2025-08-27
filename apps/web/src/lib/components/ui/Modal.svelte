@@ -113,13 +113,13 @@
       {/if}
 
       <!-- Body -->
-      <div class="p-6 overflow-y-auto max-h-96">
+      <div class="p-6 overflow-y-auto max-h-96 bg-white">
         <slot />
       </div>
 
       <!-- Footer -->
       <slot name="footer" {close} {confirm} {cancel}>
-        <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+        <div class="flex items-center justify-center gap-4 p-6 border-t border-gray-200 bg-white">
           <Button variant="ghost" on:click={cancel}>
             Отмена
           </Button>

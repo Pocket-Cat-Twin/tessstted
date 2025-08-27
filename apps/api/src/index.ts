@@ -16,6 +16,8 @@ import { orderRoutes } from "./routes/orders";
 import { subscriptionRoutes } from "./routes/subscriptions";
 import { healthRoutes } from "./routes/health";
 import { configRoutes } from "./routes/config";
+import { adminRoutes } from "./routes/admin";
+import { profileRoutes } from "./routes/profile";
 import { errorHandler } from "./middleware/error";
 import { enhancedRequestLogger } from "./middleware/request-logger";
 
@@ -60,9 +62,11 @@ const app = new Elysia()
         tags: [
           { name: "Auth", description: "Authentication endpoints" },
           { name: "Config", description: "Configuration and settings endpoints" },
+          { name: "Profile", description: "User profile management" },
           { name: "Orders", description: "Order management" },
           { name: "Users", description: "User management" },
           { name: "Subscriptions", description: "Subscription management" },
+          { name: "Admin", description: "Admin management endpoints (Admin only)" },
           { name: "Health", description: "Health check endpoints" }
         ],
       },
@@ -80,10 +84,12 @@ const app = new Elysia()
   // API routes
   .use(authRoutes)
   .use(userRoutes)
+  .use(profileRoutes)
   .use(orderRoutes)
   .use(subscriptionRoutes)
   .use(healthRoutes)
   .use(configRoutes)
+  .use(adminRoutes)
 
   // Initialize database connection on startup
   .onStart(async () => {
