@@ -154,12 +154,12 @@ function Test-EnvFileConfiguration {
         
         if ([string]::IsNullOrWhiteSpace($value)) {
             $missingVars += $requiredVar
-            Write-SafeOutput "❌ Missing: $requiredVar" -Status Error
+            Write-SafeOutput "Missing: $requiredVar" -Status Error
         } else {
             # Variable-specific validation
             switch ($requiredVar) {
                 "DB_HOST" {
-                    Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                    Write-SafeOutput "$requiredVar = $value" -Status Success
                     if ($value -notmatch "^[a-zA-Z0-9\.\-]+$") {
                         $warnings += "DB_HOST contains unusual characters: $value"
                     }
@@ -168,22 +168,22 @@ function Test-EnvFileConfiguration {
                 "DB_PORT" {
                     $port = $value -as [int]
                     if ($port -lt 1 -or $port -gt 65535) {
-                        Write-SafeOutput "❌ $requiredVar = $value (INVALID PORT)" -Status Error
+                        Write-SafeOutput "$requiredVar = $value (INVALID PORT)" -Status Error
                         $criticalIssues += "DB_PORT must be between 1 and 65535, got: $value"
                     } else {
-                        Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                        Write-SafeOutput "$requiredVar = $value" -Status Success
                         $validVars += $requiredVar
                     }
                 }
                 "DB_NAME" {
-                    Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                    Write-SafeOutput "$requiredVar = $value" -Status Success
                     if ($value -notmatch "^[a-zA-Z0-9_]+$") {
                         $warnings += "DB_NAME contains special characters that might cause issues: $value"
                     }
                     $validVars += $requiredVar
                 }
                 "DB_USER" {
-                    Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                    Write-SafeOutput "$requiredVar = $value" -Status Success
                     if ($value -eq "root") {
                         $warnings += "Using 'root' user is not recommended for production (security risk)"
                     }
@@ -191,7 +191,7 @@ function Test-EnvFileConfiguration {
                 }
                 "DB_PASSWORD" {
                     $maskedValue = "*" * [Math]::Min($value.Length, 12)
-                    Write-SafeOutput "✅ $requiredVar = $maskedValue ($($value.Length) chars)" -Status Success
+                    Write-SafeOutput "$requiredVar = $maskedValue ($($value.Length) chars)" -Status Success
                     
                     # Enhanced password validation
                     if ($value.Length -lt 8) {
@@ -236,7 +236,7 @@ function Test-EnvFileConfiguration {
     if ($missingVars.Count -gt 0) {
         Write-SafeOutput "MISSING VARIABLES:" -Status Error
         foreach ($var in $missingVars) {
-            Write-SafeOutput "  ❌ $var" -Status Error
+            Write-SafeOutput "  $var" -Status Error
         }
         Write-SafeOutput "Add these variables to your .env file" -Status Info
     }
@@ -245,7 +245,7 @@ function Test-EnvFileConfiguration {
     if ($criticalIssues.Count -gt 0) {
         Write-SafeOutput "CRITICAL ISSUES:" -Status Error
         foreach ($issue in $criticalIssues) {
-            Write-SafeOutput "  ❌ $issue" -Status Error
+            Write-SafeOutput "  $issue" -Status Error
         }
     }
     
@@ -253,13 +253,13 @@ function Test-EnvFileConfiguration {
     if ($warnings.Count -gt 0) {
         Write-SafeOutput "WARNINGS:" -Status Warning
         foreach ($warning in $warnings) {
-            Write-SafeOutput "  ⚠️  $warning" -Status Warning
+            Write-SafeOutput "  $warning" -Status Warning
         }
     }
     
     # Provide solutions if there are issues
     if ($missingVars.Count -gt 0 -or $criticalIssues.Count -gt 0) {
-        Write-SafeOutput "" -Status Info
+        Write-Host ""
         Write-SafeOutput "SOLUTIONS:" -Status Info
         Write-SafeOutput "  1. Edit .env file to add/fix missing or invalid values" -Status Info
         Write-SafeOutput "  2. Use strong passwords - minimum 12 characters with mixed case, numbers, symbols" -Status Info
