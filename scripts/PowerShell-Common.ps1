@@ -530,6 +530,561 @@ function Test-PathSafely {
     }
 }
 
+function New-TempConfigFile {
+    <#
+    .SYNOPSIS
+    Creates a temporary configuration file with secure cleanup
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Content,
+        
+        [string]$FileExtension = ".tmp",
+        
+        [switch]$SecureDelete
+    )
+    
+    try {
+        $tempFile = [System.IO.Path]::GetTempFileName()
+        
+        if ($FileExtension -ne ".tmp") {
+            $newTempFile = [System.IO.Path]::ChangeExtension($tempFile, $FileExtension)
+            Move-Item $tempFile $newTempFile -Force
+            $tempFile = $newTempFile
+        }
+        
+        # Write content with proper encoding
+        $Content | Out-File -FilePath $tempFile -Encoding ASCII -Force
+        
+        return @{
+            Success = $true
+            FilePath = $tempFile
+            CleanupAction = {
+                param($Path, $Secure)
+                try {
+                    if (Test-Path $Path) {
+                        if ($Secure) {
+                            # Overwrite with random data before deletion
+                            $randomData = -join ((1..1024) | ForEach-Object { Get-Random -Maximum 256 })
+                            $randomData | Out-File -FilePath $Path -Encoding ASCII -Force -ErrorAction SilentlyContinue
+                        }
+                        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+                    }
+                } catch {
+                    # Silently continue if cleanup fails
+                }
+            }.GetNewClosure()
+        }
+    }
+    catch {
+        return @{
+            Success = $false
+            FilePath = $null
+            Message = "Failed to create temp file: $($_.Exception.Message)"
+            Error = $_.Exception.Message
+        }
+    }
+}
+
+function Invoke-WithTempFile {
+    <#
+    .SYNOPSIS
+    Executes a script block with a temporary file that gets automatically cleaned up
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Content,
+        
+        [Parameter(Mandatory = $true)]
+        [ScriptBlock]$ScriptBlock,
+        
+        [string]$FileExtension = ".tmp",
+        
+        [switch]$SecureDelete
+    )
+    
+    $tempFileResult = New-TempConfigFile -Content $Content -FileExtension $FileExtension -SecureDelete:$SecureDelete
+    
+    if (-not $tempFileResult.Success) {
+        return @{
+            Success = $false
+            Message = $tempFileResult.Message
+            Error = $tempFileResult.Error
+        }
+    }
+    
+    try {
+        $result = & $ScriptBlock $tempFileResult.FilePath
+        return @{
+            Success = $true
+            Result = $result
+            TempFilePath = $tempFileResult.FilePath
+        }
+    }
+    catch {
+        return @{
+            Success = $false
+            Message = "Script block execution failed: $($_.Exception.Message)"
+            Error = $_.Exception.Message
+        }
+    }
+    finally {
+        # Always cleanup the temp file
+        if ($tempFileResult.CleanupAction) {
+            & $tempFileResult.CleanupAction $tempFileResult.FilePath $SecureDelete
+        }
+    }
+}
+
+# ==============================================================================
+# ENVIRONMENT AND CONFIGURATION MANAGEMENT
+# ==============================================================================
+
+function Read-EnvFileSafely {
+    <#
+    .SYNOPSIS
+    Safely reads and parses .env files with comprehensive error handling
+    #>
+    param(
+        [string]$EnvFilePath,
+        
+        [string[]]$RequiredVariables = @(),
+        
+        [switch]$CreateFromTemplate
+    )
+    
+    if (-not $EnvFilePath) {
+        $projectRoot = Get-ProjectRoot
+        $EnvFilePath = Join-Path $projectRoot ".env"
+    }
+    
+    # Check if .env exists, create from template if requested
+    if (-not (Test-Path $EnvFilePath)) {
+        if ($CreateFromTemplate) {
+            $templatePath = $EnvFilePath -replace '\\.env$', '.env.example'
+            if (Test-Path $templatePath) {
+                try {
+                    Copy-Item $templatePath $EnvFilePath -ErrorAction Stop
+                    Write-SafeOutput "Created .env from template" -Status Success
+                } catch {
+                    return @{
+                        Success = $false
+                        Variables = @{}
+                        Message = "Failed to create .env from template: $($_.Exception.Message)"
+                        RequiredMissing = $RequiredVariables
+                    }
+                }
+            } else {
+                return @{
+                    Success = $false
+                    Variables = @{}
+                    Message = "Environment file not found and no template available: $EnvFilePath"
+                    RequiredMissing = $RequiredVariables
+                }
+            }
+        } else {
+            return @{
+                Success = $false
+                Variables = @{}
+                Message = "Environment file not found: $EnvFilePath"
+                RequiredMissing = $RequiredVariables
+            }
+        }
+    }
+    
+    try {
+        $envVars = @{}
+        $content = Get-Content $EnvFilePath -ErrorAction Stop
+        
+        foreach ($line in $content) {
+            # Skip empty lines and comments
+            if ([string]::IsNullOrWhiteSpace($line) -or $line.Trim().StartsWith("#")) {
+                continue
+            }
+            
+            # Parse KEY=VALUE format
+            if ($line -match '^([^=]+)=(.*)$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                
+                # Remove quotes if present
+                if (($value.StartsWith('"') -and $value.EndsWith('"')) -or 
+                    ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+                    $value = $value.Substring(1, $value.Length - 2)
+                }
+                
+                $envVars[$key] = $value
+            }
+        }
+        
+        # Check required variables
+        $missingVars = @()
+        foreach ($requiredVar in $RequiredVariables) {
+            $value = $envVars[$requiredVar]
+            if ([string]::IsNullOrWhiteSpace($value)) {
+                $missingVars += $requiredVar
+            }
+        }
+        
+        return @{
+            Success = $missingVars.Count -eq 0
+            Variables = $envVars
+            Message = if ($missingVars.Count -eq 0) { "Environment file loaded successfully" } else { "Missing required variables: $($missingVars -join ', ')" }
+            Path = $EnvFilePath
+            RequiredMissing = $missingVars
+        }
+    }
+    catch {
+        return @{
+            Success = $false
+            Variables = @{}
+            Message = "Failed to read environment file: $($_.Exception.Message)"
+            Error = $_.Exception.Message
+            RequiredMissing = $RequiredVariables
+        }
+    }
+}
+
+function Test-CommandAvailability {
+    <#
+    .SYNOPSIS
+    Tests if multiple commands are available in the system PATH
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [hashtable]$CommandMap,
+        
+        [switch]$ShowVersions
+    )
+    
+    $results = @{}
+    $allAvailable = $true
+    
+    foreach ($command in $CommandMap.Keys) {
+        $commandPath = Get-Command $command -ErrorAction SilentlyContinue
+        
+        if ($commandPath) {
+            $version = "Unknown"
+            if ($ShowVersions) {
+                try {
+                    $versionOutput = & $command --version 2>&1 | Select-Object -First 1
+                    $version = $versionOutput -replace '\n.*', ''
+                } catch {
+                    $version = "Unknown"
+                }
+            }
+            
+            $results[$command] = @{
+                Available = $true
+                Path = $commandPath.Path
+                Version = $version
+                Message = "Found $command"
+            }
+            
+            Write-SafeOutput "Found $command`: $version" -Status Success
+        }
+        else {
+            $results[$command] = @{
+                Available = $false
+                Path = $null
+                Version = $null
+                Message = "Missing required command: $command"
+                InstallInfo = $CommandMap[$command]
+            }
+            
+            Write-SafeOutput "Missing required command: $command" -Status Error
+            Write-SafeOutput "Install: $($CommandMap[$command])" -Status Info
+            $allAvailable = $false
+        }
+    }
+    
+    return @{
+        AllAvailable = $allAvailable
+        Commands = $results
+        MissingCount = ($results.Values | Where-Object { -not $_.Available }).Count
+    }
+}
+
+# ==============================================================================
+# DATABASE UTILITIES
+# ==============================================================================
+
+function Test-MySQLConnectionSecure {
+    <#
+    .SYNOPSIS
+    Tests MySQL connection using secure temporary configuration files
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [hashtable]$ConnectionParams,
+        
+        [string]$TestQuery = "SELECT 1",
+        
+        [int]$TimeoutSeconds = 10
+    )
+    
+    $host = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
+    $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }
+    $user = if ($ConnectionParams["DB_USER"]) { $ConnectionParams["DB_USER"] } else { "root" }
+    $password = $ConnectionParams["DB_PASSWORD"]
+    
+    if ([string]::IsNullOrWhiteSpace($password)) {
+        return @{
+            Success = $false
+            Message = "DB_PASSWORD not configured"
+            Error = "Missing password"
+        }
+    }
+    
+    # Check if mysql client is available
+    $mysqlCommand = Get-Command mysql -ErrorAction SilentlyContinue
+    if (-not $mysqlCommand) {
+        return @{
+            Success = $false
+            Message = "MySQL client (mysql.exe) not found in PATH"
+            Error = "MySQL client not available"
+            SkipReason = "ClientNotFound"
+        }
+    }
+    
+    # Create MySQL configuration content
+    $configContent = @"
+[mysql]
+host=$host
+port=$port
+user=$user
+password=$password
+"@
+    
+    # Use secure temp file for connection
+    $tempFileResult = Invoke-WithTempFile -Content $configContent -SecureDelete -ScriptBlock {
+        param($TempConfigFile)
+        
+        try {
+            $result = Invoke-SafeCommand -Command "mysql" -Arguments @("--defaults-file=$TempConfigFile", "--silent", "--execute=$TestQuery") -Description "Testing MySQL connection" -TimeoutSeconds $TimeoutSeconds -IgnoreErrors
+            
+            return @{
+                Success = $result.Success
+                Output = $result.Output
+                ExitCode = $result.ExitCode
+                Duration = $result.Duration
+            }
+        }
+        catch {
+            return @{
+                Success = $false
+                Output = $_.Exception.Message
+                ExitCode = -1
+                Duration = 0
+            }
+        }
+    }
+    
+    if ($tempFileResult.Success -and $tempFileResult.Result.Success) {
+        return @{
+            Success = $true
+            Message = "MySQL connection successful"
+            Duration = $tempFileResult.Result.Duration
+            Host = $host
+            Port = $port
+            User = $user
+        }
+    }
+    else {
+        $errorMessage = if ($tempFileResult.Success) { $tempFileResult.Result.Output } else { $tempFileResult.Message }
+        return @{
+            Success = $false
+            Message = "MySQL connection failed"
+            Error = $errorMessage
+            Host = $host
+            Port = $port
+            User = $user
+        }
+    }
+}
+
+function Test-MySQLDatabase {
+    <#
+    .SYNOPSIS
+    Tests if a specific MySQL database exists
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [hashtable]$ConnectionParams,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$DatabaseName,
+        
+        [int]$TimeoutSeconds = 10
+    )
+    
+    $showDbQuery = "SHOW DATABASES LIKE '$DatabaseName'"
+    
+    $connectionTest = Test-MySQLConnectionSecure -ConnectionParams $ConnectionParams -TestQuery $showDbQuery -TimeoutSeconds $TimeoutSeconds
+    
+    if (-not $connectionTest.Success) {
+        return $connectionTest  # Pass through connection error
+    }
+    
+    # Check if database name appears in output
+    if ($connectionTest.Success -and $connectionTest.ContainsKey("Output")) {
+        $databaseExists = $connectionTest.Output -like "*$DatabaseName*"
+        
+        return @{
+            Success = $true
+            DatabaseExists = $databaseExists
+            DatabaseName = $DatabaseName
+            Message = if ($databaseExists) { "Database '$DatabaseName' exists" } else { "Database '$DatabaseName' does not exist" }
+            Host = $connectionTest.Host
+            Port = $connectionTest.Port
+        }
+    }
+    
+    return @{
+        Success = $false
+        DatabaseExists = $false
+        DatabaseName = $DatabaseName
+        Message = "Could not determine database existence"
+        Error = "Unexpected response format"
+    }
+}
+
+function Get-MySQLServiceInfo {
+    <#
+    .SYNOPSIS
+    Gets comprehensive MySQL service information on Windows
+    #>
+    param(
+        [string[]]$ServiceNames = @("MySQL80", "MySQL", "MySQL57"),
+        
+        [switch]$IncludeVersion
+    )
+    
+    $serviceInfo = @{
+        Found = $false
+        Services = @()
+        PreferredService = $null
+        AllRunning = $false
+    }
+    
+    foreach ($serviceName in $ServiceNames) {
+        $serviceResult = Test-ServiceSafely -ServiceName $serviceName
+        
+        if ($serviceResult.Found) {
+            $info = @{
+                Name = $serviceResult.Name
+                DisplayName = $serviceResult.DisplayName
+                Status = $serviceResult.Status
+                IsRunning = $serviceResult.Status -eq "Running"
+                IsPreferred = $false
+            }
+            
+            if ($IncludeVersion) {
+                try {
+                    # Try to get MySQL version if service is running
+                    if ($info.IsRunning) {
+                        $versionResult = & mysql --version 2>&1 | Select-Object -First 1
+                        $info.Version = $versionResult -replace '.*Ver ([0-9\.]+).*', '$1'
+                    }
+                    else {
+                        $info.Version = "Unknown (service not running)"
+                    }
+                }
+                catch {
+                    $info.Version = "Unknown"
+                }
+            }
+            
+            $serviceInfo.Services += $info
+            $serviceInfo.Found = $true
+            
+            # Mark first found service as preferred
+            if (-not $serviceInfo.PreferredService) {
+                $info.IsPreferred = $true
+                $serviceInfo.PreferredService = $info
+            }
+        }
+    }
+    
+    $serviceInfo.AllRunning = ($serviceInfo.Services | Where-Object { -not $_.IsRunning }).Count -eq 0
+    
+    return $serviceInfo
+}
+
+# ==============================================================================
+# PROCESS AND PERFORMANCE MONITORING
+# ==============================================================================
+
+function Get-SystemResourceInfo {
+    <#
+    .SYNOPSIS
+    Gets current system resource information for monitoring
+    #>
+    param(
+        [switch]$IncludeProcesses
+    )
+    
+    try {
+        $memoryInfo = Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue
+        $osInfo = Get-WmiObject -Class Win32_OperatingSystem -ErrorAction SilentlyContinue
+        $processorInfo = Get-WmiObject -Class Win32_Processor -ErrorAction SilentlyContinue | Select-Object -First 1
+        
+        $resourceInfo = @{
+            Success = $true
+            Timestamp = Get-Date
+            Memory = @{
+                TotalGB = if ($memoryInfo) { [math]::Round($memoryInfo.TotalPhysicalMemory / 1GB, 2) } else { "Unknown" }
+                AvailableGB = if ($osInfo) { [math]::Round($osInfo.FreePhysicalMemory / 1MB / 1024, 2) } else { "Unknown" }
+                UsedPercentage = if ($osInfo -and $memoryInfo) { 
+                    [math]::Round((($memoryInfo.TotalPhysicalMemory - ($osInfo.FreePhysicalMemory * 1024)) / $memoryInfo.TotalPhysicalMemory) * 100, 1)
+                } else { "Unknown" }
+            }
+            Processor = @{
+                Name = if ($processorInfo) { $processorInfo.Name } else { "Unknown" }
+                Cores = if ($processorInfo) { $processorInfo.NumberOfCores } else { "Unknown" }
+                LogicalProcessors = if ($processorInfo) { $processorInfo.NumberOfLogicalProcessors } else { "Unknown" }
+            }
+            Disk = @{
+                SystemDrive = $env:SystemDrive
+                FreeSpaceGB = "Unknown"
+            }
+        }
+        
+        # Get disk space for system drive
+        try {
+            $systemDisk = Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='$($env:SystemDrive)'" -ErrorAction SilentlyContinue
+            if ($systemDisk) {
+                $resourceInfo.Disk.FreeSpaceGB = [math]::Round($systemDisk.FreeSpace / 1GB, 2)
+                $resourceInfo.Disk.TotalSpaceGB = [math]::Round($systemDisk.Size / 1GB, 2)
+                $resourceInfo.Disk.UsedPercentage = [math]::Round((($systemDisk.Size - $systemDisk.FreeSpace) / $systemDisk.Size) * 100, 1)
+            }
+        }
+        catch {
+            # Continue with unknown disk info
+        }
+        
+        if ($IncludeProcesses) {
+            $topProcesses = Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 5 | ForEach-Object {
+                @{
+                    Name = $_.ProcessName
+                    MemoryMB = [math]::Round($_.WorkingSet / 1MB, 1)
+                    CPU = if ($_.CPU) { [math]::Round($_.CPU, 1) } else { 0 }
+                }
+            }
+            $resourceInfo.TopProcesses = $topProcesses
+        }
+        
+        return $resourceInfo
+    }
+    catch {
+        return @{
+            Success = $false
+            Message = "Failed to get system resource information: $($_.Exception.Message)"
+            Error = $_.Exception.Message
+        }
+    }
+}
+
 # ==============================================================================
 # INITIALIZATION
 # ==============================================================================
@@ -541,7 +1096,7 @@ if (-not (Test-PowerShellCompatibility)) {
 
 Initialize-SafeEnvironment
 
-Write-SafeOutput "PowerShell Common Library v2.0 (Legacy) loaded successfully" -Status Success
+Write-SafeOutput "PowerShell Common Library v2.1 (Enterprise Enhanced) loaded successfully" -Status Success
 
 # NOTE: Export-ModuleMember is not used in dot-sourced scripts
 # Functions are automatically available when dot-sourcing

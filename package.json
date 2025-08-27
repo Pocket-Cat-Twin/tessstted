@@ -55,9 +55,20 @@
     "validate:modules": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Path scripts",
     "validate:modules:fix": "powershell -ExecutionPolicy Bypass -File scripts/Validate-PowerShell.ps1 -Path scripts -Fix",
     "test:powershell": "powershell -ExecutionPolicy Bypass -Command \"Write-Host '[TEST] Testing PowerShell module system...' -ForegroundColor Cyan; Import-Module ./scripts/PowerShell-Common.psd1 -Force; Write-Host '[SUCCESS] PowerShell module system working correctly!' -ForegroundColor Green\"",
-    "validate:enterprise": "bun run validate:powershell:strict && bun run validate:modules && bun run lint:check && bun run type-check",
-    "validate:all": "bun run validate:powershell && bun run lint:check && bun run type-check",
-    "validate": "bun run lint:check && bun run type-check && bun run build"
+    "test:powershell:integration": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1",
+    "test:powershell:common": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1 -TestSuites @('Common')",
+    "test:powershell:environment": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1 -TestSuites @('Environment')",
+    "test:powershell:build": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1 -TestSuites @('Build')",
+    "test:powershell:setup": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1 -TestSuites @('Setup')",
+    "test:powershell:all": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1 -TestSuites @('Common','Environment','Build','Setup')",
+    "test:powershell:network": "powershell -ExecutionPolicy Bypass -File scripts/Test-PowerShellScripts.ps1 -TestSuites @('Common') -SkipNetworkTests:$false",
+    "validate:enterprise": "bun run test:powershell:integration && bun run validate:powershell:strict && bun run validate:modules && bun run lint:check && bun run type-check",
+    "validate:enterprise:full": "bun run test:powershell:all && bun run validate:powershell:report && bun run db:check:windows && bun run lint:check && bun run type-check",
+    "validate:all": "bun run test:powershell:integration && bun run validate:powershell && bun run lint:check && bun run type-check",
+    "validate": "bun run lint:check && bun run type-check && bun run build",
+    "setup:enterprise:windows": "bun run db:check:fix:windows && bun run db:setup:full:windows && bun run test:powershell:integration",
+    "build:enterprise:windows": "bun run test:powershell:build && bun run build:windows && bun run validate:enterprise",
+    "deploy:prepare:windows": "bun run validate:enterprise:full && bun run build:enterprise:windows"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

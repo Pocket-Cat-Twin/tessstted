@@ -1,6 +1,7 @@
 # ================================
 # MySQL8 Environment Checker for Windows
 # YuYu Lolita Shopping System
+# Enterprise-grade environment validation
 # ================================
 
 [CmdletBinding()]
@@ -9,261 +10,475 @@ param(
     [switch]$Fix = $false
 )
 
-# Import common functions
-. "$PSScriptRoot\PowerShell-Common.ps1"
+# Import common functions with validation
+$commonLibPath = Join-Path $PSScriptRoot "PowerShell-Common.ps1"
+if (-not (Test-Path $commonLibPath)) {
+    Write-Error "Required PowerShell-Common.ps1 not found at: $commonLibPath"
+    exit 1
+}
+. $commonLibPath
 
-function Test-MySQLService {
-    Write-Host "🔍 [CHECK] Проверяю службу MySQL80..." -ForegroundColor Cyan
+# Environment configuration
+$Script:MYSQL_SERVICE_NAMES = @("MySQL80", "MySQL")
+$Script:MYSQL_DEFAULT_PORT = 3306
+$Script:MYSQL_CONNECTION_TIMEOUT = 5000
+$Script:ENV_REQUIRED_VARS = @("DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD")
+
+# ==============================================================================
+# ENVIRONMENT FILE OPERATIONS
+# ==============================================================================
+
+function Read-EnvFileSafely {
+    <#
+    .SYNOPSIS
+    Safely reads and parses .env file with proper error handling
+    #>
+    param(
+        [string]$EnvFilePath
+    )
     
-    $mysqlService = Get-Service -Name "MySQL80" -ErrorAction SilentlyContinue
-    
-    if (-not $mysqlService) {
-        Write-Host "❌ [ERROR] Служба MySQL80 не найдена!" -ForegroundColor Red
-        Write-Host "💡 [SOLUTION] Установите MySQL 8.0 из: https://dev.mysql.com/downloads/mysql/" -ForegroundColor Yellow
-        return $false
+    if (-not $EnvFilePath) {
+        $projectRoot = Get-ProjectRoot
+        $EnvFilePath = Join-Path $projectRoot ".env"
     }
     
-    if ($mysqlService.Status -ne "Running") {
-        Write-Host "⚠️ [WARNING] Служба MySQL80 не запущена. Статус: $($mysqlService.Status)" -ForegroundColor Yellow
-        
-        if ($Fix) {
-            Write-Host "🔧 [FIX] Пытаюсь запустить службу MySQL80..." -ForegroundColor Green
-            try {
-                Start-Service -Name "MySQL80"
-                Start-Sleep -Seconds 3
-                $mysqlService = Get-Service -Name "MySQL80"
-                if ($mysqlService.Status -eq "Running") {
-                    Write-Host "✅ [SUCCESS] Служба MySQL80 успешно запущена!" -ForegroundColor Green
-                    return $true
-                }
-            }
-            catch {
-                Write-Host "❌ [ERROR] Не удалось запустить службу MySQL80: $_" -ForegroundColor Red
-                return $false
-            }
-        } else {
-            Write-Host "💡 [SOLUTION] Запустите: Start-Service -Name 'MySQL80'" -ForegroundColor Yellow
-            return $false
+    if (-not (Test-Path $EnvFilePath)) {
+        return @{
+            Success = $false
+            Variables = @{}
+            Message = "Environment file not found: $EnvFilePath"
         }
     }
     
-    Write-Host "✅ [SUCCESS] Служба MySQL80 работает корректно" -ForegroundColor Green
-    return $true
-}
-
-function Test-MySQLPort {
-    Write-Host "🔍 [CHECK] Проверяю доступность порта 3306..." -ForegroundColor Cyan
-    
     try {
-        $connection = Test-NetConnection -ComputerName "localhost" -Port 3306 -InformationLevel Quiet
-        if ($connection) {
-            Write-Host "✅ [SUCCESS] Порт 3306 доступен для подключения" -ForegroundColor Green
-            return $true
-        } else {
-            Write-Host "❌ [ERROR] Порт 3306 недоступен!" -ForegroundColor Red
-            Write-Host "💡 [SOLUTION] Проверьте конфигурацию MySQL и firewall" -ForegroundColor Yellow
-            return $false
+        $envVars = @{}
+        $content = Get-Content $EnvFilePath -ErrorAction Stop
+        
+        foreach ($line in $content) {
+            # Skip empty lines and comments
+            if ([string]::IsNullOrWhiteSpace($line) -or $line.Trim().StartsWith("#")) {
+                continue
+            }
+            
+            # Parse KEY=VALUE format
+            if ($line -match '^([^=]+)=(.*)$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                
+                # Remove quotes if present
+                if (($value.StartsWith('"') -and $value.EndsWith('"')) -or 
+                    ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+                    $value = $value.Substring(1, $value.Length - 2)
+                }
+                
+                $envVars[$key] = $value
+            }
+        }
+        
+        return @{
+            Success = $true
+            Variables = $envVars
+            Message = "Environment file loaded successfully"
+            Path = $EnvFilePath
         }
     }
     catch {
-        Write-Host "❌ [ERROR] Ошибка при проверке порта 3306: $_" -ForegroundColor Red
-        return $false
+        return @{
+            Success = $false
+            Variables = @{}
+            Message = "Failed to read environment file: $($_.Exception.Message)"
+        }
     }
 }
 
-function Test-EnvFile {
-    Write-Host "🔍 [CHECK] Проверяю файл .env..." -ForegroundColor Cyan
+function Test-EnvFileConfiguration {
+    <#
+    .SYNOPSIS
+    Validates .env file existence and required variables
+    #>
+    param(
+        [switch]$CreateFromTemplate
+    )
     
-    $envPath = Join-Path $PSScriptRoot "..\.env"
+    Write-SafeSectionHeader "Environment File Validation" -Step 1
     
+    $projectRoot = Get-ProjectRoot
+    $envPath = Join-Path $projectRoot ".env"
+    $envExamplePath = Join-Path $projectRoot ".env.example"
+    
+    # Check if .env exists
     if (-not (Test-Path $envPath)) {
-        Write-Host "❌ [ERROR] Файл .env не найден!" -ForegroundColor Red
+        Write-SafeOutput "Environment file not found: .env" -Status Error
         
-        if ($Fix) {
-            Write-Host "🔧 [FIX] Копирую .env.example в .env..." -ForegroundColor Green
-            $envExamplePath = Join-Path $PSScriptRoot "..\.env.example"
-            if (Test-Path $envExamplePath) {
-                Copy-Item $envExamplePath $envPath
-                Write-Host "✅ [SUCCESS] Файл .env создан из шаблона" -ForegroundColor Green
-                Write-Host "⚠️ [WARNING] Необходимо настроить DB_PASSWORD в .env!" -ForegroundColor Yellow
-            } else {
-                Write-Host "❌ [ERROR] Шаблон .env.example не найден!" -ForegroundColor Red
+        if ($CreateFromTemplate -and (Test-Path $envExamplePath)) {
+            Write-SafeOutput "Creating .env from template..." -Status Processing
+            try {
+                Copy-Item $envExamplePath $envPath -ErrorAction Stop
+                Write-SafeOutput "Environment file created from .env.example" -Status Success
+                Write-SafeOutput "IMPORTANT: Configure DB_PASSWORD in .env file!" -Status Warning
+            }
+            catch {
+                Write-SafeOutput "Failed to create .env file: $($_.Exception.Message)" -Status Error
                 return $false
             }
-        } else {
-            Write-Host "💡 [SOLUTION] Скопируйте .env.example в .env и настройте параметры БД" -ForegroundColor Yellow
+        }
+        else {
+            Write-SafeOutput "Solution: Copy .env.example to .env and configure database settings" -Status Info
             return $false
         }
     }
     
-    # Проверяем ключевые параметры
-    $envContent = Get-Content $envPath -Raw
-    $requiredVars = @("DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD")
-    $missingVars = @()
+    # Load and validate environment variables
+    $envResult = Read-EnvFileSafely -EnvFilePath $envPath
     
-    foreach ($var in $requiredVars) {
-        if (-not ($envContent -match "$var\s*=\s*.+")) {
-            $missingVars += $var
+    if (-not $envResult.Success) {
+        Write-SafeOutput $envResult.Message -Status Error
+        return $false
+    }
+    
+    # Check required variables
+    $missingVars = @()
+    foreach ($requiredVar in $Script:ENV_REQUIRED_VARS) {
+        $value = $envResult.Variables[$requiredVar]
+        if ([string]::IsNullOrWhiteSpace($value)) {
+            $missingVars += $requiredVar
         }
     }
     
     if ($missingVars.Count -gt 0) {
-        Write-Host "❌ [ERROR] В файле .env отсутствуют или пусты параметры: $($missingVars -join ', ')" -ForegroundColor Red
-        Write-Host "💡 [SOLUTION] Заполните эти параметры в файле .env" -ForegroundColor Yellow
+        Write-SafeOutput "Missing or empty environment variables: $($missingVars -join ', ')" -Status Error
+        Write-SafeOutput "Configure these variables in .env file" -Status Info
         return $false
     }
     
-    Write-Host "✅ [SUCCESS] Файл .env содержит все необходимые параметры" -ForegroundColor Green
+    Write-SafeOutput "Environment file validation passed" -Status Success
     return $true
 }
 
-function Test-MySQLConnection {
-    Write-Host "🔍 [CHECK] Проверяю подключение к MySQL..." -ForegroundColor Cyan
+# ==============================================================================
+# MYSQL SERVICE OPERATIONS
+# ==============================================================================
+
+function Test-MySQLService {
+    <#
+    .SYNOPSIS
+    Tests MySQL service status and starts if needed
+    #>
+    param(
+        [switch]$StartIfStopped
+    )
     
-    # Загружаем переменные окружения
-    $envPath = Join-Path $PSScriptRoot "..\.env"
-    if (Test-Path $envPath) {
-        $envVars = @{}
-        Get-Content $envPath | ForEach-Object {
-            if ($_ -match '^([^#][^=]+)=(.*)$') {
-                $envVars[$matches[1].Trim()] = $matches[2].Trim()
-            }
+    Write-SafeSectionHeader "MySQL Service Check" -Step 2
+    
+    $serviceResult = $null
+    
+    # Try multiple service names
+    foreach ($serviceName in $Script:MYSQL_SERVICE_NAMES) {
+        $serviceResult = Test-ServiceSafely -ServiceName $serviceName
+        if ($serviceResult.Found) {
+            break
         }
-    } else {
-        Write-Host "❌ [ERROR] Файл .env не найден для проверки подключения!" -ForegroundColor Red
+    }
+    
+    if (-not $serviceResult.Found) {
+        Write-SafeOutput "MySQL service not found (tried: $($Script:MYSQL_SERVICE_NAMES -join ', '))" -Status Error
+        Write-SafeOutput "Install MySQL 8.0 from: https://dev.mysql.com/downloads/mysql/" -Status Info
         return $false
     }
     
-    $dbHost = $envVars["DB_HOST"] ?? "localhost"
-    $dbPort = $envVars["DB_PORT"] ?? "3306"
-    $dbUser = $envVars["DB_USER"] ?? "root"
-    $dbPassword = $envVars["DB_PASSWORD"] ?? ""
+    $serviceName = $serviceResult.Name
+    Write-SafeOutput "Found MySQL service: $($serviceResult.DisplayName)" -Status Success
     
-    if ([string]::IsNullOrEmpty($dbPassword)) {
-        Write-Host "❌ [ERROR] DB_PASSWORD не задан в .env файле!" -ForegroundColor Red
-        Write-Host "💡 [SOLUTION] Установите DB_PASSWORD в файле .env" -ForegroundColor Yellow
-        return $false
-    }
-    
-    # Пытаемся подключиться через mysql.exe
-    $mysqlPath = Get-Command mysql -ErrorAction SilentlyContinue
-    if ($mysqlPath) {
-        try {
-            $testQuery = "SELECT 1;"
-            $result = & mysql -h $dbHost -P $dbPort -u $dbUser -p$dbPassword -e $testQuery --silent 2>$null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "✅ [SUCCESS] Подключение к MySQL успешно установлено" -ForegroundColor Green
-                return $true
-            } else {
-                Write-Host "❌ [ERROR] Не удалось подключиться к MySQL" -ForegroundColor Red
-                Write-Host "💡 [SOLUTION] Проверьте логин/пароль MySQL" -ForegroundColor Yellow
-                return $false
-            }
+    # Check service status
+    if ($serviceResult.Status -ne "Running") {
+        Write-SafeOutput "MySQL service is not running (Status: $($serviceResult.Status))" -Status Warning
+        
+        if ($StartIfStopped) {
+            $startResult = Start-ServiceSafely -ServiceName $serviceName -Description "MySQL service"
+            return $startResult
         }
-        catch {
-            Write-Host "❌ [ERROR] Ошибка подключения к MySQL: $_" -ForegroundColor Red
+        else {
+            Write-SafeOutput "Start the service with: Start-Service -Name '$serviceName'" -Status Info
             return $false
         }
-    } else {
-        Write-Host "⚠️ [WARNING] Клиент mysql.exe не найден в PATH" -ForegroundColor Yellow
-        Write-Host "💡 [INFO] Проверка подключения пропущена" -ForegroundColor Yellow
+    }
+    
+    Write-SafeOutput "MySQL service is running correctly" -Status Success
+    return $true
+}
+
+# ==============================================================================
+# NETWORK CONNECTIVITY OPERATIONS
+# ==============================================================================
+
+function Test-MySQLNetworkAccess {
+    <#
+    .SYNOPSIS
+    Tests MySQL network port accessibility
+    #>
+    param(
+        [string]$HostName = "localhost",
+        [int]$Port = $Script:MYSQL_DEFAULT_PORT
+    )
+    
+    Write-SafeSectionHeader "MySQL Network Access Check" -Step 3
+    
+    $portTest = Test-NetworkPortSafely -HostName $HostName -Port $Port -TimeoutMs $Script:MYSQL_CONNECTION_TIMEOUT
+    
+    if ($portTest.Success) {
+        Write-SafeOutput $portTest.Message -Status Success
         return $true
+    }
+    else {
+        Write-SafeOutput $portTest.Message -Status Error
+        Write-SafeOutput "Check MySQL configuration and Windows Firewall settings" -Status Info
+        return $false
+    }
+}
+
+# ==============================================================================
+# MYSQL DATABASE OPERATIONS
+# ==============================================================================
+
+function Test-MySQLConnectionSecure {
+    <#
+    .SYNOPSIS
+    Tests MySQL connection using secure methods (no password in command line)
+    #>
+    param(
+        [hashtable]$ConnectionParams
+    )
+    
+    Write-SafeSectionHeader "MySQL Connection Test" -Step 4
+    
+    $host = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
+    $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }
+    $user = if ($ConnectionParams["DB_USER"]) { $ConnectionParams["DB_USER"] } else { "root" }
+    $password = $ConnectionParams["DB_PASSWORD"]
+    
+    if ([string]::IsNullOrWhiteSpace($password)) {
+        Write-SafeOutput "DB_PASSWORD not configured in .env file" -Status Error
+        Write-SafeOutput "Set DB_PASSWORD in .env file" -Status Info
+        return $false
+    }
+    
+    # Check if mysql client is available
+    $mysqlCommand = Get-Command mysql -ErrorAction SilentlyContinue
+    if (-not $mysqlCommand) {
+        Write-SafeOutput "MySQL client (mysql.exe) not found in PATH" -Status Warning
+        Write-SafeOutput "Connection test skipped (not critical)" -Status Info
+        return $true  # Not critical for the application
+    }
+    
+    # Create temporary configuration file for secure connection
+    $tempConfigFile = [System.IO.Path]::GetTempFileName()
+    $configContent = @"
+[mysql]
+host=$host
+port=$port
+user=$user
+password=$password
+"@
+    
+    try {
+        # Write config to temp file
+        $configContent | Out-File -FilePath $tempConfigFile -Encoding ASCII -Force
+        
+        # Test connection using config file
+        $testQuery = "SELECT 1"
+        $result = Invoke-SafeCommand -Command "mysql" -Arguments @("--defaults-file=$tempConfigFile", "--silent", "--execute=$testQuery") -Description "Testing MySQL connection" -IgnoreErrors
+        
+        if ($result.Success) {
+            Write-SafeOutput "MySQL connection test successful" -Status Success
+            return $true
+        }
+        else {
+            Write-SafeOutput "MySQL connection failed - check credentials" -Status Error
+            Write-SafeOutput "Verify username/password in .env file" -Status Info
+            return $false
+        }
+    }
+    catch {
+        Write-SafeOutput "MySQL connection test failed: $($_.Exception.Message)" -Status Error
+        return $false
+    }
+    finally {
+        # Clean up temp file
+        if (Test-Path $tempConfigFile) {
+            Remove-Item $tempConfigFile -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
 function Test-DatabaseExists {
-    param([string]$DatabaseName = "yuyu_lolita")
+    <#
+    .SYNOPSIS
+    Tests if the application database exists
+    #>
+    param(
+        [hashtable]$ConnectionParams,
+        [string]$DatabaseName
+    )
     
-    Write-Host "🔍 [CHECK] Проверяю существование базы данных '$DatabaseName'..." -ForegroundColor Cyan
+    Write-SafeSectionHeader "Database Existence Check" -Step 5
     
-    $envPath = Join-Path $PSScriptRoot "..\.env"
-    if (-not (Test-Path $envPath)) {
-        Write-Host "❌ [ERROR] Файл .env не найден!" -ForegroundColor Red
-        return $false
+    if ([string]::IsNullOrWhiteSpace($DatabaseName)) {
+        $DatabaseName = if ($ConnectionParams["DB_NAME"]) { $ConnectionParams["DB_NAME"] } else { "yuyu_lolita" }
     }
     
-    $envVars = @{}
-    Get-Content $envPath | ForEach-Object {
-        if ($_ -match '^([^#][^=]+)=(.*)$') {
-            $envVars[$matches[1].Trim()] = $matches[2].Trim()
-        }
+    # Check if mysql client is available
+    $mysqlCommand = Get-Command mysql -ErrorAction SilentlyContinue
+    if (-not $mysqlCommand) {
+        Write-SafeOutput "MySQL client not available - skipping database check" -Status Warning
+        return $true  # Not critical
     }
     
-    $dbHost = $envVars["DB_HOST"] ?? "localhost"
-    $dbPort = $envVars["DB_PORT"] ?? "3306"
-    $dbUser = $envVars["DB_USER"] ?? "root"
-    $dbPassword = $envVars["DB_PASSWORD"] ?? ""
+    $host = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
+    $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }
+    $user = if ($ConnectionParams["DB_USER"]) { $ConnectionParams["DB_USER"] } else { "root" }
+    $password = $ConnectionParams["DB_PASSWORD"]
     
-    $mysqlPath = Get-Command mysql -ErrorAction SilentlyContinue
-    if ($mysqlPath) {
-        try {
-            $testQuery = "SHOW DATABASES LIKE '$DatabaseName';"
-            $result = & mysql -h $dbHost -P $dbPort -u $dbUser -p$dbPassword -e $testQuery --silent 2>$null
-            if ($LASTEXITCODE -eq 0 -and $result -like "*$DatabaseName*") {
-                Write-Host "✅ [SUCCESS] База данных '$DatabaseName' существует" -ForegroundColor Green
-                return $true
-            } else {
-                Write-Host "⚠️ [WARNING] База данных '$DatabaseName' не существует" -ForegroundColor Yellow
-                return $false
-            }
+    # Create temporary configuration file
+    $tempConfigFile = [System.IO.Path]::GetTempFileName()
+    $configContent = @"
+[mysql]
+host=$host
+port=$port
+user=$user
+password=$password
+"@
+    
+    try {
+        $configContent | Out-File -FilePath $tempConfigFile -Encoding ASCII -Force
+        
+        $showDbQuery = "SHOW DATABASES LIKE '$DatabaseName'"
+        $result = Invoke-SafeCommand -Command "mysql" -Arguments @("--defaults-file=$tempConfigFile", "--silent", "--execute=$showDbQuery") -Description "Checking database existence" -IgnoreErrors
+        
+        if ($result.Success -and $result.Output -like "*$DatabaseName*") {
+            Write-SafeOutput "Database '$DatabaseName' exists" -Status Success
+            return $true
         }
-        catch {
-            Write-Host "❌ [ERROR] Ошибка при проверке базы данных: $_" -ForegroundColor Red
+        else {
+            Write-SafeOutput "Database '$DatabaseName' does not exist" -Status Warning
+            Write-SafeOutput "Run database setup to create it" -Status Info
             return $false
         }
-    } else {
-        Write-Host "⚠️ [WARNING] Клиент mysql.exe не найден, пропускаю проверку БД" -ForegroundColor Yellow
-        return $true
+    }
+    catch {
+        Write-SafeOutput "Database check failed: $($_.Exception.Message)" -Status Error
+        return $false
+    }
+    finally {
+        if (Test-Path $tempConfigFile) {
+            Remove-Item $tempConfigFile -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
-# ================================
-# MAIN EXECUTION
-# ================================
+# ==============================================================================
+# MAIN EXECUTION PIPELINE
+# ==============================================================================
 
-Write-Host ""
-Write-Host "🚀 =====================================" -ForegroundColor Magenta
-Write-Host "🚀 MySQL8 Environment Checker (Windows)" -ForegroundColor Magenta
-Write-Host "🚀 YuYu Lolita Shopping System" -ForegroundColor Magenta
-Write-Host "🚀 =====================================" -ForegroundColor Magenta
-Write-Host ""
+function Invoke-EnvironmentCheck {
+    <#
+    .SYNOPSIS
+    Main environment check orchestrator
+    #>
+    param(
+        [switch]$AutoFix
+    )
+    
+    Write-SafeHeader "MySQL8 Environment Checker for Windows" 
+    Write-SafeOutput "YuYu Lolita Shopping System - Environment Validation" -Status Info
+    Write-Host ""
+    
+    $checkResults = @()
+    
+    # Step 1: Environment file validation
+    $envCheck = Test-EnvFileConfiguration -CreateFromTemplate:$AutoFix
+    $checkResults += @{ Name = "Environment File"; Success = $envCheck }
+    
+    # Load environment variables for subsequent tests
+    $envData = Read-EnvFileSafely
+    $connectionParams = if ($envData.Success) { $envData.Variables } else { @{} }
+    
+    # Step 2: MySQL service check
+    $serviceCheck = Test-MySQLService -StartIfStopped:$AutoFix
+    $checkResults += @{ Name = "MySQL Service"; Success = $serviceCheck }
+    
+    # Step 3: Network access check
+    $host = if ($connectionParams["DB_HOST"]) { $connectionParams["DB_HOST"] } else { "localhost" }
+    $port = if ($connectionParams["DB_PORT"]) { [int]$connectionParams["DB_PORT"] } else { $Script:MYSQL_DEFAULT_PORT }
+    $networkCheck = Test-MySQLNetworkAccess -HostName $host -Port $port
+    $checkResults += @{ Name = "Network Access"; Success = $networkCheck }
+    
+    # Step 4: MySQL connection test
+    $connectionCheck = Test-MySQLConnectionSecure -ConnectionParams $connectionParams
+    $checkResults += @{ Name = "MySQL Connection"; Success = $connectionCheck }
+    
+    # Step 5: Database existence check
+    $databaseCheck = Test-DatabaseExists -ConnectionParams $connectionParams
+    $checkResults += @{ Name = "Database Existence"; Success = $databaseCheck }
+    
+    return $checkResults
+}
 
-$allChecks = @()
-
-# Проверка службы MySQL
-$allChecks += Test-MySQLService
-
-# Проверка порта
-$allChecks += Test-MySQLPort
-
-# Проверка .env файла
-$allChecks += Test-EnvFile
-
-# Проверка подключения к MySQL
-$allChecks += Test-MySQLConnection
-
-# Проверка существования БД
-$allChecks += Test-DatabaseExists
-
-# Подводим итоги
-Write-Host ""
-Write-Host "📊 =====================================" -ForegroundColor Magenta
-Write-Host "📊 ИТОГИ ПРОВЕРКИ ОКРУЖЕНИЯ" -ForegroundColor Magenta
-Write-Host "📊 =====================================" -ForegroundColor Magenta
-
-$passedChecks = ($allChecks | Where-Object { $_ -eq $true }).Count
-$totalChecks = $allChecks.Count
-
-Write-Host "✅ Пройдено проверок: $passedChecks из $totalChecks" -ForegroundColor Green
-
-if ($passedChecks -eq $totalChecks) {
-    Write-Host "🎉 [SUCCESS] Все проверки пройдены! Окружение готово к работе." -ForegroundColor Green
-    Write-Host "💡 [NEXT] Запустите: npm run db:setup:windows для инициализации БД" -ForegroundColor Yellow
-    exit 0
-} else {
-    Write-Host "❌ [ERROR] Некоторые проверки не пройдены. Исправьте проблемы." -ForegroundColor Red
-    if (-not $Fix) {
-        Write-Host "💡 [TIP] Запустите с параметром -Fix для автоматического исправления" -ForegroundColor Yellow
+function Show-CheckResults {
+    <#
+    .SYNOPSIS
+    Displays formatted check results and summary
+    #>
+    param(
+        [array]$Results
+    )
+    
+    Write-Host ""
+    Write-SafeHeader "Environment Check Results"
+    
+    $passedChecks = 0
+    $totalChecks = $Results.Count
+    
+    foreach ($result in $Results) {
+        $status = if ($result.Success) { "Success" } else { "Error" }
+        Write-SafeOutput "$($result.Name)" -Status $status
+        
+        if ($result.Success) {
+            $passedChecks++
+        }
     }
+    
+    Write-Host ""
+    Write-SafeOutput "Passed checks: $passedChecks of $totalChecks" -Status Info
+    
+    if ($passedChecks -eq $totalChecks) {
+        Write-SafeOutput "All environment checks passed! System ready." -Status Complete
+        Write-SafeOutput "Next step: Run database setup with 'npm run db:setup:full:windows'" -Status Info
+        return $true
+    }
+    else {
+        Write-SafeOutput "Some environment checks failed. Fix the issues above." -Status Error
+        if (-not $Fix) {
+            Write-SafeOutput "Tip: Use -Fix parameter for automatic fixes where possible" -Status Info
+        }
+        return $false
+    }
+}
+
+# ==============================================================================
+# SCRIPT ENTRY POINT
+# ==============================================================================
+
+try {
+    # Run environment validation
+    $checkResults = Invoke-EnvironmentCheck -AutoFix:$Fix
+    
+    # Display results and exit with appropriate code
+    $allPassed = Show-CheckResults -Results $checkResults
+    
+    exit $(if ($allPassed) { 0 } else { 1 })
+}
+catch {
+    Write-SafeOutput "Critical error during environment check: $($_.Exception.Message)" -Status Error
+    Write-SafeOutput "Please check the PowerShell execution environment" -Status Info
     exit 1
 }
