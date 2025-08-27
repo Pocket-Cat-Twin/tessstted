@@ -208,3 +208,48 @@ npm run db:health:mysql
 - ✅ Prevents similar configuration issues in future
 
 **This comprehensive solution addresses the immediate password issue while creating a robust, secure, and maintainable database configuration system that prevents similar issues and enhances overall system security.**
+
+### PowerShell Regex and Parsing Critical Fixes (Aug 2025)
+
+**Issue**: PowerShell script `db-environment-check-windows.ps1` had critical syntax errors causing complete script failure:
+- Line 213: Unescaped colon `:` in regex character class caused "Unexpected token ':' in expression" error
+- Line 265: Unescaped `+` symbol in string caused "You must provide a value expression following the '+' operator" error
+
+**Root Cause**: PowerShell parser interprets certain characters as operators even within strings and regex patterns when not properly escaped.
+
+**Critical Fixes Applied**:
+
+1. **Regex Escaping Fix (Line 213)**:
+```powershell
+# BEFORE (BROKEN):
+$hasSymbol = $value -match "[!@#$%^&*(),.?\":{}|<>]"
+
+# AFTER (FIXED):  
+$hasSymbol = $value -match "[!@#$%^&*(),.?\\":{}|<>]"
+```
+
+2. **String Parsing Fix (Line 265)**:
+```powershell
+# BEFORE (BROKEN):
+Write-SafeOutput "  2. Use strong passwords (12+ chars, mixed case, numbers, symbols)" -Status Info
+
+# AFTER (FIXED):
+Write-SafeOutput "  2. Use strong passwords (12 or more chars, mixed case, numbers, symbols)" -Status Info  
+```
+
+**PowerShell Escaping Rules (CRITICAL for future development)**:
+- **Colon in Regex**: Always escape `:` as `\\:` in character classes `[...]`
+- **Plus in Strings**: Avoid `12+` patterns, use `12 or more` or `12+` with proper context
+- **Regex Special Characters**: Always escape `[]{}()*+?\\^$|` when used literally
+- **Double Escaping**: PowerShell often requires double backslashes `\\` for single backslash
+
+**Files Fixed**:
+- `scripts/db-environment-check-windows.ps1` - Lines 213, 265
+
+**Impact**:
+- ✅ Eliminates PowerShell syntax parsing errors  
+- ✅ Enables database environment validation to function
+- ✅ Fixes all dependent npm scripts: `db:check:windows`, `db:setup:full:windows`
+- ✅ Prevents similar regex/parsing issues in future PowerShell development
+
+**Prevention Strategy**: Always test PowerShell regex patterns and string interpolation in isolated contexts before integrating into production scripts.
