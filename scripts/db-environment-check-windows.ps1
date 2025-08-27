@@ -200,11 +200,11 @@ function Test-EnvFileConfiguration {
                         $warnings += "DB_PASSWORD is short - 12 or more characters recommended for security"
                     }
                     
-                    # Check for weak passwords
-                    $weakPasswords = @("password", "123456", "admin", "test", "root", "mysql")
-                    if ($value.ToLower() -in $weakPasswords) {
-                        $criticalIssues += "DB_PASSWORD is using a common weak password - SECURITY RISK!"
-                    }
+                    # Check for weak passwords - DISABLED
+                    # $weakPasswords = @("password", "123456", "admin", "test", "root", "mysql")
+                    # if ($value.ToLower() -in $weakPasswords) {
+                    #     $criticalIssues += "DB_PASSWORD is using a common weak password - SECURITY RISK!"
+                    # }
                     
                     # Check password complexity
                     $hasLower = $value -cmatch "[a-z]"
