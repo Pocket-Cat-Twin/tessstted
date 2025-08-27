@@ -712,12 +712,17 @@ class ApiClient {
       };
     }
 
+    // Filter out undefined values to avoid validation errors
+    const cleanProfileData = Object.fromEntries(
+      Object.entries(profileData).filter(([_, value]) => value !== undefined)
+    );
+
     return this.request("/profile", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(profileData),
+      body: JSON.stringify(cleanProfileData),
     });
   }
 

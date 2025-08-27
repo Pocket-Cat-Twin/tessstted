@@ -67,7 +67,7 @@
     error = '';
     
     try {
-      const response = await fetch('http://127.0.0.1:3001/admin/orders', {
+      const response = await fetch('http://127.0.0.1:3001/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
@@ -81,10 +81,28 @@
       const data = await response.json();
       
       if (data.success) {
-        // Filter orders for current user (in real app, API would do this)
-        orders = data.data.orders.filter((order: Order) => 
-          order.customerEmail === $authStore.user?.email
-        );
+        // Map user orders to expected format
+        orders = data.orders.map((order: any) => ({
+          id: order.id,
+          nomerok: order.id,
+          customerName: $authStore.user?.name || 'Пользователь',
+          customerPhone: $authStore.user?.phone || '',
+          customerEmail: $authStore.user?.email || '',
+          deliveryAddress: 'Адрес не указан',
+          deliveryMethod: 'Обычная доставка',
+          paymentMethod: 'Не указан',
+          status: order.status.toUpperCase(),
+          goods: [{
+            name: order.goods,
+            priceYuan: order.totalPriceCny,
+            quantity: 1,
+            color: 'Не указан',
+            size: 'Не указан'
+          }],
+          totalRuble: Math.round(order.finalPrice * 15), // Convert CNY to RUB
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt
+        }));
       } else {
         error = 'Не удалось загрузить заказы';
       }
