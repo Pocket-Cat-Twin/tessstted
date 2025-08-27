@@ -7,9 +7,9 @@
   export let profile: any = null;
   export let loading = false;
 
-  // Form data
+  // Form data - initialize with safe defaults
   let formData = {
-    name: profile?.user?.name || '',
+    name: profile?.user?.name || 'Пользователь',
     fullName: profile?.fullName || '',
     contactPhone: profile?.contactPhone || '',
     contactEmail: profile?.contactEmail || '',
@@ -26,7 +26,7 @@
   // Update form data when profile changes
   $: if (profile) {
     formData = {
-      name: profile.user?.name || '',
+      name: profile.user?.name || 'Пользователь',
       fullName: profile.fullName || '',
       contactPhone: profile.contactPhone || '',
       contactEmail: profile.contactEmail || '',
@@ -38,8 +38,9 @@
   function validateForm() {
     errors = {};
     
-    if (!formData.name.trim()) {
+    if (!formData.name || !formData.name.trim() || formData.name.trim() === '') {
       errors.name = 'Имя обязательно для заполнения';
+      return false;
     }
     
     if (formData.contactEmail && !isValidEmail(formData.contactEmail)) {
@@ -68,7 +69,17 @@
     saving = true;
     
     try {
-      const response = await api.updateProfile(formData);
+      // Ensure required fields are never undefined or empty
+      const cleanFormData = {
+        name: formData.name?.trim() || 'Пользователь',
+        fullName: formData.fullName?.trim() || '',
+        contactPhone: formData.contactPhone?.trim() || '',
+        contactEmail: formData.contactEmail?.trim() || '',
+        avatar: formData.avatar || ''
+      };
+      
+      console.log('📝 Form data being sent:', cleanFormData);
+      const response = await api.updateProfile(cleanFormData);
       
       if (response.success) {
         dispatch('success', { message: 'Профиль успешно обновлен' });

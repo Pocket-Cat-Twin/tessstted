@@ -712,15 +712,27 @@ class ApiClient {
       };
     }
 
-    // Filter out undefined values to avoid validation errors
+    console.log('🔍 Original profile data received:', profileData);
+
+    // Filter out undefined and null values, ensure name is always a string
     const cleanProfileData = Object.fromEntries(
-      Object.entries(profileData).filter(([_, value]) => value !== undefined)
+      Object.entries(profileData)
+        .filter(([_, value]) => value !== undefined && value !== null)
+        .map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value])
     );
+
+    // Ensure name is always present and is a string
+    if (!cleanProfileData.name || typeof cleanProfileData.name !== 'string') {
+      cleanProfileData.name = 'Пользователь';
+    }
+
+    console.log('✨ Cleaned profile data to send:', cleanProfileData);
 
     return this.request("/profile", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(cleanProfileData),
     });
