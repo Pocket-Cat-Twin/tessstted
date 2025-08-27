@@ -1,7 +1,6 @@
 // Database Configuration Management
 // Centralized environment variable loading and validation
 import dotenv from 'dotenv';
-import { join } from 'path';
 import { existsSync } from 'fs';
 
 // Custom error class for configuration issues
@@ -171,8 +170,7 @@ export const testDatabaseConfig = async (): Promise<{ version: string; currentDb
       user: config.user,
       password: config.password,
       // Don't specify database for initial connection test
-      connectTimeout: 5000,
-      timeout: 5000
+      connectTimeout: 5000
     });
     
     const [rows] = await connection.execute('SELECT VERSION() as version, DATABASE() as current_db');

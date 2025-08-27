@@ -1,6 +1,6 @@
 // MySQL8 Health Check
 import { getPool, initializeConnection } from "./connection.js";
-import { ConfigurationError, getDatabaseConfig } from "./config.js";
+import { ConfigurationError } from "./config.js";
 
 interface HealthCheckResult {
   status: "healthy" | "unhealthy";

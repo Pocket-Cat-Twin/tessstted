@@ -13,9 +13,6 @@ import {
 class MySQLConnection {
   private pool: Pool | null = null;
   private config: DatabaseConfig;
-  private connectionAttempts = 0;
-  private readonly maxRetries = 3;
-  private readonly retryDelayMs = 1000;
 
   constructor(config: DatabaseConfig) {
     this.config = config;
@@ -43,9 +40,6 @@ class MySQLConnection {
       connectionLimit: extendedConfig.connectionLimit,
       queueLimit: extendedConfig.queueLimit,
       charset: extendedConfig.charset,
-      acquireTimeout: 10000,
-      timeout: 10000,
-      reconnect: true,
       multipleStatements: false // Security: disable by default
     };
 
@@ -206,9 +200,7 @@ export const getSystemPool = async (): Promise<Pool> => {
     connectionLimit: 5, // Smaller pool for system operations
     queueLimit: 0,
     charset: "utf8mb4",
-    multipleStatements: true, // Enable for migrations
-    acquireTimeout: 10000,
-    timeout: 10000
+    multipleStatements: true // Enable for migrations
   };
 
   try {

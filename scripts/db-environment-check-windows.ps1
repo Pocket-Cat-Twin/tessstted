@@ -93,7 +93,7 @@ function Read-EnvFileSafely {
 function Test-EnvFileConfiguration {
     <#
     .SYNOPSIS
-    Validates .env file existence and required variables
+    Validates .env file existence and required variables with enhanced security checks
     #>
     param(
         [switch]$CreateFromTemplate
@@ -123,9 +123,16 @@ function Test-EnvFileConfiguration {
         }
         else {
             Write-SafeOutput "Solution: Copy .env.example to .env and configure database settings" -Status Info
+            if (Test-Path $envExamplePath) {
+                Write-SafeOutput "Command: Copy-Item '.env.example' '.env'" -Status Info
+            } else {
+                Write-SafeOutput "No .env.example template found - create .env manually" -Status Warning
+            }
             return $false
         }
     }
+    
+    Write-SafeOutput "Found .env file" -Status Success
     
     # Load and validate environment variables
     $envResult = Read-EnvFileSafely -EnvFilePath $envPath
@@ -135,22 +142,138 @@ function Test-EnvFileConfiguration {
         return $false
     }
     
-    # Check required variables
+    $envVars = $envResult.Variables
     $missingVars = @()
+    $criticalIssues = @()
+    $warnings = @()
+    $validVars = @()
+    
+    # Enhanced validation for each required variable
     foreach ($requiredVar in $Script:ENV_REQUIRED_VARS) {
-        $value = $envResult.Variables[$requiredVar]
+        $value = $envVars[$requiredVar]
+        
         if ([string]::IsNullOrWhiteSpace($value)) {
             $missingVars += $requiredVar
+            Write-SafeOutput "❌ Missing: $requiredVar" -Status Error
+        } else {
+            # Variable-specific validation
+            switch ($requiredVar) {
+                "DB_HOST" {
+                    Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                    if ($value -notmatch "^[a-zA-Z0-9\.\-]+$") {
+                        $warnings += "DB_HOST contains unusual characters: $value"
+                    }
+                    $validVars += $requiredVar
+                }
+                "DB_PORT" {
+                    $port = $value -as [int]
+                    if ($port -lt 1 -or $port -gt 65535) {
+                        Write-SafeOutput "❌ $requiredVar = $value (INVALID PORT)" -Status Error
+                        $criticalIssues += "DB_PORT must be between 1 and 65535, got: $value"
+                    } else {
+                        Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                        $validVars += $requiredVar
+                    }
+                }
+                "DB_NAME" {
+                    Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                    if ($value -notmatch "^[a-zA-Z0-9_]+$") {
+                        $warnings += "DB_NAME contains special characters that might cause issues: $value"
+                    }
+                    $validVars += $requiredVar
+                }
+                "DB_USER" {
+                    Write-SafeOutput "✅ $requiredVar = $value" -Status Success
+                    if ($value -eq "root") {
+                        $warnings += "Using 'root' user is not recommended for production (security risk)"
+                    }
+                    $validVars += $requiredVar
+                }
+                "DB_PASSWORD" {
+                    $maskedValue = "*" * [Math]::Min($value.Length, 12)
+                    Write-SafeOutput "✅ $requiredVar = $maskedValue ($($value.Length) chars)" -Status Success
+                    
+                    # Enhanced password validation
+                    if ($value.Length -lt 8) {
+                        $criticalIssues += "DB_PASSWORD too short (minimum 8 characters required)"
+                    } elseif ($value.Length -lt 12) {
+                        $warnings += "DB_PASSWORD is short (12+ characters recommended for security)"
+                    }
+                    
+                    # Check for weak passwords
+                    $weakPasswords = @("password", "123456", "admin", "test", "root", "mysql")
+                    if ($value.ToLower() -in $weakPasswords) {
+                        $criticalIssues += "DB_PASSWORD is using a common weak password - SECURITY RISK!"
+                    }
+                    
+                    # Check password complexity
+                    $hasLower = $value -cmatch "[a-z]"
+                    $hasUpper = $value -cmatch "[A-Z]"
+                    $hasDigit = $value -match "\d"
+                    $hasSymbol = $value -match "[!@#$%^&*(),.?\":{}|<>]"
+                    
+                    $complexityScore = [int]$hasLower + [int]$hasUpper + [int]$hasDigit + [int]$hasSymbol
+                    
+                    if ($complexityScore -lt 3) {
+                        $warnings += "DB_PASSWORD lacks complexity (should have lowercase, uppercase, numbers, and symbols)"
+                    }
+                    
+                    $validVars += $requiredVar
+                }
+            }
         }
     }
     
+    # Summary and recommendations
+    Write-Host ""
+    Write-SafeOutput "VALIDATION SUMMARY:" -Status Info
+    Write-SafeOutput "  Valid variables: $($validVars.Count)/$($Script:ENV_REQUIRED_VARS.Count)" -Status Info
+    Write-SafeOutput "  Missing variables: $($missingVars.Count)" -Status Info
+    Write-SafeOutput "  Critical issues: $($criticalIssues.Count)" -Status Info
+    Write-SafeOutput "  Warnings: $($warnings.Count)" -Status Info
+    
+    # Report missing variables
     if ($missingVars.Count -gt 0) {
-        Write-SafeOutput "Missing or empty environment variables: $($missingVars -join ', ')" -Status Error
-        Write-SafeOutput "Configure these variables in .env file" -Status Info
+        Write-SafeOutput "MISSING VARIABLES:" -Status Error
+        foreach ($var in $missingVars) {
+            Write-SafeOutput "  ❌ $var" -Status Error
+        }
+        Write-SafeOutput "Add these variables to your .env file" -Status Info
+    }
+    
+    # Report critical issues
+    if ($criticalIssues.Count -gt 0) {
+        Write-SafeOutput "CRITICAL ISSUES:" -Status Error
+        foreach ($issue in $criticalIssues) {
+            Write-SafeOutput "  ❌ $issue" -Status Error
+        }
+    }
+    
+    # Report warnings
+    if ($warnings.Count -gt 0) {
+        Write-SafeOutput "WARNINGS:" -Status Warning
+        foreach ($warning in $warnings) {
+            Write-SafeOutput "  ⚠️  $warning" -Status Warning
+        }
+    }
+    
+    # Provide solutions if there are issues
+    if ($missingVars.Count -gt 0 -or $criticalIssues.Count -gt 0) {
+        Write-SafeOutput "" -Status Info
+        Write-SafeOutput "SOLUTIONS:" -Status Info
+        Write-SafeOutput "  1. Edit .env file to add/fix missing or invalid values" -Status Info
+        Write-SafeOutput "  2. Use strong passwords (12+ chars, mixed case, numbers, symbols)" -Status Info
+        Write-SafeOutput "  3. Avoid common passwords like 'password', '123456', etc." -Status Info
+        Write-SafeOutput "  4. For production, create dedicated MySQL user (not root)" -Status Info
         return $false
     }
     
-    Write-SafeOutput "Environment file validation passed" -Status Success
+    if ($warnings.Count -gt 0) {
+        Write-SafeOutput "Environment file validation PASSED with warnings" -Status Success
+    } else {
+        Write-SafeOutput "Environment file validation PASSED - Configuration looks good!" -Status Success
+    }
+    
     return $true
 }
 
