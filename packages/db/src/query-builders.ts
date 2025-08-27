@@ -1,6 +1,6 @@
 // Native MySQL Query Builders
 import type { Pool, RowDataPacket, ResultSetHeader } from "mysql2/promise";
-import type { User, Order, Subscription } from "./schema";
+import type { User, Order, Subscription, Address } from "./schema";
 
 export class QueryBuilder {
   private pool: Pool;
@@ -113,6 +113,73 @@ export class QueryBuilder {
     const sql = "SELECT * FROM subscriptions WHERE user_id = ? AND status = \"active\" AND expires_at > NOW() ORDER BY expires_at DESC LIMIT 1";
     const [rows] = await this.pool.execute<RowDataPacket[]>(sql, [userId]);
     return rows[0] as Subscription || null;
+  }
+
+  // Address queries
+  async createAddress(addressData: Omit<Address, "id" | "created_at" | "updated_at">): Promise<string> {
+    // If this address is set as default, unset all other default addresses for this user
+    if (addressData.is_default) {
+      await this.pool.execute(
+        "UPDATE addresses SET is_default = FALSE WHERE user_id = ?",
+        [addressData.user_id]
+      );
+    }
+
+    const sql = `
+      INSERT INTO addresses (user_id, full_address, city, postal_code, country, address_comments, is_default)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    const [result] = await this.pool.execute<ResultSetHeader>(sql, [
+      addressData.user_id,
+      addressData.full_address,
+      addressData.city,
+      addressData.postal_code,
+      addressData.country,
+      addressData.address_comments,
+      addressData.is_default
+    ]);
+    
+    return result.insertId.toString();
+  }
+
+  async getAddressesByUserId(userId: string): Promise<Address[]> {
+    const sql = "SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC";
+    const [rows] = await this.pool.execute<RowDataPacket[]>(sql, [userId]);
+    return rows as Address[];
+  }
+
+  async getAddressById(addressId: string, userId: string): Promise<Address | null> {
+    const sql = "SELECT * FROM addresses WHERE id = ? AND user_id = ?";
+    const [rows] = await this.pool.execute<RowDataPacket[]>(sql, [addressId, userId]);
+    return rows[0] as Address || null;
+  }
+
+  async updateAddress(addressId: string, userId: string, updateData: Partial<Omit<Address, "id" | "user_id" | "created_at" | "updated_at">>): Promise<boolean> {
+    // If this address is being set as default, unset all other default addresses for this user
+    if (updateData.is_default) {
+      await this.pool.execute(
+        "UPDATE addresses SET is_default = FALSE WHERE user_id = ? AND id != ?",
+        [userId, addressId]
+      );
+    }
+
+    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updateData);
+    
+    if (fields.length === 0) return false;
+
+    const sql = `UPDATE addresses SET ${fields} WHERE id = ? AND user_id = ?`;
+    const [result] = await this.pool.execute<ResultSetHeader>(sql, [...values, addressId, userId]);
+    
+    return result.affectedRows > 0;
+  }
+
+  async deleteAddress(addressId: string, userId: string): Promise<boolean> {
+    const sql = "DELETE FROM addresses WHERE id = ? AND user_id = ?";
+    const [result] = await this.pool.execute<ResultSetHeader>(sql, [addressId, userId]);
+    
+    return result.affectedRows > 0;
   }
 }
 

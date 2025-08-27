@@ -38,7 +38,7 @@
         class={`flex items-center px-4 py-3 text-sm rounded-lg transition-colors ${
           currentPath === item.href || (item.href === '/admin' && currentPath === '/admin')
             ? 'bg-pink-600 text-white'
-            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            : 'text-gray-100 hover:bg-gray-800 hover:text-white'
         }`}
       >
         <span class="text-lg mr-3">{item.icon}</span>

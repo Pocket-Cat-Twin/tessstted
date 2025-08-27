@@ -1,7 +1,18 @@
 import { Elysia, t } from "elysia";
+import { jwt } from "@elysiajs/jwt";
+import { cookie } from "@elysiajs/cookie";
+import { getPool, QueryBuilder } from "@lolita-fashion/db";
 
 // Config routes for application configuration data
 export const configRoutes = new Elysia({ prefix: "/config" })
+  .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET || "mysql-jwt-secret-change-in-production",
+      exp: "7d",
+    }),
+  )
+  .use(cookie())
 
   // Base config endpoint
   .get(
@@ -64,8 +75,8 @@ export const configRoutes = new Elysia({ prefix: "/config" })
       console.log("💱 Fetching exchange rates");
       
       try {
-        // Exchange rate from database - user specified 15 ₽/¥ (CNY to RUB)
-        const baseKurs = 15.0; // 15 rubles per yuan as specified by user
+        // Exchange rate from environment variable or default
+        const baseKurs = parseFloat(process.env.EXCHANGE_RATE || "15.0");
         
         // Add small variance for realism (±0.5%)
         const variance = (Math.random() - 0.5) * 0.01; // ±0.5% variance
@@ -231,6 +242,83 @@ export const configRoutes = new Elysia({ prefix: "/config" })
         tags: ["Config"],
         summary: "Get application settings", 
         description: "Retrieve user interface and application configuration settings",
+      },
+    }
+  )
+
+  // Update exchange rate (Admin only)
+  .put(
+    "/kurs",
+    async ({ body, jwt, cookie: { auth } }) => {
+      try {
+        if (!auth.value) {
+          return {
+            success: false,
+            error: "Authentication required",
+          };
+        }
+
+        const payload = await jwt.verify(auth.value);
+        if (!payload) {
+          return {
+            success: false,
+            error: "Invalid token",
+          };
+        }
+
+        // Check if user is admin
+        const pool = await getPool();
+        const queryBuilder = new QueryBuilder(pool);
+        const user = await queryBuilder.getUserById(payload.userId as string);
+
+        if (!user || user.role !== 'admin') {
+          return {
+            success: false,
+            error: "Admin access required",
+          };
+        }
+
+        // Validate exchange rate
+        const newKurs = parseFloat(body.kurs);
+        if (isNaN(newKurs) || newKurs <= 0 || newKurs > 1000) {
+          return {
+            success: false,
+            error: "Invalid exchange rate. Must be a positive number between 0 and 1000",
+          };
+        }
+
+        // Update environment variable (this will only persist during runtime)
+        // In production, you should save this to a configuration file or database
+        process.env.EXCHANGE_RATE = body.kurs;
+
+        console.log(`💱 Admin ${user.name} updated exchange rate to: ${newKurs} ₽/¥`);
+
+        return {
+          success: true,
+          message: "Exchange rate updated successfully",
+          data: {
+            kurs: newKurs,
+            updatedBy: user.name,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      } catch (error) {
+        console.error("❌ Update exchange rate error:", error);
+        return {
+          success: false,
+          error: "KURS_UPDATE_FAILED",
+          message: "Failed to update exchange rate",
+        };
+      }
+    },
+    {
+      body: t.Object({
+        kurs: t.String({ minLength: 1 }),
+      }),
+      detail: {
+        tags: ["Config"],
+        summary: "Update exchange rate (Admin only)",
+        description: "Update the CNY to RUB exchange rate. Admin access required.",
       },
     }
   );

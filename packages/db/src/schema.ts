@@ -68,3 +68,16 @@ export interface Story {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface Address {
+  id: string;
+  user_id: string;
+  full_address: string;
+  city: string;
+  postal_code?: string;
+  country: string;
+  address_comments?: string;
+  is_default: boolean;
+  created_at: Date;
+  updated_at: Date;
+}

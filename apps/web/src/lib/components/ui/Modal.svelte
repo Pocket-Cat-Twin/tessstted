@@ -82,7 +82,7 @@
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div
-      class="bg-white/80 rounded-xl shadow-xl w-full {modalSizeClasses[size]} max-h-screen overflow-hidden"
+      class="bg-white rounded-xl shadow-xl w-full {modalSizeClasses[size]} max-h-screen overflow-hidden"
       transition:scale={{ duration: 200 }}
       on:click|stopPropagation
       role="document"

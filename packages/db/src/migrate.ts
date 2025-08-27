@@ -132,6 +132,25 @@ export class MySQLMigrator {
           INDEX idx_link (link),
           INDEX idx_status (status)
         ) ENGINE=InnoDB`
+      },
+      {
+        name: 'addresses',
+        sql: `CREATE TABLE IF NOT EXISTS addresses (
+          id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+          user_id CHAR(36) NOT NULL,
+          full_address TEXT NOT NULL,
+          city VARCHAR(100) NOT NULL,
+          postal_code VARCHAR(20),
+          country VARCHAR(100) DEFAULT 'Россия',
+          address_comments TEXT,
+          is_default BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          INDEX idx_user_id (user_id),
+          INDEX idx_is_default (is_default)
+        ) ENGINE=InnoDB`
       }
     ];
 

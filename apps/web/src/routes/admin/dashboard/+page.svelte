@@ -4,7 +4,9 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Spinner from '$lib/components/ui/Spinner.svelte';
   import Badge from '$lib/components/ui/Badge.svelte';
+  import Input from '$lib/components/ui/Input.svelte';
   import { api } from '$lib/api/client-simple';
+  import { configStore } from '$lib/stores/config';
 
   const stats: any = {
     orders: { total: 0, processing: 0, completed: 0 },
@@ -16,6 +18,14 @@
   let systemHealth: any = null;
   let loading = true;
   let error = '';
+
+  // Exchange rate form
+  let currentKurs = '';
+  let newKurs = '';
+  let kurstLoading = false;
+  let kurstUpdating = false;
+  let kurstError = '';
+  let kurstSuccess = '';
 
   interface QuickAction {
     label: string;
@@ -58,6 +68,7 @@
 
   onMount(async () => {
     await loadDashboardData();
+    await loadCurrentKurs();
   });
 
   async function loadDashboardData() {
@@ -129,6 +140,86 @@
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  async function loadCurrentKurs() {
+    kurstLoading = true;
+    kurstError = '';
+
+    try {
+      const response = await fetch('/api/config/kurs');
+      const data = await response.json();
+      
+      if (data.success) {
+        currentKurs = data.data.kurs.toString();
+        newKurs = currentKurs;
+      } else {
+        kurstError = 'Ошибка загрузки текущего курса';
+      }
+    } catch (err) {
+      kurstError = 'Ошибка подключения к серверу';
+      console.error('Load kurs error:', err);
+    } finally {
+      kurstLoading = false;
+    }
+  }
+
+  async function updateKurs() {
+    if (!newKurs || !newKurs.trim()) {
+      kurstError = 'Введите новый курс';
+      return;
+    }
+
+    const numericKurs = parseFloat(newKurs);
+    if (isNaN(numericKurs) || numericKurs <= 0 || numericKurs > 1000) {
+      kurstError = 'Курс должен быть числом от 0 до 1000';
+      return;
+    }
+
+    kurstUpdating = true;
+    kurstError = '';
+    kurstSuccess = '';
+
+    try {
+      const response = await fetch('/api/config/kurs', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          kurs: newKurs
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        currentKurs = numericKurs.toString();
+        kurstSuccess = 'Курс успешно обновлен';
+        
+        // Refresh config store
+        await configStore.loadKurs();
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          kurstSuccess = '';
+        }, 3000);
+      } else {
+        kurstError = data.error || 'Ошибка при обновлении курса';
+      }
+    } catch (err) {
+      kurstError = 'Ошибка подключения к серверу';
+      console.error('Update kurs error:', err);
+    } finally {
+      kurstUpdating = false;
+    }
+  }
+
+  function resetKursForm() {
+    newKurs = currentKurs;
+    kurstError = '';
+    kurstSuccess = '';
   }
 </script>
 
@@ -255,6 +346,98 @@
         </div>
       </Card>
     </div>
+
+    <!-- Exchange Rate Management -->
+    <Card variant="shadow" class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Управление курсом валют</h2>
+          <p class="text-sm text-gray-600 mt-1">Обновление курса CNY к RUB</p>
+        </div>
+        <div class="flex items-center">
+          {#if kurstLoading}
+            <Spinner size="sm" />
+          {:else}
+            <div class="text-right">
+              <div class="text-sm text-gray-600">Текущий курс</div>
+              <div class="text-xl font-bold text-green-600">{currentKurs} ₽/¥</div>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <form on:submit|preventDefault={updateKurs} class="max-w-md">
+        <div class="space-y-4">
+          <div>
+            <label for="newKurs" class="block text-sm font-medium text-gray-700 mb-2">
+              Новый курс (₽/¥)
+            </label>
+            <Input
+              id="newKurs"
+              type="number"
+              step="0.1"
+              min="0"
+              max="1000"
+              bind:value={newKurs}
+              placeholder="15.0"
+              disabled={kurstUpdating || kurstLoading}
+              error={kurstError}
+              class="w-full"
+            />
+          </div>
+
+          {#if kurstError}
+            <div class="bg-red-50 border border-red-200 rounded-md p-3">
+              <div class="flex">
+                <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm text-red-700">{kurstError}</span>
+              </div>
+            </div>
+          {/if}
+
+          {#if kurstSuccess}
+            <div class="bg-green-50 border border-green-200 rounded-md p-3">
+              <div class="flex">
+                <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm text-green-700">{kurstSuccess}</span>
+              </div>
+            </div>
+          {/if}
+
+          <div class="flex space-x-3">
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={kurstUpdating || kurstLoading || !newKurs}
+              class="flex-1"
+            >
+              {#if kurstUpdating}
+                <Spinner size="sm" className="mr-2" />
+              {/if}
+              {kurstUpdating ? 'Обновляю...' : 'Обновить курс'}
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              on:click={resetKursForm}
+              disabled={kurstUpdating || kurstLoading}
+            >
+              Сбросить
+            </Button>
+          </div>
+
+          <div class="text-xs text-gray-500">
+            <strong>Примечание:</strong> Обновление курса повлияет на расчеты во всем приложении. 
+            Изменения вступают в силу немедленно.
+          </div>
+        </div>
+      </form>
+    </Card>
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

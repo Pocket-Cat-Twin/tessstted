@@ -341,7 +341,7 @@
       </label>
     </div>
 
-    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+    <div slot="footer" class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
       <Button
         variant="outline"
         on:click={() => showAddModal = false}
