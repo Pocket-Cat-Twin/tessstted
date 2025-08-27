@@ -340,26 +340,26 @@
         Сделать адресом по умолчанию
       </label>
     </div>
-
-    <div slot="footer" class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-      <Button
-        variant="outline"
-        on:click={() => showAddModal = false}
-        disabled={savingAddress}
-      >
-        Отмена
-      </Button>
-      
-      <Button
-        type="submit"
-        disabled={savingAddress}
-        class="min-w-[120px]"
-      >
-        {#if savingAddress}
-          <Spinner size="sm" className="mr-2" />
-        {/if}
-        {editingAddress ? 'Обновить' : 'Добавить'}
-      </Button>
-    </div>
   </form>
+
+  <div slot="footer" class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+    <Button
+      variant="outline"
+      on:click={() => showAddModal = false}
+      disabled={savingAddress}
+    >
+      Отмена
+    </Button>
+    
+    <Button
+      on:click={saveAddress}
+      disabled={savingAddress}
+      class="min-w-[120px]"
+    >
+      {#if savingAddress}
+        <Spinner size="sm" className="mr-2" />
+      {/if}
+      {editingAddress ? 'Обновить' : 'Добавить'}
+    </Button>
+  </div>
 </Modal>
