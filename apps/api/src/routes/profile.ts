@@ -13,6 +13,14 @@ export const profileRoutes = new Elysia({ prefix: "/profile" })
   )
   .use(cookie())
 
+  // Add debugging middleware to see if requests reach this route at all
+  .onRequest(({ request }) => {
+    const url = new URL(request.url);
+    console.log(`🎯 PROFILE ROUTE HIT: ${request.method} ${url.pathname}`);
+    console.log(`🍪 Cookies in request:`, request.headers.get('cookie'));
+    console.log(`📝 Content-Type:`, request.headers.get('content-type'));
+  })
+
   // Get User Profile
   .get(
     "/",

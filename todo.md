@@ -619,3 +619,72 @@ if (!$authStore.user) {
 5. **Proper Error Handling**: Clear logging shows exactly what fails and where
 
 **Both critical issues should now be completely resolved with full debugging visibility.**
+
+---
+
+# 🎯 CRITICAL BUG FOUND & FIXED - Route Conflicts (August 27, 2025)
+
+## The Real Problem: Route Conflicts
+
+After comprehensive debugging, found the **actual root cause**:
+
+### 🕵️ Investigation Results
+
+**Frontend was working perfectly**:
+- ✅ Data prepared correctly
+- ✅ Request sent to right endpoint `/profile` PUT
+- ✅ HTTP 200 OK received
+
+**Problem**: Routes were being **intercepted by wrong handler**!
+
+### 🔍 Root Cause Found
+
+**Route Conflict**: Two different routes handling `/profile`:
+
+1. **OLD**: `userRoutes` had `/profile` GET + PUT (loaded first)
+2. **NEW**: `profileRoutes` had `/profile` GET + PUT with detailed logging
+
+**In `index.ts`**:
+```typescript
+.use(userRoutes)      // ← Loaded FIRST, intercepts requests
+.use(profileRoutes)   // ← Never reached due to conflict
+```
+
+### 🛠️ Final Fix Applied
+
+**Removed conflicting routes from `userRoutes`**:
+- ❌ Deleted GET "/profile" from userRoutes  
+- ❌ Deleted PUT "/profile" from userRoutes
+- ✅ Now only `profileRoutes` handles `/profile` endpoints
+
+**Files Modified**:
+- `apps/api/src/routes/users.ts` - Removed duplicate profile routes
+- `apps/api/src/routes/profile.ts` - Added request-level debugging
+
+### 🎉 Expected Results Now
+
+**Profile Updates**:
+- ✅ Requests now reach **correct handler** with full logging
+- ✅ Our detailed backend logging will now appear
+- ✅ Data will actually save to database  
+- ✅ Success responses will be properly sent
+
+**Request Flow**:
+1. Frontend sends PUT `/profile`
+2. Request reaches `profileRoutes` (not old userRoutes)  
+3. Our detailed logging shows every step
+4. SQL UPDATE executes with full visibility
+5. Success/error properly handled
+
+### 📊 Debugging Logs You'll Now See
+
+```
+🎯 PROFILE ROUTE HIT: PUT /profile
+🍪 Cookies in request: auth=...
+🔍 [abc123] Profile UPDATE request received: ...
+🔄 [abc123] Executing SQL UPDATE: ...
+✅ [abc123] SQL UPDATE completed: {affectedRows: 1}
+🎉 [abc123] Profile update SUCCESS
+```
+
+**Route conflicts eliminated - profile updates should now work completely!**
