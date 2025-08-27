@@ -38,24 +38,24 @@ $Script:SETUP_PHASES = @{
         Name = "Database Schema Migration"
         Description = "MySQL table creation and schema setup"
         Command = "npm"
-        Arguments = @("run", "migrate:windows")
-        WorkingDir = "packages\db"
+        Arguments = @("run", "db:migrate:windows")
+        WorkingDir = "."
         Required = $true
     }
     "UserSeeding" = @{
         Name = "Initial User Creation"
         Description = "Admin and test user account creation"
         Command = "npm"
-        Arguments = @("run", "seed:windows")
-        WorkingDir = "packages\db"
+        Arguments = @("run", "db:seed:windows")
+        WorkingDir = "."
         Required = $true
     }
     "HealthCheck" = @{
         Name = "Final System Validation"
         Description = "Database connectivity and data integrity check"
         Command = "npm"
-        Arguments = @("run", "health:mysql")
-        WorkingDir = "packages\db"
+        Arguments = @("run", "db:health:mysql")
+        WorkingDir = "."
         Required = $false
     }
 }

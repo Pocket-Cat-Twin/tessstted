@@ -118,17 +118,43 @@ bun run type-check         # ✅ Better performance
 - ✅ Updated package.json scripts to use the new entry point
 - ✅ All migrate commands now point to `run-migrate.ts`
 
-### Expected Result
+#### 5. Fixed PowerShell Script Working Directory Issue ✅
+**Problem**: PowerShell script was trying to run package-level scripts from packages/db directory
+**Error**: `Unknown command: "run migrate:windows"` (npm couldn't find the script)
+**Solution**: Updated PowerShell script to use root-level scripts from project root
+**Changes**:
+- DatabaseMigrations: `migrate:windows` → `db:migrate:windows`, WorkingDir → `.` (root)
+- UserSeeding: `seed:windows` → `db:seed:windows`, WorkingDir → `.` (root)  
+- HealthCheck: `health:mysql` → `db:health:mysql`, WorkingDir → `.` (root)
+
+### Final Result ✅
 Now when running `npm run db:setup:full:windows` on Windows PC:
 1. ✅ SQL syntax error fixed (no more `current_user` reserved word issue)
 2. ✅ PowerShell script uses npm instead of bun for database operations
-3. ✅ Migration should create users table properly
-4. ✅ User seeding should work after successful migration
+3. ✅ PowerShell script runs commands from correct directory with correct script names
+4. ✅ Migration should create users table properly
+5. ✅ User seeding should work after successful migration
+
+## Final Summary
+
+### Root Causes Identified & Fixed:
+1. **MySQL 8.0 Reserved Word**: `current_user` alias caused SQL syntax error
+2. **Bun vs NPM**: Database TypeScript execution worked better with npm/tsx
+3. **PowerShell Script Commands**: Used bun instead of npm for database operations
+4. **Working Directory Issue**: Script tried to run root-level commands from package directory
+
+### All Fixes Applied:
+✅ **SQL Syntax**: `current_user` → `current_user_name` in connection queries  
+✅ **Package Commands**: Database scripts use `npm + tsx` instead of `bun`  
+✅ **PowerShell Scripts**: All database phases use `npm` instead of `bun`  
+✅ **Working Directory**: PowerShell runs commands from root using `db:*` scripts  
+
+### Command Strategy:
+- **Database operations** → npm (compatibility with TypeScript execution)
+- **Build/runtime operations** → bun (performance optimization)
 
 ## Notes
-- The SQL syntax error was the critical blocking issue
-- Only database-related commands were changed from bun to npm
-- Build and runtime commands kept with bun for optimal performance  
-- PowerShell script commands also needed to be updated
-- Migration needed proper entry point script to execute
 - Changes were minimal and targeted to specific error sources
+- Build and runtime commands kept with bun for optimal performance
+- Only problematic database-related commands were migrated to npm
+- PowerShell script working directory was key issue in final debugging
