@@ -74,7 +74,8 @@
         name: formData.name?.trim() || 'Пользователь',
         fullName: formData.fullName?.trim() || '',
         contactPhone: formData.contactPhone?.trim() || '',
-        contactEmail: formData.contactEmail?.trim() || '',
+        // Only include contactEmail if it's not empty (backend requires valid email format)
+        ...(formData.contactEmail?.trim() && { contactEmail: formData.contactEmail.trim() }),
         avatar: formData.avatar || ''
       };
       

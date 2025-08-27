@@ -714,19 +714,35 @@ class ApiClient {
 
     console.log('🔍 Original profile data received:', profileData);
 
-    // Filter out undefined and null values, ensure name is always a string
-    const cleanProfileData = Object.fromEntries(
-      Object.entries(profileData)
-        .filter(([_, value]) => value !== undefined && value !== null)
-        .map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value])
-    );
+    // Filter out undefined, null, and handle empty strings for fields with format validation
+    const cleanProfileData: Record<string, any> = {};
+    
+    for (const [key, value] of Object.entries(profileData)) {
+      if (value === undefined || value === null) {
+        console.log(`❌ Skipping ${key}: ${value} (undefined/null)`);
+        continue;
+      }
+      
+      const trimmedValue = typeof value === 'string' ? value.trim() : value;
+      
+      // For email fields, skip empty strings (backend expects valid email or undefined)
+      if (key === 'contactEmail' && trimmedValue === '') {
+        console.log(`❌ Skipping ${key}: empty string (email format required)`);
+        continue;
+      }
+      
+      // For other optional fields, include empty strings (they're allowed)
+      cleanProfileData[key] = trimmedValue;
+      console.log(`✅ Including ${key}: "${trimmedValue}"`);
+    }
 
     // Ensure name is always present and is a string
     if (!cleanProfileData.name || typeof cleanProfileData.name !== 'string') {
       cleanProfileData.name = 'Пользователь';
+      console.log(`🔧 Set default name: ${cleanProfileData.name}`);
     }
 
-    console.log('✨ Cleaned profile data to send:', cleanProfileData);
+    console.log('✨ Final cleaned profile data to send:', cleanProfileData);
 
     return this.request("/profile", {
       method: "PUT",
