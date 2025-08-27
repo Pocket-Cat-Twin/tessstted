@@ -23,38 +23,77 @@ function createAuthStore() {
 
     // Initialize auth state
     init: async () => {
-      if (!browser) return;
+      console.log('🔄 Auth init STARTING');
+      
+      if (!browser) {
+        console.log('❌ Auth init SKIPPED - not in browser');
+        return;
+      }
 
+      // Check if already initializing or initialized to prevent loops
+      let currentState: AuthState;
+      const unsubscribe = subscribe((state) => { currentState = state; });
+      unsubscribe();
+
+      if (currentState!.loading) {
+        console.log('⚠️ Auth init already in progress, skipping...');
+        return;
+      }
+
+      if (currentState!.initialized) {
+        console.log('✅ Auth already initialized, skipping...');
+        return;
+      }
+
+      console.log('🔄 Auth init proceeding, setting loading=true');
       update((state) => ({ ...state, loading: true }));
 
       try {
+        console.log('🔍 Calling getCurrentUser API...');
         const response = await api.getCurrentUser();
-        console.log('🔍 Auth init response:', response);
+        console.log('📥 Auth init response received:', response);
+        
         if (response.success && response.user) {
-          console.log('✅ Auth init successful, user:', response.user);
+          console.log('✅ Auth init SUCCESS - user found:', {
+            id: response.user.id,
+            email: response.user.email,
+            name: response.user.name
+          });
+          
           update((state) => ({
             ...state,
             user: response.user,
             loading: false,
             initialized: true,
           }));
+          
+          console.log('🎉 Auth state updated with user data');
         } else {
-          console.log('❌ Auth init failed:', response.error || 'No user data');
+          console.log('❌ Auth init FAILED - no user:', response.error || 'No user data');
+          
           update((state) => ({
             ...state,
             user: null,
             loading: false,
             initialized: true,
           }));
+          
+          console.log('🔄 Auth state updated - no user');
         }
-      } catch (_error) {
+      } catch (error) {
+        console.error('💥 Auth init ERROR:', error);
+        
         update((state) => ({
           ...state,
           user: null,
           loading: false,
           initialized: true,
         }));
+        
+        console.log('🔄 Auth state updated after error');
       }
+      
+      console.log('✨ Auth init COMPLETED');
     },
 
     // Login

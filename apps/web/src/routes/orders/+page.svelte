@@ -53,12 +53,33 @@
   };
 
   onMount(async () => {
-    // Check if user is authenticated
+    console.log('📦 Orders page mounting, authStore state:', $authStore);
+    
+    // Wait for auth to be initialized before making decisions
+    if (!$authStore.initialized) {
+      console.log('⏳ Waiting for auth initialization...');
+      
+      // Wait for auth to initialize
+      let unsubscribe: any;
+      await new Promise<void>((resolve) => {
+        unsubscribe = authStore.subscribe((state) => {
+          if (state.initialized) {
+            console.log('✅ Auth initialized in orders page:', state);
+            resolve();
+          }
+        });
+      });
+      unsubscribe();
+    }
+    
+    // Now check if user is authenticated
     if (!$authStore.user) {
+      console.log('❌ No user found after auth init, redirecting to login');
       goto('/login');
       return;
     }
     
+    console.log('✅ User authenticated in orders page, loading orders');
     await loadOrders();
   });
 

@@ -80,16 +80,24 @@
       };
       
       console.log('📝 Form data being sent:', cleanFormData);
+      console.log('🚀 Calling API updateProfile...');
+      
       const response = await api.updateProfile(cleanFormData);
       
+      console.log('📥 Received response in ProfileEditForm:', response);
+      
       if (response.success) {
+        console.log('🎉 Profile update SUCCESS in form, dispatching success event');
         dispatch('success', { message: 'Профиль успешно обновлен' });
       } else {
-        dispatch('error', { message: response.message || 'Ошибка при обновлении профиля' });
+        console.log('❌ Profile update FAILED in form:', response.error || response.message);
+        dispatch('error', { message: response.message || response.error || 'Ошибка при обновлении профиля' });
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error('💥 Profile update EXCEPTION in form:', error);
       dispatch('error', { message: 'Ошибка подключения к серверу' });
     } finally {
+      console.log('✨ Profile update process completed, setting saving=false');
       saving = false;
     }
   }

@@ -84,8 +84,17 @@ export const profileRoutes = new Elysia({ prefix: "/profile" })
   .put(
     "/",
     async ({ body, jwt, cookie: { auth } }) => {
+      const requestId = Math.random().toString(36).substr(2, 9);
+      console.log(`🔍 [${requestId}] Profile UPDATE request received:`, {
+        timestamp: new Date().toISOString(),
+        hasAuth: !!auth.value,
+        bodyKeys: Object.keys(body || {}),
+        body: body
+      });
+
       try {
         if (!auth.value) {
+          console.log(`❌ [${requestId}] Authentication required - no auth cookie`);
           return {
             success: false,
             error: "Authentication required",
@@ -94,11 +103,14 @@ export const profileRoutes = new Elysia({ prefix: "/profile" })
 
         const payload = await jwt.verify(auth.value);
         if (!payload) {
+          console.log(`❌ [${requestId}] Invalid token - JWT verification failed`);
           return {
             success: false,
             error: "Invalid token",
           };
         }
+
+        console.log(`✅ [${requestId}] Authentication successful for user:`, payload.userId);
 
         const pool = await getPool();
         
@@ -109,25 +121,52 @@ export const profileRoutes = new Elysia({ prefix: "/profile" })
           WHERE id = ?
         `;
         
-        await pool.execute(sql, [
+        const updateParams = [
           body.name,
           body.fullName,
           body.phone,
           body.contactEmail,
           body.contactPhone,
           payload.userId as string,
-        ]);
+        ];
 
-        return {
+        console.log(`🔄 [${requestId}] Executing SQL UPDATE:`, {
+          sql: sql.replace(/\s+/g, ' ').trim(),
+          params: updateParams,
+          userId: payload.userId
+        });
+        
+        const [result] = await pool.execute(sql, updateParams);
+        
+        console.log(`✅ [${requestId}] SQL UPDATE completed:`, {
+          affectedRows: (result as any).affectedRows,
+          changedRows: (result as any).changedRows,
+          insertId: (result as any).insertId,
+          warningCount: (result as any).warningCount
+        });
+
+        const response = {
           success: true,
           message: "Profile updated successfully",
         };
+
+        console.log(`🎉 [${requestId}] Profile update SUCCESS, sending response:`, response);
+        return response;
+
       } catch (error) {
-        console.error("Update profile error:", error);
-        return {
+        console.error(`❌ [${requestId}] Update profile error:`, {
+          error: error,
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        
+        const errorResponse = {
           success: false,
           error: "Failed to update profile",
         };
+
+        console.log(`💥 [${requestId}] Sending ERROR response:`, errorResponse);
+        return errorResponse;
       }
     },
     {

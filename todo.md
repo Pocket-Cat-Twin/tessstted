@@ -502,3 +502,120 @@ this.removeToken(); // Also clear localStorage
 - ✅ **Secure httpOnly cookies**
 
 **Authentication persistence is now fully functional.**
+
+---
+
+# 🔧 COMPREHENSIVE DEBUGGING & FIXES - Final Solution (August 27, 2025)
+
+## Issues: Profile Update Not Working + Infinite Page Reloads
+
+**Problems**:
+1. Profile updates show success message but **data doesn't save**
+2. Page **infinite reloads** on refresh
+
+## Root Cause Analysis - Deep Investigation
+
+### Problem 1: Profile Update Not Working
+**Root Causes Found**:
+1. **Still using Bearer tokens** in `updateProfile()` instead of cookies 
+2. **Insufficient logging** - couldn't see where the process failed
+3. **Backend validation issues** potentially not visible
+
+### Problem 2: Infinite Page Reloads  
+**Root Cause Found**:
+1. **Race condition**: Pages check `$authStore.user` BEFORE auth initialization completes
+2. **Orders page**: Redirects to `/login` immediately if no user (before auth loads)
+3. **Auth initialization** completes successfully but redirect already happened
+
+## Comprehensive Fix Applied
+
+### ✅ Fix 1: Backend Logging (Profile Debugging)
+**File**: `apps/api/src/routes/profile.ts`
+
+**Added**:
+- Request ID tracking for each profile update
+- Detailed logging of incoming request body
+- SQL execution logging with parameters
+- Database operation results (affectedRows, changedRows)
+- Success/error response logging
+
+### ✅ Fix 2: Frontend API Client Fix + Logging
+**File**: `apps/web/src/lib/api/client-simple.ts`
+
+**Critical Fix**: Removed Bearer token from `updateProfile()`:
+```typescript
+// OLD (WRONG)
+headers: {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+},
+
+// NEW (CORRECT)
+headers: {
+  "Content-Type": "application/json",
+  // No Authorization header - backend uses cookies
+},
+```
+
+**Added**: Comprehensive response logging and error handling.
+
+### ✅ Fix 3: Auth Store Anti-Loop Protection
+**File**: `apps/web/src/lib/stores/auth.ts`
+
+**Added**:
+- Loop prevention: Check if already loading/initialized
+- Detailed initialization logging  
+- State tracking throughout the process
+
+### ✅ Fix 4: Page Redirect Race Condition Fix
+**File**: `apps/web/src/routes/orders/+page.svelte`
+
+**Fixed Race Condition**:
+```typescript
+// OLD (WRONG) - Immediate check
+if (!$authStore.user) {
+  goto('/login');
+}
+
+// NEW (CORRECT) - Wait for initialization
+if (!$authStore.initialized) {
+  await new Promise<void>((resolve) => {
+    unsubscribe = authStore.subscribe((state) => {
+      if (state.initialized) resolve();
+    });
+  });
+}
+// THEN check user
+if (!$authStore.user) {
+  goto('/login');
+}
+```
+
+### ✅ Fix 5: Layout & Form Debugging
+**Files**: `+layout.svelte`, `ProfileEditForm.svelte`
+
+**Added**: Complete logging chain to track data flow from form → API → backend → database.
+
+## Expected Results
+
+### Profile Updates:
+- ✅ **Backend receives requests** with proper cookie authentication  
+- ✅ **SQL UPDATE executes** and shows affected rows
+- ✅ **Data actually saves** to database
+- ✅ **Full logging visibility** of entire process
+
+### Page Reloads:
+- ✅ **No more infinite reloads** 
+- ✅ **Auth initialization completes** before redirect decisions
+- ✅ **Proper user state persistence** on page refresh
+- ✅ **Navigation works correctly**
+
+## Why This Complete Fix Works
+
+1. **Authentication Fixed**: Profile updates now use correct cookie-based auth
+2. **Race Conditions Eliminated**: Pages wait for auth before making navigation decisions  
+3. **Full Debugging**: Complete visibility into every step of the process
+4. **Loop Prevention**: Auth store prevents multiple initializations
+5. **Proper Error Handling**: Clear logging shows exactly what fails and where
+
+**Both critical issues should now be completely resolved with full debugging visibility.**

@@ -13,10 +13,28 @@
   import '$lib/utils/api-diagnostics';
 
   onMount(() => {
+    console.log('🏠 Layout MOUNTING');
+    console.log('🏠 Current authStore state on mount:', $authStore);
+    
     // Initialize stores
+    console.log('🔄 Starting authStore initialization...');
     authStore.init();
+    
+    console.log('🔄 Starting configStore initialization...');
     configStore.init();
+    
+    console.log('✅ Layout store initialization calls completed');
   });
+
+  // Add reactive logging to track auth state changes
+  $: {
+    console.log('🔄 Auth state changed:', {
+      hasUser: !!$authStore.user,
+      loading: $authStore.loading,
+      initialized: $authStore.initialized,
+      userEmail: $authStore.user?.email
+    });
+  }
 </script>
 
 <!-- Отдельный белый фон -->

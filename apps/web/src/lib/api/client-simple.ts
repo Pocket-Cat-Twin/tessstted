@@ -753,14 +753,31 @@ class ApiClient {
 
     console.log('✨ Final cleaned profile data to send:', cleanProfileData);
 
-    return this.request("/profile", {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(cleanProfileData),
-    });
+    try {
+      console.log('🚀 Making profile update request to backend...');
+      
+      const response = await this.request("/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          // No Authorization header - backend uses cookies
+        },
+        body: JSON.stringify(cleanProfileData),
+      });
+
+      console.log('📥 Profile update response received:', response);
+
+      if (response.success) {
+        console.log('🎉 Profile update SUCCESS!');
+      } else {
+        console.log('❌ Profile update FAILED:', response.error || response.message);
+      }
+
+      return response;
+    } catch (error) {
+      console.error('💥 Profile update request ERROR:', error);
+      throw error;
+    }
   }
 
   async getAddresses() {
