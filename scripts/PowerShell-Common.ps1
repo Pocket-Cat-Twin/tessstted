@@ -823,7 +823,7 @@ function Test-MySQLConnectionSecure {
         [int]$TimeoutSeconds = 10
     )
     
-    $host = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
+    $hostName = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
     $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }
     $user = if ($ConnectionParams["DB_USER"]) { $ConnectionParams["DB_USER"] } else { "root" }
     $password = $ConnectionParams["DB_PASSWORD"]
@@ -850,7 +850,7 @@ function Test-MySQLConnectionSecure {
     # Create MySQL configuration content
     $configContent = @"
 [mysql]
-host=$host
+host=$hostName
 port=$port
 user=$user
 password=$password
@@ -885,7 +885,7 @@ password=$password
             Success = $true
             Message = "MySQL connection successful"
             Duration = $tempFileResult.Result.Duration
-            Host = $host
+            Host = $hostName
             Port = $port
             User = $user
         }
@@ -896,7 +896,7 @@ password=$password
             Success = $false
             Message = "MySQL connection failed"
             Error = $errorMessage
-            Host = $host
+            Host = $hostName
             Port = $port
             User = $user
         }

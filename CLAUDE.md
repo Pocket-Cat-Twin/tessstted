@@ -40,3 +40,31 @@ When working with my code:
 ## Summary
 
 The key is to write clean, testable, functional code that evolves through small, safe increments. Every change should be driven by a test that describes the desired behavior, and the implementation should be the simplest thing that makes that test pass. When in doubt, favor simplicity and readability over cleverness.
+
+## PowerShell Script Learnings & Gotchas
+
+### PowerShell Automatic Variables Conflicts (Aug 2025)
+
+**Issue**: PowerShell scripts in `scripts/` folder had two critical variable naming conflicts:
+
+1. **`[CmdletBinding()]` + Explicit `[switch]$Verbose`**: Causes "Parameter named 'Verbose' has already been defined" error
+2. **Using `$host` as Variable Name**: Causes "Cannot overwrite variable Host because it is constant" error
+
+**Solutions Applied**:
+- **Verbose Parameter**: Remove explicit `[switch]$Verbose = $false` - `[CmdletBinding()]` provides it automatically
+- **Host Variable**: Replace all `$host` variables with `$hostName` throughout the codebase
+
+**Files Affected**:
+- `scripts/db-environment-check-windows.ps1` - Both issues fixed
+- `scripts/PowerShell-Common.ps1` - Host variable issue fixed
+
+**Key Learnings**:
+- PowerShell automatic variables (`$host`, `$error`, `$input`, etc.) are read-only and cannot be assigned
+- `[CmdletBinding()]` automatically provides common parameters (`-Verbose`, `-Debug`, `-ErrorAction`, etc.)
+- Always use descriptive variable names like `$hostName`, `$serverName` instead of PowerShell reserved words
+- Test PowerShell scripts incrementally to catch variable conflicts early
+
+**Future Prevention**:
+- Avoid these PowerShell reserved variable names: `$host`, `$home`, `$input`, `$output`, `$error`, `$matches`
+- When using `[CmdletBinding()]`, don't explicitly define automatic parameters
+- Use PowerShell validators like `Test-PowerShellScripts.ps1` before deployment

@@ -250,7 +250,7 @@ function Test-MySQLConnectionSecure {
     
     Write-SafeSectionHeader "MySQL Connection Test" -Step 4
     
-    $host = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
+    $hostName = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
     $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }
     $user = if ($ConnectionParams["DB_USER"]) { $ConnectionParams["DB_USER"] } else { "root" }
     $password = $ConnectionParams["DB_PASSWORD"]
@@ -273,7 +273,7 @@ function Test-MySQLConnectionSecure {
     $tempConfigFile = [System.IO.Path]::GetTempFileName()
     $configContent = @"
 [mysql]
-host=$host
+host=$hostName
 port=$port
 user=$user
 password=$password
@@ -332,7 +332,7 @@ function Test-DatabaseExists {
         return $true  # Not critical
     }
     
-    $host = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
+    $hostName = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
     $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }
     $user = if ($ConnectionParams["DB_USER"]) { $ConnectionParams["DB_USER"] } else { "root" }
     $password = $ConnectionParams["DB_PASSWORD"]
@@ -341,7 +341,7 @@ function Test-DatabaseExists {
     $tempConfigFile = [System.IO.Path]::GetTempFileName()
     $configContent = @"
 [mysql]
-host=$host
+host=$hostName
 port=$port
 user=$user
 password=$password
@@ -406,9 +406,9 @@ function Invoke-EnvironmentCheck {
     $checkResults += @{ Name = "MySQL Service"; Success = $serviceCheck }
     
     # Step 3: Network access check
-    $host = if ($connectionParams["DB_HOST"]) { $connectionParams["DB_HOST"] } else { "localhost" }
+    $hostName = if ($connectionParams["DB_HOST"]) { $connectionParams["DB_HOST"] } else { "localhost" }
     $port = if ($connectionParams["DB_PORT"]) { [int]$connectionParams["DB_PORT"] } else { $Script:MYSQL_DEFAULT_PORT }
-    $networkCheck = Test-MySQLNetworkAccess -HostName $host -Port $port
+    $networkCheck = Test-MySQLNetworkAccess -HostName $hostName -Port $port
     $checkResults += @{ Name = "Network Access"; Success = $networkCheck }
     
     # Step 4: MySQL connection test
