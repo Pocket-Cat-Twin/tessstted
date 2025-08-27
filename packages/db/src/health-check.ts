@@ -1,5 +1,6 @@
 // MySQL8 Health Check
-import { getPool } from "./connection";
+import { getPool, initializeConnection } from "./connection.js";
+import { ConfigurationError, getDatabaseConfig } from "./config.js";
 
 interface HealthCheckResult {
   status: "healthy" | "unhealthy";
@@ -21,6 +22,10 @@ export async function checkMySQLHealth(): Promise<HealthCheckResult> {
   const timestamp = new Date().toISOString();
   
   try {
+    // Initialize connection if not already done
+    console.log('[HEALTH] 🔧 Initializing database connection...');
+    initializeConnection();
+    
     const pool = await getPool();
     
     // Test basic connection
@@ -56,11 +61,15 @@ export async function checkMySQLHealth(): Promise<HealthCheckResult> {
       const activeConnections = parseInt((threadsRows as any[])[0]?.active || "0");
       const maxConnections = parseInt((threadsRows as any[])[0]?.max_connections || "0");
       
+      // Get current database name
+      const [dbRows] = await connection.execute("SELECT DATABASE() as current_db");
+      const currentDb = (dbRows as any[])[0]?.current_db || "unknown";
+      
       return {
         status: "healthy",
         message: "MySQL8 database is healthy and responsive",
         details: {
-          database: "yuyu_lolita",
+          database: currentDb,
           uptime: uptime,
           version: version,
           connections: {
@@ -77,32 +86,45 @@ export async function checkMySQLHealth(): Promise<HealthCheckResult> {
     }
     
   } catch (error) {
+    let errorMessage = `MySQL8 health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    
+    if (error instanceof ConfigurationError) {
+      errorMessage = `Configuration error: ${error.message}`;
+    }
+    
     return {
       status: "unhealthy",
-      message: `MySQL8 health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: errorMessage,
       timestamp
     };
   }
 }
 
-// CLI execution
-if (require.main === module) {
+// CLI execution (ES modules pattern)
+if (import.meta.url.includes(process.argv[1]?.replace(/\\/g, '/') || '')) {
+  console.log('[HEALTH] 🏥 Starting MySQL health check...');
+  
   checkMySQLHealth()
     .then(result => {
       console.log(`[${result.status.toUpperCase()}] ${result.message}`);
       if (result.details) {
-        console.log(`Database: ${result.details.database}`);
-        console.log(`Version: ${result.details.version}`);
-        console.log(`Uptime: ${result.details.uptime} seconds`);
+        console.log(`[HEALTH] 📂 Database: ${result.details.database}`);
+        console.log(`[HEALTH] 🗄️ Version: ${result.details.version}`);
+        console.log(`[HEALTH] ⏰ Uptime: ${result.details.uptime} seconds`);
         if (result.details.connections) {
-          console.log(`Connections: ${result.details.connections.active}/${result.details.connections.total} (${result.details.connections.idle} idle)`);
+          console.log(`[HEALTH] 🔗 Connections: ${result.details.connections.active}/${result.details.connections.total} (${result.details.connections.idle} idle)`);
         }
       }
-      console.log(`Checked at: ${result.timestamp}`);
+      console.log(`[HEALTH] 📅 Checked at: ${result.timestamp}`);
       process.exit(result.status === "healthy" ? 0 : 1);
     })
     .catch(error => {
-      console.error(`[ERROR] Health check failed: ${error.message}`);
+      console.error(`[HEALTH] ❌ Health check failed: ${error instanceof Error ? error.message : String(error)}`);
+      
+      if (error instanceof ConfigurationError) {
+        console.error(`[HEALTH] ❌ Please check your .env file configuration`);
+      }
+      
       process.exit(1);
     });
 }

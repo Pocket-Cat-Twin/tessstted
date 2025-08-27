@@ -1,7 +1,8 @@
 // Автоматическое создание начальных пользователей для Windows
 // YuYu Lolita Shopping System
-import { getPool, createConnection, type DatabaseConfig } from "./connection.js";
+import { getPool, initializeConnection, testConnection } from "./connection.js";
 import { getUserByEmail } from "./query-builders.js";
+import { ConfigurationError } from "./config.js";
 
 async function hashPassword(password: string): Promise<string> {
   // Простой hash для demo - в продакшене используйте bcrypt
@@ -73,25 +74,16 @@ export async function seedUsers(): Promise<void> {
   console.log('🌱 ========================================');
   console.log('');
   
-  // Initialize database connection
-  const dbConfig: DatabaseConfig = {
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "3306"),
-    database: process.env.DB_NAME || "yuyu_lolita",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || ""
-  };
-  
-  console.log(`🔧 Database config:`);
-  console.log(`📍 Host: ${dbConfig.host}:${dbConfig.port}`);
-  console.log(`📂 Database: ${dbConfig.database}`);
-  console.log(`👤 User: ${dbConfig.user}`);
-  console.log('');
-  
-  // Create database connection
-  createConnection(dbConfig);
-  
   try {
+    // Initialize database connection with environment configuration
+    console.log('[SEED] 🔧 Initializing database connection...');
+    initializeConnection();
+    
+    // Test connection before proceeding
+    console.log('[SEED] 🧪 Testing database connectivity...');
+    await testConnection();
+    console.log('[SEED] ✅ Database connection verified');
+    console.log('');
     console.log('👑 Создаем главного администратора...');
     
     // Создаем главного администратора с безопасным паролем
@@ -181,7 +173,25 @@ export async function seedUsers(): Promise<void> {
     console.error('❌ ========================================');
     console.error('❌ ОШИБКА ПРИ СОЗДАНИИ ПОЛЬЗОВАТЕЛЕЙ');
     console.error('❌ ========================================');
-    console.error('❌ Детали ошибки:', error);
+    
+    if (error instanceof ConfigurationError) {
+      console.error('❌ Ошибка конфигурации базы данных:');
+      console.error('❌', error.message);
+      console.error('');
+      console.error('❌ Проверьте файл .env и настройки MySQL');
+    } else if (error instanceof Error) {
+      console.error('❌ Детали ошибки:', error.message);
+      if (error.message.includes('Access denied')) {
+        console.error('');
+        console.error('❌ РЕШЕНИЕ:');
+        console.error('❌ 1. Проверьте DB_PASSWORD в файле .env');
+        console.error('❌ 2. Убедитесь что MySQL сервер запущен');
+        console.error('❌ 3. Проверьте права пользователя MySQL');
+      }
+    } else {
+      console.error('❌ Неизвестная ошибка:', error);
+    }
+    
     console.error('❌ ========================================');
     console.error('');
     throw error;

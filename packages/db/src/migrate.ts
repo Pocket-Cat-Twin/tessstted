@@ -1,5 +1,6 @@
 // MySQL8 Migration System
-import { getPool, getSystemPool, createConnection, type DatabaseConfig } from "./connection";
+import { getPool, getSystemPool, initializeConnection } from "./connection.js";
+import { ConfigurationError, getDatabaseConfig } from "./config.js";
 import type { Pool } from "mysql2/promise";
 
 export class MySQLMigrator {
@@ -152,32 +153,17 @@ export class MySQLMigrator {
 export const runMigrations = async (): Promise<void> => {
   console.log("[MIGRATION] 🚀 Starting database migration process...");
   
-  // Get database configuration from environment
-  const dbConfig: DatabaseConfig = {
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "3306"),
-    database: process.env.DB_NAME || "yuyu_lolita",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || ""
-  };
-  
-  console.log(`[MIGRATION] 🔧 Database config:`);
-  console.log(`[MIGRATION] 📍 Host: ${dbConfig.host}:${dbConfig.port}`);
-  console.log(`[MIGRATION] 📂 Database: ${dbConfig.database}`);
-  console.log(`[MIGRATION] 👤 User: ${dbConfig.user}`);
-  
   let systemPool: Pool | null = null;
   let databasePool: Pool | null = null;
   
   try {
+    // Get database configuration (will load .env automatically)
+    console.log("[MIGRATION] 🔧 Loading database configuration...");
+    const dbConfig = getDatabaseConfig();
+    
     // Step 1: Connect to MySQL server without specifying database
     console.log("[MIGRATION] 🔌 Phase 1: Connecting to MySQL server...");
-    systemPool = await getSystemPool({
-      host: dbConfig.host,
-      port: dbConfig.port,
-      user: dbConfig.user,
-      password: dbConfig.password
-    });
+    systemPool = await getSystemPool();
     
     // Step 2: Create database using system connection
     console.log("[MIGRATION] 🔌 Phase 2: Creating database...");
@@ -188,7 +174,7 @@ export const runMigrations = async (): Promise<void> => {
     console.log(`[MIGRATION] 🔌 Phase 3: Connecting to database '${dbConfig.database}'...`);
     
     // Initialize database-specific connection
-    createConnection(dbConfig);
+    initializeConnection();
     databasePool = await getPool();
     
     console.log(`[MIGRATION] ✅ Connected to database '${dbConfig.database}' successfully`);
@@ -202,7 +188,27 @@ export const runMigrations = async (): Promise<void> => {
     console.log(`[MIGRATION] 📊 Database '${dbConfig.database}' is ready for use`);
     
   } catch (error) {
-    console.error("[MIGRATION] ❌ Migration failed:", error);
+    console.error("[MIGRATION] ❌ Migration failed:");
+    
+    if (error instanceof ConfigurationError) {
+      console.error("[MIGRATION] ❌ Configuration Error:");
+      console.error("[MIGRATION] ❌", error.message);
+      console.error("");
+      console.error("[MIGRATION] ❌ Please check your .env file configuration");
+    } else if (error instanceof Error) {
+      console.error("[MIGRATION] ❌", error.message);
+      
+      if (error.message.includes('Access denied')) {
+        console.error("");
+        console.error("[MIGRATION] ❌ SOLUTION:");
+        console.error("[MIGRATION] ❌ 1. Check DB_PASSWORD in .env file");
+        console.error("[MIGRATION] ❌ 2. Ensure MySQL server is running");
+        console.error("[MIGRATION] ❌ 3. Verify MySQL user permissions");
+      }
+    } else {
+      console.error("[MIGRATION] ❌ Unknown error:", error);
+    }
+    
     throw error;
   } finally {
     // Cleanup connections
