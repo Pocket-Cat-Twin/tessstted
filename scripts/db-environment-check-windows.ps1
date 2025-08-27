@@ -261,13 +261,52 @@ function Test-MySQLConnectionSecure {
         return $false
     }
     
-    # Check if mysql client is available
+    # Check if mysql client is available - CRITICAL REQUIREMENT
+    Write-SafeOutput "Checking for MySQL client (mysql.exe) availability..." -Status Processing
+    
+    # Search for mysql.exe in common installation paths
+    $commonMySQLPaths = @(
+        "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe",
+        "${env:ProgramFiles}\MySQL\MySQL Server 8.0\bin\mysql.exe",
+        "${env:ProgramFiles}\MySQL\MySQL Server 5.7\bin\mysql.exe",
+        "${env:ProgramFiles(x86)}\MySQL\MySQL Server 8.0\bin\mysql.exe",
+        "${env:ProgramFiles(x86)}\MySQL\MySQL Server 5.7\bin\mysql.exe"
+    )
+    
     $mysqlCommand = Get-Command mysql -ErrorAction SilentlyContinue
-    if (-not $mysqlCommand) {
-        Write-SafeOutput "MySQL client (mysql.exe) not found in PATH" -Status Warning
-        Write-SafeOutput "Connection test skipped (not critical)" -Status Info
-        return $true  # Not critical for the application
+    $mysqlPath = $null
+    
+    if ($mysqlCommand) {
+        $mysqlPath = $mysqlCommand.Path
+        Write-SafeOutput "MySQL client found in PATH: $mysqlPath" -Status Success
+    } else {
+        Write-SafeOutput "MySQL client not found in PATH, checking common installation locations..." -Status Processing
+        
+        foreach ($path in $commonMySQLPaths) {
+            if (Test-Path $path) {
+                $mysqlPath = $path
+                Write-SafeOutput "MySQL client found at: $mysqlPath" -Status Success
+                # Add to PATH temporarily for this session
+                $env:PATH += ";$(Split-Path $mysqlPath -Parent)"
+                break
+            }
+        }
     }
+    
+    if (-not $mysqlPath) {
+        Write-SafeOutput "CRITICAL ERROR: MySQL client (mysql.exe) not found in PATH or common locations" -Status Error
+        Write-SafeOutput "Searched locations:" -Status Error
+        Write-SafeOutput "- System PATH environment variable" -Status Error
+        foreach ($path in $commonMySQLPaths) {
+            Write-SafeOutput "- $path" -Status Error
+        }
+        Write-SafeOutput "MySQL client is REQUIRED for database connectivity validation" -Status Error
+        Write-SafeOutput "Install MySQL 8.0 from: https://dev.mysql.com/downloads/mysql/" -Status Info
+        Write-SafeOutput "Or add existing MySQL installation to PATH" -Status Info
+        return $false  # CRITICAL FAILURE
+    }
+    
+    Write-SafeOutput "MySQL client validation passed: $mysqlPath" -Status Success
     
     # Create temporary configuration file for secure connection
     $tempConfigFile = [System.IO.Path]::GetTempFileName()
@@ -325,12 +364,52 @@ function Test-DatabaseExists {
         $DatabaseName = if ($ConnectionParams["DB_NAME"]) { $ConnectionParams["DB_NAME"] } else { "yuyu_lolita" }
     }
     
-    # Check if mysql client is available
+    # Check if mysql client is available - CRITICAL REQUIREMENT
+    Write-SafeOutput "Verifying MySQL client availability for database existence check..." -Status Processing
+    
+    # Search for mysql.exe in common installation paths  
+    $commonMySQLPaths = @(
+        "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe",
+        "${env:ProgramFiles}\MySQL\MySQL Server 8.0\bin\mysql.exe",
+        "${env:ProgramFiles}\MySQL\MySQL Server 5.7\bin\mysql.exe",
+        "${env:ProgramFiles(x86)}\MySQL\MySQL Server 8.0\bin\mysql.exe",
+        "${env:ProgramFiles(x86)}\MySQL\MySQL Server 5.7\bin\mysql.exe"
+    )
+    
     $mysqlCommand = Get-Command mysql -ErrorAction SilentlyContinue
-    if (-not $mysqlCommand) {
-        Write-SafeOutput "MySQL client not available - skipping database check" -Status Warning
-        return $true  # Not critical
+    $mysqlPath = $null
+    
+    if ($mysqlCommand) {
+        $mysqlPath = $mysqlCommand.Path
+        Write-SafeOutput "MySQL client confirmed in PATH: $mysqlPath" -Status Success
+    } else {
+        Write-SafeOutput "MySQL client not in PATH, searching installation directories..." -Status Processing
+        
+        foreach ($path in $commonMySQLPaths) {
+            if (Test-Path $path) {
+                $mysqlPath = $path  
+                Write-SafeOutput "MySQL client located at: $mysqlPath" -Status Success
+                # Add to PATH temporarily for this session
+                $env:PATH += ";$(Split-Path $mysqlPath -Parent)"
+                break
+            }
+        }
     }
+    
+    if (-not $mysqlPath) {
+        Write-SafeOutput "CRITICAL ERROR: MySQL client required but not found for database validation" -Status Error
+        Write-SafeOutput "Cannot verify database existence without MySQL client" -Status Error
+        Write-SafeOutput "Searched locations:" -Status Error
+        Write-SafeOutput "- System PATH environment variable" -Status Error
+        foreach ($path in $commonMySQLPaths) {
+            Write-SafeOutput "- $path" -Status Error
+        }
+        Write-SafeOutput "Database existence validation is MANDATORY - cannot skip" -Status Error
+        Write-SafeOutput "Install MySQL client or ensure it's in PATH" -Status Info
+        return $false  # CRITICAL FAILURE - Cannot validate database
+    }
+    
+    Write-SafeOutput "MySQL client validation passed for database check: $mysqlPath" -Status Success
     
     $hostName = if ($ConnectionParams["DB_HOST"]) { $ConnectionParams["DB_HOST"] } else { "localhost" }
     $port = if ($ConnectionParams["DB_PORT"]) { $ConnectionParams["DB_PORT"] } else { "3306" }

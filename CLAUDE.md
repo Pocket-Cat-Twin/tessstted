@@ -68,3 +68,34 @@ The key is to write clean, testable, functional code that evolves through small,
 - Avoid these PowerShell reserved variable names: `$host`, `$home`, `$input`, `$output`, `$error`, `$matches`
 - When using `[CmdletBinding()]`, don't explicitly define automatic parameters
 - Use PowerShell validators like `Test-PowerShellScripts.ps1` before deployment
+
+### Critical MySQL Client Requirements (Aug 2025)
+
+**Issue**: PowerShell database validation scripts were skipping MySQL connection tests with WARN status when mysql.exe was not found, allowing incomplete environment validation.
+
+**Requirement Change**: MySQL client availability is now MANDATORY - tests must never skip with warnings.
+
+**Critical Updates Applied**:
+- **Connection Test**: `Test-MySQLConnectionSecure` now returns `$false` (failure) instead of `$true` (skip) when mysql.exe not found
+- **Database Check**: `Test-DatabaseExists` now returns `$false` (failure) instead of `$true` (skip) when mysql.exe not found
+- **Error Level**: Changed from Warning to Error status for missing MySQL client
+- **Detailed Logging**: Added comprehensive search and validation logging
+
+**Files Modified**:
+- `scripts/db-environment-check-windows.ps1` - Both critical functions updated
+- `scripts/PowerShell-Common.ps1` - `Test-MySQLConnectionSecure` function updated
+
+**Enhanced Validation Logic**:
+1. **Comprehensive Search**: Checks PATH + common installation directories
+2. **Automatic PATH Addition**: Temporarily adds found MySQL installation to PATH
+3. **Detailed Error Reporting**: Lists all searched locations when mysql.exe not found
+4. **Critical Failure**: Returns `$false` to fail environment validation completely
+
+**Common MySQL Installation Paths Searched**:
+- `C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe` (explicit hardcoded path)
+- `${env:ProgramFiles}\MySQL\MySQL Server 8.0\bin\mysql.exe` (environment variable path)
+- `${env:ProgramFiles}\MySQL\MySQL Server 5.7\bin\mysql.exe`
+- `${env:ProgramFiles(x86)}\MySQL\MySQL Server 8.0\bin\mysql.exe`
+- `${env:ProgramFiles(x86)}\MySQL\MySQL Server 5.7\bin\mysql.exe`
+
+**Key Principle**: Database connectivity validation is MANDATORY - no skipping allowed. Environment setup cannot proceed without verified MySQL client availability.
