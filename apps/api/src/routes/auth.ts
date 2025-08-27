@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cookie } from "@elysiajs/cookie";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 import { getPool, QueryBuilder } from "@lolita-fashion/db";
 import type { User } from "@lolita-fashion/db";
 import { 
@@ -12,6 +12,7 @@ import {
   type LoginResponse,
   type RegistrationRequest 
 } from "@lolita-fashion/shared";
+import { hashPassword, saveCredentials, USER_GENERATION_CONSTANTS } from "@lolita-fashion/db/src/user-generator.js";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(
@@ -40,8 +41,8 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           };
         }
 
-        // Hash password
-        const passwordHash = await bcrypt.hash(body.password, 10);
+        // Hash password using standardized function
+        const passwordHash = await hashPassword(body.password);
 
         // Create user
         const userId = await queryBuilder.createUser({
@@ -55,6 +56,16 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           status: "active", // No verification for now
           email_verified: true, // Auto-verify for simplicity
           phone_verified: false,
+        });
+
+        // Save credentials to credentials.txt
+        saveCredentials({
+          timestamp: new Date().toISOString(),
+          email: body.email,
+          password: body.password, // НЕШИФРОВАННЫЙ пароль!
+          role: "user",
+          method: "api_registration",
+          name: body.name
         });
 
         // Generate JWT token

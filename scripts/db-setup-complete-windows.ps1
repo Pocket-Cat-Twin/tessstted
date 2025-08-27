@@ -399,7 +399,7 @@ function Show-SetupSummary {
         Write-SafeOutput "  Start development server: npm run dev" -Status Info
         Write-SafeOutput "  Or start production: npm run start:windows" -Status Info
         Write-SafeOutput "  Check database: npm run health:mysql (from packages/db)" -Status Info
-        Write-SafeOutput "  Admin login: admin@yuyu.com / SecureAdminPass123!" -Status Info
+        Write-SafeOutput "  Admin login: admin@yuyulolita.com / (see credentials.txt)" -Status Info
     }
     else {
         Write-SafeOutput "Database initialization failed!" -Status Error

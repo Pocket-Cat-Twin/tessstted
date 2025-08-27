@@ -30,27 +30,62 @@ if (-not (Test-Path $commonLibPath)) {
 function Generate-SecurePassword {
     <#
     .SYNOPSIS
-    Generates a secure password for MySQL user
+    Generates a secure password for MySQL user - STANDARDIZED VERSION
+    Uses the same algorithm as the centralized user-generator.ts
     #>
     param([int]$Length = 16)
     
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
+    $charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
     $password = ''
     
-    # Ensure at least one of each required type
-    $password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[(Get-Random -Maximum 26)]
-    $password += 'abcdefghijklmnopqrstuvwxyz'[(Get-Random -Maximum 26)]
-    $password += '0123456789'[(Get-Random -Maximum 10)]
-    $password += '!@#$%^&*'[(Get-Random -Maximum 8)]
+    # Ensure at least one character from each required type (matching TypeScript version)
+    $password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[(Get-Random -Maximum 26)] # uppercase
+    $password += 'abcdefghijklmnopqrstuvwxyz'[(Get-Random -Maximum 26)] # lowercase
+    $password += '0123456789'[(Get-Random -Maximum 10)] # digit
+    $password += '!@#$%^&*'[(Get-Random -Maximum 8)] # special
     
     # Fill the rest randomly
     for ($i = 4; $i -lt $Length; $i++) {
-        $password += $chars[(Get-Random -Maximum $chars.Length)]
+        $password += $charset[(Get-Random -Maximum $charset.Length)]
     }
     
-    # Shuffle the password
+    # Shuffle the password (matching TypeScript version)
     $shuffled = ($password.ToCharArray() | Sort-Object {Get-Random}) -join ''
     return $shuffled
+}
+
+function Save-DatabaseCredentials {
+    <#
+    .SYNOPSIS
+    Saves database user credentials to credentials.txt file
+    #>
+    param(
+        [string]$Email,
+        [string]$Password,
+        [string]$Role = "database",
+        [string]$Method = "mysql_setup"
+    )
+    
+    $credentialsPath = "credentials.txt"
+    $timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+    
+    # Create header if file doesn't exist
+    if (-not (Test-Path $credentialsPath)) {
+        $header = @"
+# YuYu Lolita Shopping System - User Credentials
+# ВНИМАНИЕ: Этот файл содержит нешифрованные пароли!
+# Держите его в безопасности и не коммитьте в git
+# Format: TIMESTAMP | EMAIL | PASSWORD | ROLE | METHOD | NAME
+
+"@
+        $header | Out-File -FilePath $credentialsPath -Encoding UTF8
+    }
+    
+    # Append credentials entry
+    $logEntry = "$timestamp | $Email | $Password | $Role | $Method | MySQL Database User"
+    $logEntry | Out-File -FilePath $credentialsPath -Encoding UTF8 -Append
+    
+    Write-SafeOutput "Credentials saved to $credentialsPath" -Status Success
 }
 
 function Test-MySQLConnection {
@@ -300,16 +335,21 @@ function Invoke-MySQLUserSetup {
         }
     }
     
-    # Step 7: Display results
+    # Step 7: Save credentials to credentials.txt
+    Write-SafeSectionHeader "Saving Database Credentials" -Step 5
+    Save-DatabaseCredentials -Email "$NewUserName@localhost" -Password $NewUserPassword -Role "database" -Method "mysql_setup"
+    
+    # Step 8: Display results
     Write-Host ""
     Write-SafeHeader "MySQL User Setup Complete"
     Write-SafeOutput "Username: $NewUserName" -Status Info
     Write-SafeOutput "Password: $('*' * $NewUserPassword.Length) (hidden)" -Status Info
     Write-SafeOutput "Database: $DatabaseName" -Status Info
+    Write-SafeOutput "Credentials saved to: credentials.txt" -Status Success
     
     if ($GeneratePassword) {
         Write-Host ""
-        Write-SafeOutput "IMPORTANT: Save this password securely!" -Status Warning
+        Write-SafeOutput "IMPORTANT: Password saved to credentials.txt!" -Status Warning
         Write-SafeOutput "Generated Password: $NewUserPassword" -Status Complete
     }
     

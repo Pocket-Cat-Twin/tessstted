@@ -1,76 +1,19 @@
 // Автоматическое создание начальных пользователей для Windows
-// YuYu Lolita Shopping System
-import { getPool, initializeConnection, testConnection } from "./connection.js";
-import { getUserByEmail } from "./query-builders.js";
+// YuYu Lolita Shopping System - Обновлено для использования централизованного модуля
+import { initializeConnection, testConnection } from "./connection.js";
 import { ConfigurationError } from "./config.js";
-
-async function hashPassword(password: string): Promise<string> {
-  // Простой hash для demo - в продакшене используйте bcrypt
-  const crypto = await import('crypto');
-  return crypto.createHash('sha256').update(password + 'yuyulolita_salt').digest('hex');
-}
-
-function generateSecurePassword(): string {
-  const length = 12;
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  let password = '';
-  
-  // Ensure at least one character from each required type
-  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]; // uppercase
-  password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]; // lowercase
-  password += '0123456789'[Math.floor(Math.random() * 10)]; // digit
-  password += '!@#$%^&*'[Math.floor(Math.random() * 8)]; // special
-  
-  // Fill the rest randomly
-  for (let i = 4; i < length; i++) {
-    password += charset[Math.floor(Math.random() * charset.length)];
-  }
-  
-  // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('');
-}
-
-async function createUser(
-  email: string, 
-  password: string, 
-  role: 'admin' | 'user' = 'user', 
-  name: string = '',
-  fullName: string = ''
-): Promise<void> {
-  const pool = await getPool();
-  
-  try {
-    // Проверяем, существует ли пользователь
-    const existing = await getUserByEmail(email);
-    if (existing) {
-      console.log(`⚠️  Пользователь ${email} уже существует, пропускаем`);
-      return;
-    }
-    
-    const hashedPassword = await hashPassword(password);
-    const userName = name || email.split('@')[0];
-    const userFullName = fullName || userName;
-    
-    await pool.execute(`
-      INSERT INTO users (
-        id, email, password_hash, name, full_name, registration_method, 
-        role, status, email_verified, created_at, updated_at
-      ) VALUES (UUID(), ?, ?, ?, ?, 'email', ?, 'active', true, NOW(), NOW())
-    `, [email, hashedPassword, userName, userFullName, role]);
-    
-    console.log(`✅ Пользователь ${email} создан успешно (роль: ${role})`);
-    
-  } catch (error) {
-    console.error(`❌ Ошибка создания пользователя ${email}:`, error);
-    throw error;
-  }
-}
+import { 
+  createAdminUser, 
+  createTestUser, 
+  displayCredentialsInfo,
+  USER_GENERATION_CONSTANTS 
+} from "./user-generator.js";
 
 export async function seedUsers(): Promise<void> {
   console.log('');
   console.log('🌱 ========================================');
   console.log('🌱 СОЗДАНИЕ НАЧАЛЬНЫХ ПОЛЬЗОВАТЕЛЕЙ');
-  console.log('🌱 YuYu Lolita Shopping System');
+  console.log('🌱 YuYu Lolita Shopping System - СТАНДАРТИЗИРОВАННАЯ ВЕРСИЯ');
   console.log('🌱 ========================================');
   console.log('');
   
@@ -86,24 +29,17 @@ export async function seedUsers(): Promise<void> {
     console.log('');
     console.log('👑 Создаем главного администратора...');
     
-    // Создаем главного администратора с безопасным паролем
-    const adminPassword = generateSecurePassword();
-    await createUser(
-      'admin@yuyulolita.com', 
-      adminPassword, 
-      'admin', 
-      'admin',
-      'Главный Администратор'
-    );
+    // Создаем главного администратора с использованием централизованного модуля
+    const adminPassword = await createAdminUser('seeding');
     
     console.log('');
     console.log('🔐 ========================================');
     console.log('🔐 ВАЖНАЯ ИНФОРМАЦИЯ О ПАРОЛЕ АДМИНА');
     console.log('🔐 ========================================');
-    console.log(`🔐 Email: admin@yuyulolita.com`);
+    console.log(`🔐 Email: ${USER_GENERATION_CONSTANTS.ADMIN_EMAIL}`);
     console.log(`🔐 Пароль: ${adminPassword}`);
     console.log('🔐 ========================================');
-    console.log('📝 ОБЯЗАТЕЛЬНО сохраните этот пароль!');
+    console.log('📝 Пароль сохранен в credentials.txt');
     console.log('🔒 Используйте его для первого входа в систему');
     console.log('🔐 ========================================');
     console.log('');
@@ -112,29 +48,9 @@ export async function seedUsers(): Promise<void> {
     if (process.env.NODE_ENV !== 'production') {
       console.log('👥 Создаем тестовых пользователей...');
       
-      await createUser(
-        'test1@yuyulolita.com', 
-        'Test123!', 
-        'user', 
-        'test1',
-        'Тестовый Пользователь 1'
-      );
-      
-      await createUser(
-        'test2@yuyulolita.com', 
-        'Test123!', 
-        'user', 
-        'test2',
-        'Тестовый Пользователь 2'
-      );
-      
-      await createUser(
-        'test3@yuyulolita.com', 
-        'Test123!', 
-        'user', 
-        'test3',
-        'Тестовый Пользователь 3'
-      );
+      await createTestUser('test1@yuyulolita.com', 'test1', 'Test123!', 'seeding');
+      await createTestUser('test2@yuyulolita.com', 'test2', 'Test123!', 'seeding');
+      await createTestUser('test3@yuyulolita.com', 'test3', 'Test123!', 'seeding');
       
       console.log('');
       console.log('👥 ========================================');
@@ -143,12 +59,13 @@ export async function seedUsers(): Promise<void> {
       console.log('👥 Email: test1@yuyulolita.com');
       console.log('👥 Email: test2@yuyulolita.com');  
       console.log('👥 Email: test3@yuyulolita.com');
-      console.log('👥 Пароль для всех: Test123!');
+      console.log('👥 Все пароли сохранены в credentials.txt');
       console.log('👥 ========================================');
       console.log('');
     }
     
     // Проверяем созданных пользователей
+    const { getPool } = await import('./connection.js');
     const pool = await getPool();
     const [rows] = await pool.execute('SELECT email, role, status FROM users ORDER BY role DESC, email');
     const users = rows as any[];
@@ -163,7 +80,9 @@ export async function seedUsers(): Promise<void> {
     });
     console.log('📊 ========================================');
     
-    console.log('');
+    // Показать информацию о файле с учетными данными
+    displayCredentialsInfo();
+    
     console.log('🎉 Создание пользователей завершено успешно!');
     console.log('🚀 База данных готова к использованию!');
     console.log('');
@@ -210,5 +129,3 @@ if (import.meta.url.includes(process.argv[1]?.replace(/\\/g, '/') || '')) {
       process.exit(1);
     });
 }
-
-export { createUser };

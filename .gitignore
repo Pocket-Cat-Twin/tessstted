@@ -4,6 +4,9 @@
 .env.production
 .env.staging
 
+# Credentials (contains plaintext passwords)
+credentials.txt
+
 # Dependencies
 node_modules/
 **/node_modules/
