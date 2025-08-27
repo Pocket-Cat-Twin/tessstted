@@ -197,7 +197,7 @@ function Invoke-SafeCommand {
         $startTime = Get-Date
         
         if ($Arguments.Count -gt 0) {
-            $result = & $Command $Arguments 2>&1
+            $result = & $Command @Arguments 2>&1
         } else {
             $result = & $Command 2>&1
         }

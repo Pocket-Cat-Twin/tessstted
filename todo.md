@@ -127,13 +127,21 @@ bun run type-check         # ✅ Better performance
 - UserSeeding: `seed:windows` → `db:seed:windows`, WorkingDir → `.` (root)  
 - HealthCheck: `health:mysql` → `db:health:mysql`, WorkingDir → `.` (root)
 
+#### 6. Fixed PowerShell Argument Array Parsing ✅
+**Problem**: PowerShell `Invoke-SafeCommand` was passing argument arrays incorrectly to npm
+**Error**: `"Unknown command: 'run db:migrate:windows'"` (treated as single argument)
+**Root Cause**: `& $Command $Arguments` passes entire array as one argument
+**Solution**: Changed to `& $Command @Arguments` (PowerShell splatting operator)
+**File**: `scripts/PowerShell-Common.ps1:200`
+
 ### Final Result ✅
 Now when running `npm run db:setup:full:windows` on Windows PC:
 1. ✅ SQL syntax error fixed (no more `current_user` reserved word issue)
 2. ✅ PowerShell script uses npm instead of bun for database operations
 3. ✅ PowerShell script runs commands from correct directory with correct script names
-4. ✅ Migration should create users table properly
-5. ✅ User seeding should work after successful migration
+4. ✅ PowerShell argument arrays properly parsed and passed to npm
+5. ✅ Migration should create users table properly
+6. ✅ User seeding should work after successful migration
 
 ## Final Summary
 
@@ -142,12 +150,14 @@ Now when running `npm run db:setup:full:windows` on Windows PC:
 2. **Bun vs NPM**: Database TypeScript execution worked better with npm/tsx
 3. **PowerShell Script Commands**: Used bun instead of npm for database operations
 4. **Working Directory Issue**: Script tried to run root-level commands from package directory
+5. **PowerShell Argument Parsing**: Arguments passed incorrectly to npm command
 
 ### All Fixes Applied:
 ✅ **SQL Syntax**: `current_user` → `current_user_name` in connection queries  
 ✅ **Package Commands**: Database scripts use `npm + tsx` instead of `bun`  
 ✅ **PowerShell Scripts**: All database phases use `npm` instead of `bun`  
 ✅ **Working Directory**: PowerShell runs commands from root using `db:*` scripts  
+✅ **Argument Parsing**: PowerShell uses splatting operator `@Arguments` for proper npm execution  
 
 ### Command Strategy:
 - **Database operations** → npm (compatibility with TypeScript execution)
