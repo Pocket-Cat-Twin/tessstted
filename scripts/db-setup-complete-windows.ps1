@@ -8,7 +8,6 @@
 param(
     [switch]$Force = $false,
     [switch]$SkipEnvironmentCheck = $false,
-    [switch]$Verbose = $false,
     [int]$TimeoutMinutes = 15
 )
 

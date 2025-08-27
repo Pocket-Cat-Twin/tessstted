@@ -6,7 +6,6 @@
 
 [CmdletBinding()]
 param(
-    [switch]$Verbose = $false,
     [switch]$SkipNetworkTests = $false,
     [string[]]$TestSuites = @("Common", "Environment", "Build", "Setup")
 )
