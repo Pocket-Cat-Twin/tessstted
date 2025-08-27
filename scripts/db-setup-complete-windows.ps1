@@ -37,7 +37,7 @@ $Script:SETUP_PHASES = @{
     "DatabaseMigrations" = @{
         Name = "Database Schema Migration"
         Description = "MySQL table creation and schema setup"
-        Command = "bun"
+        Command = "npm"
         Arguments = @("run", "migrate:windows")
         WorkingDir = "packages\db"
         Required = $true
@@ -45,15 +45,15 @@ $Script:SETUP_PHASES = @{
     "UserSeeding" = @{
         Name = "Initial User Creation"
         Description = "Admin and test user account creation"
-        Command = "bun"
-        Arguments = @("run", "src/seed-users.ts")
+        Command = "npm"
+        Arguments = @("run", "seed:windows")
         WorkingDir = "packages\db"
         Required = $true
     }
     "HealthCheck" = @{
         Name = "Final System Validation"
         Description = "Database connectivity and data integrity check"
-        Command = "bun"
+        Command = "npm"
         Arguments = @("run", "health:mysql")
         WorkingDir = "packages\db"
         Required = $false
@@ -398,7 +398,7 @@ function Show-SetupSummary {
         Write-SafeOutput "Next Steps:" -Status Info
         Write-SafeOutput "  Start development server: npm run dev" -Status Info
         Write-SafeOutput "  Or start production: npm run start:windows" -Status Info
-        Write-SafeOutput "  Check database: bun run health:mysql (from packages/db)" -Status Info
+        Write-SafeOutput "  Check database: npm run health:mysql (from packages/db)" -Status Info
         Write-SafeOutput "  Admin login: admin@yuyu.com / SecureAdminPass123!" -Status Info
     }
     else {

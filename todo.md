@@ -99,8 +99,36 @@ bun run type-check         # ✅ Better performance
 - Build/validation commands perform better with bun
 - Always test SQL queries against target MySQL version to avoid reserved word conflicts
 
+### Additional Fixes (Round 2)
+
+#### 3. Fixed PowerShell Script Bun References ✅
+**File**: `scripts/db-setup-complete-windows.ps1`
+**Problem**: PowerShell script still used `bun` commands for database operations
+**Changes**:
+- Line 40: DatabaseMigrations phase: `Command = "bun"` → `Command = "npm"`
+- Line 48: UserSeeding phase: `Command = "bun"` → `Command = "npm"`, Arguments updated to use npm script
+- Line 56: HealthCheck phase: `Command = "bun"` → `Command = "npm"`
+- Line 401: Help text: `"bun run health:mysql"` → `"npm run health:mysql"`
+
+#### 4. Fixed Migration Script Entry Point ✅
+**Problem**: Migration wasn't executing properly due to missing entry point
+**Solution**: Created dedicated migration runner script
+**Files**:
+- ✅ Added `packages/db/run-migrate.ts` - entry point for migrations
+- ✅ Updated package.json scripts to use the new entry point
+- ✅ All migrate commands now point to `run-migrate.ts`
+
+### Expected Result
+Now when running `npm run db:setup:full:windows` on Windows PC:
+1. ✅ SQL syntax error fixed (no more `current_user` reserved word issue)
+2. ✅ PowerShell script uses npm instead of bun for database operations
+3. ✅ Migration should create users table properly
+4. ✅ User seeding should work after successful migration
+
 ## Notes
 - The SQL syntax error was the critical blocking issue
 - Only database-related commands were changed from bun to npm
-- Build and runtime commands kept with bun for optimal performance
+- Build and runtime commands kept with bun for optimal performance  
+- PowerShell script commands also needed to be updated
+- Migration needed proper entry point script to execute
 - Changes were minimal and targeted to specific error sources
