@@ -197,7 +197,7 @@ function Test-EnvFileConfiguration {
                     if ($value.Length -lt 8) {
                         $criticalIssues += "DB_PASSWORD too short (minimum 8 characters required)"
                     } elseif ($value.Length -lt 12) {
-                        $warnings += "DB_PASSWORD is short (12+ characters recommended for security)"
+                        $warnings += "DB_PASSWORD is short - 12 or more characters recommended for security"
                     }
                     
                     # Check for weak passwords
@@ -210,7 +210,7 @@ function Test-EnvFileConfiguration {
                     $hasLower = $value -cmatch "[a-z]"
                     $hasUpper = $value -cmatch "[A-Z]"
                     $hasDigit = $value -match "\d"
-                    $hasSymbol = $value -match "[!@#$%^&*(),.?\\":{}|<>]"
+                    $hasSymbol = $value -match "[!@#`$%^&*(),.?\\\\:{}|<>]"
                     
                     $complexityScore = [int]$hasLower + [int]$hasUpper + [int]$hasDigit + [int]$hasSymbol
                     
@@ -262,7 +262,7 @@ function Test-EnvFileConfiguration {
         Write-SafeOutput "" -Status Info
         Write-SafeOutput "SOLUTIONS:" -Status Info
         Write-SafeOutput "  1. Edit .env file to add/fix missing or invalid values" -Status Info
-        Write-SafeOutput "  2. Use strong passwords (12 or more chars, mixed case, numbers, symbols)" -Status Info
+        Write-SafeOutput "  2. Use strong passwords - minimum 12 characters with mixed case, numbers, symbols" -Status Info
         Write-SafeOutput "  3. Avoid common passwords like 'password', '123456', etc." -Status Info
         Write-SafeOutput "  4. For production, create dedicated MySQL user (not root)" -Status Info
         return $false
