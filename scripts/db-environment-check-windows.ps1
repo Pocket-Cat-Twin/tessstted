@@ -6,7 +6,6 @@
 
 [CmdletBinding()]
 param(
-    [switch]$Verbose = $false,
     [switch]$Fix = $false
 )
 
