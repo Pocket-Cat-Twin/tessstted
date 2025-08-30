@@ -21,6 +21,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from game_monitor.main_controller import GameMonitor
 from game_monitor.database_manager import DatabaseManager
+from game_monitor.region_selector import RegionSelector, CoordinateInputDialog, RegionManager, RegionConfig
+from game_monitor.vision_system import ScreenRegion, get_vision_system
 
 
 @dataclass
@@ -760,16 +762,12 @@ class MainWindow:
                 messagebox.showerror("Export Error", f"Failed to export data:\n{e}")
     
     def calibrate_coordinates(self):
-        """Show coordinate calibration tool"""
-        messagebox.showinfo("Coordinate Calibration", 
-                          "Coordinate calibration tool will be implemented here.\n"
-                          "This would help users set up screen regions for OCR.")
+        """Show region selection and calibration interface"""
+        self.show_region_selection_dialog()
     
     def test_ocr(self):
-        """Show OCR testing panel"""
-        messagebox.showinfo("OCR Test", 
-                          "OCR testing panel will be implemented here.\n"
-                          "This would allow users to test OCR on sample images.")
+        """Show OCR testing interface"""
+        self.show_ocr_testing_dialog()
     
     def show_database_manager(self):
         """Show database management tools"""
@@ -826,6 +824,347 @@ Developed with Python, tkinter, OpenCV, and Tesseract OCR."""
         
         # Start the GUI main loop
         self.root.mainloop()
+    
+    def show_region_selection_dialog(self):
+        """Show region selection and calibration interface"""
+        if not self.game_monitor:
+            messagebox.showerror("Error", "Game Monitor not initialized")
+            return
+        
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Region Selection & Calibration")
+        dialog.geometry("600x500")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Initialize region manager
+        region_manager = RegionManager()
+        
+        # Main frame
+        main_frame = tk.Frame(dialog, padx=20, pady=20)
+        main_frame.pack(fill="both", expand=True)
+        
+        # Title
+        title_label = tk.Label(main_frame, text="Screen Region Configuration", 
+                              font=('Arial', 14, 'bold'))
+        title_label.pack(pady=(0, 20))
+        
+        # Instructions
+        instructions = tk.Label(main_frame, 
+                               text="Select regions for different hotkey functions. You can use visual selection or manual coordinate input.",
+                               font=('Arial', 10), wraplength=550)
+        instructions.pack(pady=(0, 15))
+        
+        # Region list frame
+        regions_frame = ttk.LabelFrame(main_frame, text="Hotkey Regions", padding=15)
+        regions_frame.pack(fill="both", expand=True, pady=10)
+        
+        # Create scrollable frame for regions
+        canvas = tk.Canvas(regions_frame)
+        scrollbar = ttk.Scrollbar(regions_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Add region entries
+        region_configs = [
+            ("trader_list", "F1 - Trader List", "Region for capturing trader list"),
+            ("item_scan", "F2 - Item Scan", "Region for scanning individual items"),
+            ("trader_inventory", "F3 - Trader Inventory", "Region for trader inventory view")
+        ]
+        
+        def update_region(region_name: str, config: RegionConfig):
+            """Update region configuration"""
+            config.name = region_name
+            region_manager.set_region(config)
+            self.add_log_message(f"Updated region '{region_name}': {config.x},{config.y} {config.width}x{config.height}")
+            
+            # Update game monitor regions if available
+            if self.game_monitor:
+                screen_region = ScreenRegion(config.x, config.y, config.width, config.height, config.name)
+                self.game_monitor.screen_regions[region_name] = screen_region
+                self.add_log_message(f"Applied region '{region_name}' to game monitor")
+        
+        def select_region_visual(region_name: str):
+            """Start visual region selection"""
+            dialog.withdraw()  # Hide dialog during selection
+            
+            def on_region_selected(config: RegionConfig):
+                update_region(region_name, config)
+                dialog.deiconify()  # Show dialog again
+                update_region_display()
+            
+            selector = RegionSelector(self.root)
+            selector.select_region(region_name, on_region_selected)
+        
+        def select_region_manual(region_name: str):
+            """Start manual coordinate input"""
+            current_region = region_manager.get_region(region_name)
+            coord_dialog = CoordinateInputDialog(dialog, region_name, current_region)
+            result = coord_dialog.show()
+            
+            if result:
+                update_region(region_name, result)
+                update_region_display()
+        
+        def update_region_display():
+            """Update the display of current regions"""
+            for region_name, _, _ in region_configs:
+                region = region_manager.get_region(region_name)
+                if region and region_name in region_labels:
+                    region_labels[region_name].config(
+                        text=f"({region.x}, {region.y}) - {region.width}x{region.height}"
+                    )
+        
+        # Store region label references for updating
+        region_labels = {}
+        
+        for i, (region_name, display_name, description) in enumerate(region_configs):
+            # Region frame
+            region_frame = tk.Frame(scrollable_frame)
+            region_frame.pack(fill="x", pady=5)
+            
+            # Region info
+            info_frame = tk.Frame(region_frame)
+            info_frame.pack(side="left", fill="x", expand=True)
+            
+            name_label = tk.Label(info_frame, text=display_name, font=('Arial', 11, 'bold'))
+            name_label.pack(anchor="w")
+            
+            desc_label = tk.Label(info_frame, text=description, font=('Arial', 9), fg="gray")
+            desc_label.pack(anchor="w")
+            
+            # Current coordinates
+            current_region = region_manager.get_region(region_name)
+            coord_text = "Not configured"
+            if current_region:
+                coord_text = f"({current_region.x}, {current_region.y}) - {current_region.width}x{current_region.height}"
+            
+            coord_label = tk.Label(info_frame, text=coord_text, font=('Arial', 10))
+            coord_label.pack(anchor="w")
+            region_labels[region_name] = coord_label
+            
+            # Buttons
+            button_frame = tk.Frame(region_frame)
+            button_frame.pack(side="right")
+            
+            tk.Button(button_frame, text="Visual Select", 
+                     command=lambda rn=region_name: select_region_visual(rn)).pack(side="right", padx=2)
+            tk.Button(button_frame, text="Manual Input", 
+                     command=lambda rn=region_name: select_region_manual(rn)).pack(side="right", padx=2)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Control buttons
+        button_frame = tk.Frame(main_frame)
+        button_frame.pack(fill="x", pady=20)
+        
+        tk.Button(button_frame, text="Reset to Defaults", 
+                 command=lambda: self.reset_regions(region_manager, update_region_display)).pack(side="left")
+        
+        tk.Button(button_frame, text="Test All Regions", 
+                 command=lambda: self.test_all_regions(region_manager)).pack(side="left", padx=10)
+        
+        tk.Button(button_frame, text="Close", command=dialog.destroy).pack(side="right")
+    
+    def show_ocr_testing_dialog(self):
+        """Show OCR testing interface"""
+        if not self.game_monitor:
+            messagebox.showerror("Error", "Game Monitor not initialized")
+            return
+        
+        dialog = tk.Toplevel(self.root)
+        dialog.title("OCR Testing Interface")
+        dialog.geometry("700x600")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Get vision system
+        vision_system = get_vision_system()
+        
+        # Main frame
+        main_frame = tk.Frame(dialog, padx=20, pady=20)
+        main_frame.pack(fill="both", expand=True)
+        
+        # Title
+        title_label = tk.Label(main_frame, text="OCR Testing & Output", 
+                              font=('Arial', 14, 'bold'))
+        title_label.pack(pady=(0, 20))
+        
+        # Testing controls frame
+        controls_frame = ttk.LabelFrame(main_frame, text="Testing Controls", padding=15)
+        controls_frame.pack(fill="x", pady=10)
+        
+        # Testing status
+        status_frame = tk.Frame(controls_frame)
+        status_frame.pack(fill="x", pady=5)
+        
+        tk.Label(status_frame, text="Testing Output:", font=('Arial', 10, 'bold')).pack(side="left")
+        
+        status_label = tk.Label(status_frame, text="Disabled", fg="red")
+        status_label.pack(side="left", padx=10)
+        
+        # Control buttons
+        button_frame = tk.Frame(controls_frame)
+        button_frame.pack(fill="x", pady=10)
+        
+        def toggle_testing():
+            """Toggle testing output"""
+            if vision_system.testing_enabled:
+                vision_system.enable_testing_output(False)
+                status_label.config(text="Disabled", fg="red")
+                toggle_button.config(text="Enable Testing")
+                self.add_log_message("OCR testing output disabled")
+            else:
+                vision_system.enable_testing_output(True)
+                status_label.config(text="Enabled", fg="green")
+                toggle_button.config(text="Disable Testing")
+                self.add_log_message("OCR testing output enabled - Check console and files for results")
+        
+        toggle_button = tk.Button(button_frame, text="Enable Testing", command=toggle_testing)
+        toggle_button.pack(side="left", padx=5)
+        
+        tk.Button(button_frame, text="Clear Output Files", 
+                 command=lambda: self.clear_testing_files(vision_system)).pack(side="left", padx=5)
+        
+        tk.Button(button_frame, text="View Output Folder", 
+                 command=self.open_testing_folder).pack(side="left", padx=5)
+        
+        # Testing info frame
+        info_frame = ttk.LabelFrame(main_frame, text="Testing Information", padding=15)
+        info_frame.pack(fill="both", expand=True, pady=10)
+        
+        # Instructions
+        instructions = tk.Text(info_frame, height=8, wrap="word", font=('Arial', 10))
+        instructions.pack(fill="x", pady=5)
+        
+        instructions_text = """OCR Testing Instructions:
+
+1. Enable testing output using the button above
+2. Use hotkeys (F1-F5) to capture screen regions
+3. Check console output for real-time OCR results
+4. Check data/testing_output.txt for simple text log
+5. Check data/testing_detailed.json for detailed JSON results
+
+Testing will show:
+- Raw OCR text extracted from screenshots
+- Processing time and confidence scores
+- Parsed data results
+- Region coordinates and settings
+
+Use this to verify OCR accuracy and tune your regions for optimal results."""
+        
+        instructions.insert("1.0", instructions_text)
+        instructions.config(state="disabled")
+        
+        # Testing summary frame
+        summary_frame = ttk.LabelFrame(main_frame, text="Testing Summary", padding=10)
+        summary_frame.pack(fill="x", pady=10)
+        
+        def update_summary():
+            """Update testing summary"""
+            summary = vision_system.get_testing_summary()
+            summary_text.delete("1.0", tk.END)
+            
+            summary_info = f"""Testing Status: {'Enabled' if summary['testing_enabled'] else 'Disabled'}
+Output File: {summary['output_file']}
+Detailed File: {summary['detailed_file']}
+Total Tests: {summary.get('total_tests', 0)}
+Files Exist: Output={summary['output_file_exists']}, Detailed={summary['detailed_file_exists']}"""
+            
+            summary_text.insert("1.0", summary_info)
+        
+        summary_text = tk.Text(summary_frame, height=5, font=('Consolas', 9))
+        summary_text.pack(fill="x")
+        
+        # Auto-update summary
+        def refresh_summary():
+            update_summary()
+            dialog.after(2000, refresh_summary)  # Update every 2 seconds
+        
+        refresh_summary()
+        
+        # Close button
+        tk.Button(main_frame, text="Close", command=dialog.destroy).pack(pady=10)
+        
+        # Set initial testing status
+        if vision_system.testing_enabled:
+            status_label.config(text="Enabled", fg="green")
+            toggle_button.config(text="Disable Testing")
+    
+    def reset_regions(self, region_manager: RegionManager, update_callback):
+        """Reset regions to defaults"""
+        if messagebox.askyesno("Reset Regions", "Reset all regions to default coordinates?"):
+            region_manager.set_default_regions()
+            update_callback()
+            self.add_log_message("All regions reset to defaults")
+    
+    def test_all_regions(self, region_manager: RegionManager):
+        """Test all configured regions"""
+        regions = region_manager.list_regions()
+        if not regions:
+            messagebox.showwarning("No Regions", "No regions configured to test")
+            return
+        
+        self.add_log_message("Testing all configured regions...")
+        
+        # Enable testing output temporarily
+        vision_system = get_vision_system()
+        was_enabled = vision_system.testing_enabled
+        if not was_enabled:
+            vision_system.enable_testing_output(True)
+        
+        # Test each region
+        for region in regions:
+            screen_region = ScreenRegion(region.x, region.y, region.width, region.height, region.name)
+            self.add_log_message(f"Testing region: {region.name}")
+            
+            # Simulate region processing (would normally be triggered by hotkey)
+            try:
+                result = vision_system.capture_and_process_region(screen_region, 'general')
+                if result:
+                    self.add_log_message(f"✓ {region.name}: Success")
+                else:
+                    self.add_log_message(f"✗ {region.name}: No data extracted")
+            except Exception as e:
+                self.add_log_message(f"✗ {region.name}: Error - {e}")
+        
+        # Restore testing state
+        if not was_enabled:
+            vision_system.enable_testing_output(False)
+        
+        messagebox.showinfo("Testing Complete", "Region testing completed. Check console and log files for results.")
+    
+    def clear_testing_files(self, vision_system):
+        """Clear testing output files"""
+        if messagebox.askyesno("Clear Files", "Clear all testing output files?"):
+            vision_system.clear_testing_output()
+            self.add_log_message("Testing output files cleared")
+    
+    def open_testing_folder(self):
+        """Open testing output folder"""
+        import subprocess
+        import platform
+        
+        folder_path = "data"
+        
+        try:
+            if platform.system() == "Windows":
+                subprocess.run(["explorer", folder_path])
+            elif platform.system() == "Darwin":  # macOS
+                subprocess.run(["open", folder_path])
+            else:  # Linux
+                subprocess.run(["xdg-open", folder_path])
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open folder: {e}")
+            self.add_log_message(f"Failed to open testing folder: {e}")
 
 
 def main():

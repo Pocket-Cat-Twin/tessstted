@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 import io
+import json
+from datetime import datetime
 
 # Try to import required libraries with fallbacks
 try:
@@ -91,6 +93,14 @@ class VisionSystem:
             'total_processing_time': 0.0,
             'avg_ocr_time': 0.0
         }
+        
+        # Testing output configuration
+        self.testing_enabled = False
+        self.testing_output_file = Path("data/testing_output.txt")
+        self.testing_detailed_file = Path("data/testing_detailed.json")
+        
+        # Ensure testing output directory exists
+        self.testing_output_file.parent.mkdir(parents=True, exist_ok=True)
         
         # Check available libraries
         self._check_dependencies()
@@ -373,6 +383,9 @@ class VisionSystem:
             parsed_data['ocr_confidence'] = ocr_result.confidence
             parsed_data['processing_time'] = total_time
         
+        # Log testing output if enabled
+        self.log_testing_output(ocr_result, region, parsed_data)
+        
         return parsed_data
     
     def process_multiple_regions(self, regions: List[Tuple[ScreenRegion, str]]) -> List[Dict[str, Any]]:
@@ -414,6 +427,116 @@ class VisionSystem:
                 'avg_ocr_time': 0.0
             }
         logger.info("Vision system statistics reset")
+    
+    def enable_testing_output(self, enabled: bool = True):
+        """Enable or disable testing output to console and files"""
+        self.testing_enabled = enabled
+        if enabled:
+            logger.info("Testing output enabled - OCR results will be logged to console and files")
+            # Initialize testing output file
+            with open(self.testing_output_file, 'w', encoding='utf-8') as f:
+                f.write(f"OCR Testing Output - Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("=" * 80 + "\n\n")
+        else:
+            logger.info("Testing output disabled")
+    
+    def log_testing_output(self, ocr_result: OCRResult, region: ScreenRegion, parsed_data: Optional[Dict[str, Any]] = None):
+        """Log OCR testing results to console and file"""
+        if not self.testing_enabled:
+            return
+        
+        timestamp = datetime.now().strftime('%H:%M:%S')
+        
+        # Console output
+        print("\n" + "=" * 60)
+        print(f"📊 OCR TEST RESULT [{timestamp}]")
+        print("=" * 60)
+        print(f"🎯 Region: {region.name} ({region.x}, {region.y}) {region.width}x{region.height}")
+        print(f"📝 Region Type: {ocr_result.region_type}")
+        print(f"⚡ Processing Time: {ocr_result.processing_time:.3f}s")
+        print(f"🎯 Confidence: {ocr_result.confidence:.2f}")
+        print(f"📋 Cached: {'Yes' if ocr_result.cached else 'No'}")
+        print(f"📄 Raw OCR Text: '{ocr_result.text}'")
+        
+        if parsed_data:
+            print("✅ Parsed Data:")
+            for key, value in parsed_data.items():
+                print(f"   {key}: {value}")
+        else:
+            print("❌ No valid data parsed")
+        
+        print("=" * 60 + "\n")
+        
+        # File output (simple text)
+        try:
+            with open(self.testing_output_file, 'a', encoding='utf-8') as f:
+                f.write(f"[{timestamp}] Region: {region.name} | Type: {ocr_result.region_type}\n")
+                f.write(f"   Text: '{ocr_result.text}' | Confidence: {ocr_result.confidence:.2f} | Time: {ocr_result.processing_time:.3f}s\n")
+                if parsed_data:
+                    f.write(f"   Parsed: {parsed_data}\n")
+                f.write("\n")
+        except Exception as e:
+            logger.error(f"Failed to write to testing output file: {e}")
+        
+        # Detailed JSON output
+        try:
+            detailed_result = {
+                'timestamp': datetime.now().isoformat(),
+                'region': {
+                    'name': region.name,
+                    'x': region.x,
+                    'y': region.y,
+                    'width': region.width,
+                    'height': region.height
+                },
+                'ocr': {
+                    'text': ocr_result.text,
+                    'confidence': ocr_result.confidence,
+                    'processing_time': ocr_result.processing_time,
+                    'region_type': ocr_result.region_type,
+                    'cached': ocr_result.cached
+                },
+                'parsed_data': parsed_data or {}
+            }
+            
+            # Append to JSON lines file
+            with open(self.testing_detailed_file, 'a', encoding='utf-8') as f:
+                json.dump(detailed_result, f, ensure_ascii=False)
+                f.write('\n')
+                
+        except Exception as e:
+            logger.error(f"Failed to write detailed testing output: {e}")
+    
+    def clear_testing_output(self):
+        """Clear testing output files"""
+        try:
+            if self.testing_output_file.exists():
+                self.testing_output_file.unlink()
+            if self.testing_detailed_file.exists():
+                self.testing_detailed_file.unlink()
+            logger.info("Testing output files cleared")
+        except Exception as e:
+            logger.error(f"Failed to clear testing output files: {e}")
+    
+    def get_testing_summary(self) -> Dict[str, Any]:
+        """Get summary of testing results"""
+        summary = {
+            'testing_enabled': self.testing_enabled,
+            'output_file': str(self.testing_output_file),
+            'detailed_file': str(self.testing_detailed_file),
+            'output_file_exists': self.testing_output_file.exists(),
+            'detailed_file_exists': self.testing_detailed_file.exists()
+        }
+        
+        # Count lines in output file
+        try:
+            if self.testing_output_file.exists():
+                with open(self.testing_output_file, 'r', encoding='utf-8') as f:
+                    summary['total_tests'] = len([line for line in f if line.startswith('[')])
+        except:
+            summary['total_tests'] = 0
+        
+        return summary
 
 # Global instance for easy access
 _vision_system_instance = None
