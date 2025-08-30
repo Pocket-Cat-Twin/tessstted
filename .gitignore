@@ -70,3 +70,5 @@ config/dev_*.yaml
 # Performance data
 *.prof
 *.profile
+data/game_monitor.db-shm
+data/game_monitor.db-wal
