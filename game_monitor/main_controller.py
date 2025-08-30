@@ -8,18 +8,23 @@ data processing pipeline and <1 second response times.
 import logging
 import time
 import threading
+import sys
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
 from enum import Enum
 import json
 from pathlib import Path
+from datetime import datetime
 
 from .hotkey_manager import HotkeyManager, HotkeyType, CaptureEvent, get_hotkey_manager
 from .vision_system import VisionSystem, ScreenRegion, get_vision_system
 from .fast_validator import FastValidator, ValidationLevel, get_validator
 from .database_manager import DatabaseManager, get_database
+from .advanced_logger import get_main_controller_logger
+from .error_tracker import ErrorTracker
+from .performance_logger import PerformanceMonitor
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)  # Keep for compatibility
 
 class SystemState(Enum):
     """System operational states"""
@@ -44,38 +49,156 @@ class GameMonitor:
     """High-performance game monitoring system controller"""
     
     def __init__(self, config_path: str = "config/config.yaml"):
+        init_start = time.time()
+        
+        # Basic initialization
         self.config_path = config_path
         self.state = SystemState.STOPPED
         self._state_lock = threading.Lock()
         
-        # Initialize subsystems
-        self.db = get_database()
-        self.hotkey_manager = get_hotkey_manager()
-        self.vision_system = get_vision_system()
-        self.validator = get_validator()
+        # Advanced logging and monitoring
+        self.advanced_logger = get_main_controller_logger()
+        self.error_tracker = ErrorTracker()
+        self.performance_monitor = PerformanceMonitor()
         
-        # Configuration
-        self.config = self._load_default_config()
-        
-        # Performance tracking
-        self.performance_stats = {
-            'total_captures': 0,
-            'successful_captures': 0,
-            'failed_captures': 0,
-            'avg_processing_time': 0.0,
-            'total_processing_time': 0.0,
-            'fastest_capture': float('inf'),
-            'slowest_capture': 0.0,
-            'uptime_start': None
-        }
-        
-        # Screen regions for different capture types
-        self.screen_regions = self._initialize_screen_regions()
-        
-        # Register hotkey callbacks
-        self._register_hotkey_callbacks()
-        
-        logger.info("GameMonitor initialized successfully")
+        with self.advanced_logger.operation_context('game_monitor', 'initialization'):
+            try:
+                self.advanced_logger.info(
+                    "Starting GameMonitor initialization",
+                    extra_data={
+                        'config_path': config_path,
+                        'python_version': sys.version,
+                        'initialization_started': datetime.now().isoformat()
+                    }
+                )
+                
+                # Stage 1: Initialize subsystems
+                subsystems_start = time.time()
+                self.advanced_logger.info("Initializing core subsystems")
+                
+                self.db = get_database()
+                self.hotkey_manager = get_hotkey_manager()
+                self.vision_system = get_vision_system()
+                self.validator = get_validator()
+                
+                subsystems_time = time.time() - subsystems_start
+                
+                self.advanced_logger.info(
+                    f"Subsystems initialized in {subsystems_time*1000:.2f}ms",
+                    extra_data={
+                        'subsystems_init_time_ms': subsystems_time * 1000,
+                        'subsystems_count': 4,
+                        'subsystems': ['database', 'hotkey_manager', 'vision_system', 'validator']
+                    }
+                )
+                
+                # Stage 2: Load configuration
+                config_start = time.time()
+                self.config = self._load_default_config()
+                config_time = time.time() - config_start
+                
+                self.advanced_logger.info(
+                    f"Configuration loaded in {config_time*1000:.2f}ms",
+                    extra_data={
+                        'config_load_time_ms': config_time * 1000,
+                        'config_source': 'file' if Path(config_path).exists() else 'defaults',
+                        'config_sections': list(self.config.keys()) if self.config else []
+                    }
+                )
+                
+                # Stage 3: Initialize performance tracking
+                stats_start = time.time()
+                self.performance_stats = {
+                    'total_captures': 0,
+                    'successful_captures': 0,
+                    'failed_captures': 0,
+                    'avg_processing_time': 0.0,
+                    'total_processing_time': 0.0,
+                    'fastest_capture': float('inf'),
+                    'slowest_capture': 0.0,
+                    'uptime_start': None
+                }
+                stats_time = time.time() - stats_start
+                
+                self.advanced_logger.debug(
+                    f"Performance tracking initialized in {stats_time*1000:.2f}ms",
+                    extra_data={
+                        'stats_init_time_ms': stats_time * 1000,
+                        'performance_fields': list(self.performance_stats.keys())
+                    }
+                )
+                
+                # Stage 4: Initialize screen regions
+                regions_start = time.time()
+                self.screen_regions = self._initialize_screen_regions()
+                regions_time = time.time() - regions_start
+                
+                self.advanced_logger.info(
+                    f"Screen regions initialized in {regions_time*1000:.2f}ms",
+                    extra_data={
+                        'regions_init_time_ms': regions_time * 1000,
+                        'regions_count': len(self.screen_regions),
+                        'region_names': list(self.screen_regions.keys())
+                    }
+                )
+                
+                # Stage 5: Register hotkey callbacks
+                callbacks_start = time.time()
+                self._register_hotkey_callbacks()
+                callbacks_time = time.time() - callbacks_start
+                
+                self.advanced_logger.info(
+                    f"Hotkey callbacks registered in {callbacks_time*1000:.2f}ms",
+                    extra_data={
+                        'callbacks_registration_time_ms': callbacks_time * 1000,
+                        'callbacks_count': 5,
+                        'hotkey_types': [hk.value for hk in HotkeyType]
+                    }
+                )
+                
+                init_time = time.time() - init_start
+                
+                # Final initialization log
+                self.advanced_logger.info(
+                    f"GameMonitor initialized successfully in {init_time*1000:.2f}ms",
+                    extra_data={
+                        'total_initialization_time_ms': init_time * 1000,
+                        'timing_breakdown': {
+                            'subsystems_ms': subsystems_time * 1000,
+                            'config_ms': config_time * 1000,
+                            'stats_ms': stats_time * 1000,
+                            'regions_ms': regions_time * 1000,
+                            'callbacks_ms': callbacks_time * 1000
+                        },
+                        'system_ready': True,
+                        'initial_state': self.state.value,
+                        'config_path': config_path
+                    }
+                )
+                
+                logger.info("GameMonitor initialized successfully")
+                
+            except Exception as e:
+                # Log initialization failure
+                init_time = time.time() - init_start
+                
+                self.advanced_logger.error(
+                    f"GameMonitor initialization failed: {str(e)}",
+                    error=e,
+                    extra_data={
+                        'initialization_time_ms': init_time * 1000,
+                        'config_path': config_path,
+                        'initialization_stage': 'unknown'
+                    }
+                )
+                
+                # Record initialization error
+                self.error_tracker.record_error(
+                    'game_monitor', 'initialization', e,
+                    context={'config_path': config_path}
+                )
+                
+                raise
     
     def _load_default_config(self) -> Dict[str, Any]:
         """Load default configuration"""
@@ -167,32 +290,145 @@ class GameMonitor:
         logger.info("Hotkey callbacks registered")
     
     def start(self):
-        """Start the game monitoring system"""
-        with self._state_lock:
-            if self.state == SystemState.RUNNING:
-                logger.warning("System already running")
-                return
-            
-            self.state = SystemState.STARTING
+        """Start the game monitoring system with comprehensive logging"""
+        # Start performance tracking for system startup
+        trace_id = self.performance_monitor.start_operation(
+            'game_monitor', 'system_start',
+            context={'current_state': self.state.value}
+        )
         
-        try:
-            logger.info("Starting Game Monitor System...")
+        with self.advanced_logger.operation_context('game_monitor', 'start'):
+            start_time = time.time()
             
-            # Start hotkey manager
-            self.hotkey_manager.start()
-            
-            # Update state and performance tracking
-            with self._state_lock:
-                self.state = SystemState.RUNNING
-                self.performance_stats['uptime_start'] = time.time()
-            
-            logger.info("Game Monitor System started successfully")
-            
-        except Exception as e:
-            logger.error(f"Failed to start system: {e}")
-            with self._state_lock:
-                self.state = SystemState.ERROR
-            raise
+            try:
+                # Check current state
+                with self._state_lock:
+                    if self.state == SystemState.RUNNING:
+                        self.advanced_logger.warning(
+                            "System start requested but already running",
+                            extra_data={
+                                'current_state': self.state.value,
+                                'uptime': time.time() - self.performance_stats.get('uptime_start', time.time()),
+                                'action_taken': 'ignored'
+                            }
+                        )
+                        logger.warning("System already running")
+                        
+                        # Finish performance tracking - not an error but no action taken
+                        self.performance_monitor.finish_operation(trace_id, success=True, operation_data={'already_running': True})
+                        return
+                    
+                    # Update state to starting
+                    previous_state = self.state
+                    self.state = SystemState.STARTING
+                
+                self.advanced_logger.info(
+                    "Starting Game Monitor System",
+                    extra_data={
+                        'previous_state': previous_state.value,
+                        'new_state': self.state.value,
+                        'registered_callbacks': len(getattr(self.hotkey_manager, '_callbacks', {})),
+                        'screen_regions': list(self.screen_regions.keys()),
+                        'config_sections': list(self.config.keys()) if self.config else []
+                    }
+                )
+                
+                logger.info("Starting Game Monitor System...")
+                
+                # Start hotkey manager
+                hotkey_start = time.time()
+                self.hotkey_manager.start()
+                hotkey_time = time.time() - hotkey_start
+                
+                self.advanced_logger.info(
+                    f"Hotkey manager started in {hotkey_time*1000:.2f}ms",
+                    extra_data={
+                        'hotkey_manager_start_time_ms': hotkey_time * 1000,
+                        'hotkey_manager_state': 'running',
+                        'registered_hotkeys': [hk.value for hk in HotkeyType]
+                    }
+                )
+                
+                # Update state and performance tracking
+                state_update_start = time.time()
+                with self._state_lock:
+                    self.state = SystemState.RUNNING
+                    self.performance_stats['uptime_start'] = time.time()
+                state_update_time = time.time() - state_update_start
+                
+                total_time = time.time() - start_time
+                
+                # Log successful startup
+                self.advanced_logger.info(
+                    f"Game Monitor System started successfully in {total_time*1000:.2f}ms",
+                    extra_data={
+                        'total_startup_time_ms': total_time * 1000,
+                        'timing_breakdown': {
+                            'hotkey_manager_start_ms': hotkey_time * 1000,
+                            'state_update_ms': state_update_time * 1000
+                        },
+                        'final_state': self.state.value,
+                        'uptime_start': self.performance_stats['uptime_start'],
+                        'system_status': 'operational',
+                        'subsystems_status': {
+                            'hotkey_manager': 'running',
+                            'vision_system': 'ready',
+                            'database': 'connected',
+                            'validator': 'ready'
+                        }
+                    }
+                )
+                
+                # Finish performance tracking
+                self.performance_monitor.finish_operation(
+                    trace_id, success=True,
+                    operation_data={
+                        'startup_time_ms': total_time * 1000,
+                        'final_state': self.state.value,
+                        'subsystems_started': ['hotkey_manager']
+                    }
+                )
+                
+                logger.info("Game Monitor System started successfully")
+                
+            except Exception as e:
+                # Comprehensive error logging
+                total_time = time.time() - start_time
+                
+                self.advanced_logger.error(
+                    f"Failed to start Game Monitor System: {str(e)}",
+                    error=e,
+                    extra_data={
+                        'startup_time_ms': total_time * 1000,
+                        'attempted_state_change': f"{SystemState.STOPPED.value} -> {SystemState.RUNNING.value}",
+                        'final_state': SystemState.ERROR.value,
+                        'subsystem_states': {
+                            'hotkey_manager': getattr(self.hotkey_manager, 'is_running', False),
+                            'vision_system': 'unknown',
+                            'database': 'unknown'
+                        }
+                    }
+                )
+                
+                # Update state to error
+                with self._state_lock:
+                    self.state = SystemState.ERROR
+                
+                # Record error for tracking
+                self.error_tracker.record_error(
+                    'game_monitor', 'system_start', e,
+                    context={
+                        'startup_time_ms': total_time * 1000,
+                        'config_path': self.config_path
+                    },
+                    trace_id=trace_id
+                )
+                
+                # Finish performance tracking with error
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                logger.error(f"Failed to start system: {e}")
+                raise
     
     def stop(self):
         """Stop the game monitoring system"""
@@ -239,69 +475,262 @@ class GameMonitor:
     # Hotkey event handlers
     
     def _handle_trader_list_capture(self, event: CaptureEvent) -> ProcessingResult:
-        """Handle F1 - Trader List Capture"""
-        logger.debug("Processing trader list capture")
+        """Handle F1 - Trader List Capture with comprehensive logging"""
+        # Start performance tracking for complete pipeline
+        trace_id = self.performance_monitor.start_operation(
+            'game_monitor', 'trader_list_capture',
+            context={
+                'hotkey': 'F1',
+                'event_timestamp': event.timestamp,
+                'system_state': self.state.value
+            }
+        )
         
-        start_time = time.time()
-        
-        try:
-            # Get screen region for trader list
-            region = self.screen_regions['trader_list']
+        with self.advanced_logger.operation_context('game_monitor', 'trader_list_capture'):
+            start_time = time.time()
             
-            # Capture and process with high performance settings
-            result = self.vision_system.capture_and_process_region(
-                region, 'trader_name'
-            )
-            
-            if result:
-                # Validate data
-                validation_result = self.validator.validate_trader_nickname(
-                    result.get('trader_nickname', ''),
-                    ValidationLevel.BALANCED
+            try:
+                self.advanced_logger.info(
+                    "Processing F1 - Trader List Capture",
+                    extra_data={
+                        'hotkey': 'F1',
+                        'capture_type': 'trader_list',
+                        'event_timestamp': event.timestamp,
+                        'processing_delay_ms': (start_time - event.timestamp) * 1000,
+                        'system_state': self.state.value
+                    }
                 )
                 
-                if validation_result.is_valid:
-                    # Process as trader list data
-                    processed_data = self._process_trader_list_data([result])
+                logger.debug("Processing trader list capture")
+                
+                # Stage 1: Get screen region
+                region_start = time.time()
+                region = self.screen_regions['trader_list']
+                region_time = time.time() - region_start
+                
+                self.advanced_logger.debug(
+                    f"Screen region retrieved in {region_time*1000:.2f}ms",
+                    extra_data={
+                        'region_retrieval_time_ms': region_time * 1000,
+                        'region_config': {
+                            'name': region.name,
+                            'coordinates': f"({region.x}, {region.y})",
+                            'dimensions': f"{region.width}x{region.height}",
+                            'area_pixels': region.width * region.height
+                        }
+                    }
+                )
+                
+                # Stage 2: Capture and process with vision system
+                vision_start = time.time()
+                result = self.vision_system.capture_and_process_region(
+                    region, 'trader_name'
+                )
+                vision_time = time.time() - vision_start
+                
+                self.advanced_logger.info(
+                    f"Vision processing completed in {vision_time*1000:.2f}ms",
+                    extra_data={
+                        'vision_processing_time_ms': vision_time * 1000,
+                        'vision_result_available': result is not None,
+                        'extracted_data_fields': list(result.keys()) if result else []
+                    }
+                )
+                
+                if result:
+                    # Stage 3: Validate data
+                    validation_start = time.time()
+                    trader_nickname = result.get('trader_nickname', '')
                     
-                    processing_time = time.time() - start_time
-                    self._update_performance_stats(processing_time, True)
+                    self.advanced_logger.debug(
+                        f"Validating trader nickname: '{trader_nickname}'",
+                        extra_data={
+                            'trader_nickname': trader_nickname,
+                            'nickname_length': len(trader_nickname),
+                            'validation_level': 'BALANCED'
+                        }
+                    )
+                    
+                    validation_result = self.validator.validate_trader_nickname(
+                        trader_nickname, ValidationLevel.BALANCED
+                    )
+                    validation_time = time.time() - validation_start
+                    
+                    self.advanced_logger.info(
+                        f"Data validation completed in {validation_time*1000:.2f}ms",
+                        extra_data={
+                            'validation_time_ms': validation_time * 1000,
+                            'validation_result': validation_result.is_valid,
+                            'confidence_score': validation_result.confidence,
+                            'validation_warnings': validation_result.warnings,
+                            'validation_level': 'BALANCED'
+                        }
+                    )
+                    
+                    if validation_result.is_valid:
+                        # Stage 4: Process and store data
+                        processing_start = time.time()
+                        processed_data = self._process_trader_list_data([result])
+                        processing_time_stage = time.time() - processing_start
+                        
+                        total_processing_time = time.time() - start_time
+                        self._update_performance_stats(total_processing_time, True)
+                        
+                        # Log successful completion
+                        self.advanced_logger.info(
+                            f"Trader list capture completed successfully in {total_processing_time*1000:.2f}ms",
+                            extra_data={
+                                'total_processing_time_ms': total_processing_time * 1000,
+                                'timing_breakdown': {
+                                    'region_retrieval_ms': region_time * 1000,
+                                    'vision_processing_ms': vision_time * 1000,
+                                    'validation_ms': validation_time * 1000,
+                                    'data_processing_ms': processing_time_stage * 1000
+                                },
+                                'performance_status': 'EXCELLENT' if total_processing_time < 0.5 else 'GOOD' if total_processing_time < 1.0 else 'SLOW',
+                                'data_extracted': {
+                                    'traders_count': processed_data.get('traders_found', 0),
+                                    'trade_ids_generated': len(processed_data.get('trade_ids', []))
+                                },
+                                'final_confidence': validation_result.confidence
+                            }
+                        )
+                        
+                        # Finish performance tracking
+                        self.performance_monitor.finish_operation(
+                            trace_id, success=True,
+                            operation_data={
+                                'total_time_ms': total_processing_time * 1000,
+                                'traders_processed': processed_data.get('traders_found', 0),
+                                'confidence': validation_result.confidence,
+                                'pipeline_stages': 4
+                            }
+                        )
+                        
+                        return ProcessingResult(
+                            success=True,
+                            processing_time=total_processing_time,
+                            data_extracted=processed_data,
+                            confidence=validation_result.confidence,
+                            errors=[],
+                            warnings=validation_result.warnings
+                        )
+                    else:
+                        # Validation failed
+                        total_processing_time = time.time() - start_time
+                        self._update_performance_stats(total_processing_time, False)
+                        
+                        self.advanced_logger.warning(
+                            f"Trader list validation failed in {total_processing_time*1000:.2f}ms",
+                            extra_data={
+                                'total_processing_time_ms': total_processing_time * 1000,
+                                'validation_confidence': validation_result.confidence,
+                                'validation_warnings': validation_result.warnings,
+                                'extracted_nickname': trader_nickname,
+                                'failure_reason': 'validation_failed'
+                            }
+                        )
+                        
+                        # Finish performance tracking with validation failure
+                        self.performance_monitor.finish_operation(
+                            trace_id, success=False, error_count=1,
+                            operation_data={'failure_stage': 'validation'}
+                        )
+                        
+                        return ProcessingResult(
+                            success=False,
+                            processing_time=total_processing_time,
+                            data_extracted={},
+                            confidence=validation_result.confidence,
+                            errors=["Validation failed for trader data"],
+                            warnings=validation_result.warnings
+                        )
+                else:
+                    # Vision processing failed
+                    total_processing_time = time.time() - start_time
+                    self._update_performance_stats(total_processing_time, False)
+                    
+                    self.advanced_logger.error(
+                        f"Vision processing failed in {total_processing_time*1000:.2f}ms",
+                        extra_data={
+                            'total_processing_time_ms': total_processing_time * 1000,
+                            'timing_breakdown': {
+                                'region_retrieval_ms': region_time * 1000,
+                                'vision_processing_ms': vision_time * 1000
+                            },
+                            'failure_stage': 'vision_processing',
+                            'region_config': region.name
+                        }
+                    )
+                    
+                    # Record vision processing error
+                    self.error_tracker.record_error(
+                        'game_monitor', 'trader_list_capture_vision_failed',
+                        Exception("Vision processing returned no results"),
+                        context={
+                            'region_name': region.name,
+                            'processing_time_ms': total_processing_time * 1000
+                        },
+                        trace_id=trace_id
+                    )
+                    
+                    # Finish performance tracking with vision failure
+                    self.performance_monitor.finish_operation(
+                        trace_id, success=False, error_count=1,
+                        operation_data={'failure_stage': 'vision_processing'}
+                    )
                     
                     return ProcessingResult(
-                        success=True,
-                        processing_time=processing_time,
-                        data_extracted=processed_data,
-                        confidence=validation_result.confidence,
-                        errors=[],
-                        warnings=validation_result.warnings
+                        success=False,
+                        processing_time=total_processing_time,
+                        data_extracted={},
+                        confidence=0.0,
+                        errors=["Failed to capture trader list data"],
+                        warnings=[]
                     )
-            
-            # Failed processing
-            processing_time = time.time() - start_time
-            self._update_performance_stats(processing_time, False)
-            
-            return ProcessingResult(
-                success=False,
-                processing_time=processing_time,
-                data_extracted={},
-                confidence=0.0,
-                errors=["Failed to capture trader list data"],
-                warnings=[]
-            )
-            
-        except Exception as e:
-            processing_time = time.time() - start_time
-            self._update_performance_stats(processing_time, False)
-            
-            logger.error(f"Error in trader list capture: {e}")
-            return ProcessingResult(
-                success=False,
-                processing_time=processing_time,
-                data_extracted={},
-                confidence=0.0,
-                errors=[str(e)],
-                warnings=[]
-            )
+                
+            except Exception as e:
+                # Comprehensive error handling
+                total_processing_time = time.time() - start_time
+                self._update_performance_stats(total_processing_time, False)
+                
+                self.advanced_logger.error(
+                    f"Trader list capture failed with exception: {str(e)}",
+                    error=e,
+                    extra_data={
+                        'total_processing_time_ms': total_processing_time * 1000,
+                        'hotkey_type': 'F1',
+                        'system_state': self.state.value,
+                        'event_timestamp': event.timestamp,
+                        'failure_type': 'exception',
+                        'region_name': self.screen_regions['trader_list'].name
+                    }
+                )
+                
+                # Record exception error
+                self.error_tracker.record_error(
+                    'game_monitor', 'trader_list_capture_exception', e,
+                    context={
+                        'hotkey_type': 'F1',
+                        'processing_time_ms': total_processing_time * 1000,
+                        'event_timestamp': event.timestamp
+                    },
+                    trace_id=trace_id
+                )
+                
+                # Finish performance tracking with error
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                logger.error(f"Error in trader list capture: {e}")
+                
+                return ProcessingResult(
+                    success=False,
+                    processing_time=total_processing_time,
+                    data_extracted={},
+                    confidence=0.0,
+                    errors=[str(e)],
+                    warnings=[]
+                )
     
     def _handle_item_scan_capture(self, event: CaptureEvent) -> ProcessingResult:
         """Handle F2 - Item Scan Capture"""
