@@ -1,6 +1,6 @@
 Lineage 2 Automation Policy
 Developer: NCSoft
-Last Updated: August 29, 2025
+Last Updated: August 29, 2023
 Overview
 NCSoft permits limited use of automated keyboard and mouse inputs in Lineage 2 for specific purposes, such as market monitoring and accessibility, to enhance player experience while maintaining game integrity. This policy outlines the conditions under which automation is allowed.
 Scope

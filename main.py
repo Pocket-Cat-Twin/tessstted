@@ -9,6 +9,7 @@ import sys
 import os
 import signal
 import time
+import argparse
 from pathlib import Path
 
 # Setup logging first
@@ -24,12 +25,25 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def main():
+def main(console_mode=True):
     """Main application entry point"""
     print("=" * 60)
     print("Game Monitor System v1.0.0")
     print("High-Performance Screen Reading System")
     print("=" * 60)
+    
+    if not console_mode:
+        print("Starting GUI interface...")
+        try:
+            from game_monitor.gui_interface import main as gui_main
+            gui_main()
+            return
+        except ImportError as e:
+            print(f"GUI not available: {e}")
+            print("Falling back to console mode...")
+        except Exception as e:
+            print(f"GUI error: {e}")
+            print("Falling back to console mode...")
     
     try:
         # Ensure required directories exist
@@ -148,4 +162,14 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Game Monitor System')
+    parser.add_argument('--gui', action='store_true', help='Start GUI interface instead of console')
+    parser.add_argument('--console', action='store_true', help='Force console mode (default)')
+    
+    args = parser.parse_args()
+    
+    # Determine mode
+    if args.gui and not args.console:
+        main(console_mode=False)  # GUI mode
+    else:
+        main(console_mode=True)   # Console mode (default)
