@@ -19,6 +19,8 @@ import numpy as np
 from functools import wraps, lru_cache
 import logging
 
+from .constants import Database, Performance, Memory, Threading, Queues
+
 try:
     import cv2
     CV2_AVAILABLE = True
@@ -37,13 +39,13 @@ class OCROptimizer:
     
     def __init__(self):
         self.image_cache = OrderedDict()
-        self.cache_max_size = 100
+        self.cache_max_size = Queues.MAX_BATCH_SIZE
         self.preprocessing_cache = OrderedDict()
         self.region_configs = self._init_region_configs()
         self.template_cache = {}
         
         # OCR engine pool
-        self.ocr_pool = queue.Queue(maxsize=3)
+        self.ocr_pool = queue.Queue(maxsize=Threading.DEFAULT_THREAD_POOL_SIZE)
         self._init_ocr_pool()
         
         logging.info("OCROptimizer initialized with advanced optimizations")
@@ -78,7 +80,7 @@ class OCROptimizer:
         if not TESSERACT_AVAILABLE:
             return
         
-        for _ in range(3):
+        for _ in range(Threading.DEFAULT_THREAD_POOL_SIZE):
             # Pre-initialize OCR configurations
             ocr_config = {
                 'initialized': True,
@@ -109,7 +111,7 @@ class OCROptimizer:
             optimized = self._default_enhance(image)
         
         # Cache the result
-        if len(self.preprocessing_cache) >= self.cache_max_size:
+        if len(self.preprocessing_cache) >= Queues.MAX_BATCH_SIZE:
             self.preprocessing_cache.popitem(last=False)
         self.preprocessing_cache[cache_key] = optimized
         
@@ -247,7 +249,7 @@ class OCROptimizer:
         
         # Wait for all threads
         for thread in threads:
-            thread.join(timeout=2.0)  # 2 second timeout per thread
+            thread.join(timeout=Threading.THREAD_TIMEOUT * 2)  # 2 second timeout per thread
         
         # Filter out None results
         return [r for r in results if r is not None]
@@ -333,7 +335,7 @@ class DatabaseOptimizer:
     def __init__(self, db_manager):
         self.db_manager = db_manager
         self.query_cache = OrderedDict()
-        self.cache_max_size = 1000
+        self.cache_max_size = Database.CACHE_SIZE_PAGES // 10  # 1000 for query cache
         self.prepared_statements = {}
         self.batch_queue = queue.Queue()
         self.batch_thread = None
@@ -350,7 +352,7 @@ class DatabaseOptimizer:
         optimizations = [
             "PRAGMA journal_mode=WAL",
             "PRAGMA synchronous=NORMAL", 
-            "PRAGMA cache_size=10000",
+            f"PRAGMA cache_size={Database.CACHE_SIZE_PAGES}",
             "PRAGMA temp_store=MEMORY",
             "PRAGMA mmap_size=268435456",  # 256MB
             "PRAGMA optimize"
@@ -420,7 +422,7 @@ class DatabaseOptimizer:
             except sqlite3.Error as e:
                 logging.warning(f"Failed to prepare statement '{name}': {e}")
     
-    @lru_cache(maxsize=500)
+    @lru_cache(maxsize=Database.CACHE_SIZE_PAGES // 20)  # 500 for query cache
     def cached_query(self, query_hash: str, query: str, params: tuple):
         """Cache query results for repeated queries"""
         # This is a simplified version - in practice, you'd need to handle cache invalidation
@@ -456,19 +458,19 @@ class DatabaseOptimizer:
         """Stop batch processing thread"""
         self.batch_processing = False
         if self.batch_thread:
-            self.batch_thread.join(timeout=5)
+            self.batch_thread.join(timeout=Performance.TIMEOUT_STANDARD * 5)  # 5 second timeout
     
     def _batch_processor(self):
         """Background batch processor"""
         batch_trades = []
-        batch_timeout = 1.0  # Process batches every second
+        batch_timeout = Performance.BATCH_TIMEOUT  # Process batches every second
         
         while self.batch_processing:
             try:
                 # Collect trades for batching
                 deadline = time.time() + batch_timeout
                 
-                while time.time() < deadline and len(batch_trades) < 100:
+                while time.time() < deadline and len(batch_trades) < Queues.MAX_BATCH_SIZE:
                     try:
                         trade = self.batch_queue.get(timeout=0.1)
                         batch_trades.append(trade)
@@ -511,7 +513,7 @@ class MemoryOptimizer:
     def configure_gc(self):
         """Configure garbage collection for better performance"""
         # Increase GC thresholds to reduce frequency
-        gc.set_threshold(1000, 15, 15)
+        gc.set_threshold(1000, 15, 15)  # Keep hardcoded as GC-specific values
         
         # Enable automatic garbage collection
         gc.enable()
@@ -798,7 +800,7 @@ class ThreadingOptimizer:
             
             # Wait for workers to finish
             for worker in thread_pool['workers']:
-                worker.join(timeout=2.0)
+                worker.join(timeout=Threading.THREAD_TIMEOUT * 2)  # 2 second timeout
             
             logging.info(f"Shutdown thread pool '{pool_name}'")
 

@@ -15,6 +15,7 @@ import traceback
 import hashlib
 
 from .advanced_logger import get_logger, ErrorSeverity
+from .constants import Queues
 
 
 class ErrorCategory(Enum):
@@ -117,7 +118,7 @@ class ErrorTracker:
         self.logger = get_logger('error_tracker')
         
         # Error storage
-        self._errors = deque(maxlen=10000)  # Keep last 10K errors
+        self._errors = deque(maxlen=Queues.MAX_ERROR_HISTORY)  # Keep last 10K errors
         self._error_patterns = {}  # signature -> ErrorPattern
         self._lock = threading.RLock()
         

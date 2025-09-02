@@ -18,6 +18,8 @@ import traceback
 import queue
 import json
 
+from .constants import Performance, Queues
+
 
 @dataclass 
 class PerformanceMetric:
@@ -46,7 +48,7 @@ class SystemAlert:
 class PerformanceCollector:
     """Collects and manages performance metrics"""
     
-    def __init__(self, max_metrics: int = 10000):
+    def __init__(self, max_metrics: int = Queues.MAX_PERFORMANCE_METRICS):
         self.max_metrics = max_metrics
         self.metrics = deque(maxlen=max_metrics)
         self.operation_stats = defaultdict(list)
@@ -54,7 +56,7 @@ class PerformanceCollector:
         
         # Performance thresholds
         self.thresholds = {
-            'response_time': 1.0,  # seconds
+            'response_time': Performance.GOOD_THRESHOLD,  # seconds
             'memory_usage': 80.0,  # percentage
             'cpu_usage': 75.0,     # percentage
             'error_rate': 5.0      # percentage
@@ -224,7 +226,7 @@ class AlertManager:
         # Alert thresholds
         self.thresholds = {
             'response_time_warning': 0.5,
-            'response_time_critical': 1.0,
+            'response_time_critical': Performance.GOOD_THRESHOLD,
             'memory_warning': 80.0,
             'memory_critical': 90.0,
             'cpu_warning': 75.0,

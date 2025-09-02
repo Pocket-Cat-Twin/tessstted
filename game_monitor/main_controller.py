@@ -23,6 +23,16 @@ from .database_manager import DatabaseManager, get_database
 from .advanced_logger import get_main_controller_logger
 from .error_tracker import ErrorTracker
 from .performance_logger import PerformanceMonitor
+from .error_handler import ErrorHandler, ErrorContext, ErrorCategory, RecoveryStrategy, get_error_handler
+from .input_validator import get_input_validator
+from .performance_profiler import get_performance_profiler, profile_performance
+from .database_optimizer import get_database_optimizer
+from .memory_optimizer import get_memory_optimizer
+from .security_manager import get_security_manager, Permission
+from .encryption_manager import get_encryption_manager
+from .security_auditor import get_security_auditor
+from .file_security import get_file_security_manager
+from .constants import Performance, GUI, ConfigDefaults
 
 logger = logging.getLogger(__name__)  # Keep for compatibility
 
@@ -55,11 +65,13 @@ class GameMonitor:
         self.config_path = config_path
         self.state = SystemState.STOPPED
         self._state_lock = threading.Lock()
+        self._performance_lock = threading.Lock()  # Add lock for performance stats
         
         # Advanced logging and monitoring
         self.advanced_logger = get_main_controller_logger()
         self.error_tracker = ErrorTracker()
         self.performance_monitor = PerformanceMonitor()
+        self.error_handler = get_error_handler()
         
         with self.advanced_logger.operation_context('game_monitor', 'initialization'):
             try:
@@ -80,6 +92,14 @@ class GameMonitor:
                 self.hotkey_manager = get_hotkey_manager()
                 self.vision_system = get_vision_system()
                 self.validator = get_validator()
+                self.input_validator = get_input_validator()
+                self.performance_profiler = get_performance_profiler()
+                self.db_optimizer = get_database_optimizer()
+                self.memory_optimizer = get_memory_optimizer()
+                self.security_manager = get_security_manager()
+                self.encryption_manager = get_encryption_manager()
+                self.security_auditor = get_security_auditor()
+                self.file_security = get_file_security_manager()
                 
                 subsystems_time = time.time() - subsystems_start
                 
@@ -87,8 +107,8 @@ class GameMonitor:
                     f"Subsystems initialized in {subsystems_time*1000:.2f}ms",
                     extra_data={
                         'subsystems_init_time_ms': subsystems_time * 1000,
-                        'subsystems_count': 4,
-                        'subsystems': ['database', 'hotkey_manager', 'vision_system', 'validator']
+                        'subsystems_count': 12,
+                        'subsystems': ['database', 'hotkey_manager', 'vision_system', 'validator', 'input_validator', 'performance_profiler', 'db_optimizer', 'memory_optimizer', 'security_manager', 'encryption_manager', 'security_auditor', 'file_security']
                     }
                 )
                 
@@ -211,7 +231,7 @@ class GameMonitor:
             },
             'ocr': {
                 'confidence_threshold': 0.85,
-                'max_processing_time': 0.8,  # Reserve 0.2s for other operations
+                'max_processing_time': Performance.MAX_PROCESSING_TIME,  # Reserve 0.2s for other operations
                 'use_cache': True
             },
             'validation': {
@@ -220,8 +240,8 @@ class GameMonitor:
                 'auto_approve_threshold': 0.95
             },
             'performance': {
-                'max_capture_time': 1.0,
-                'warning_threshold': 0.8,
+                'max_capture_time': Performance.MAX_CAPTURE_TIME,
+                'warning_threshold': Performance.WARNING_THRESHOLD,
                 'enable_performance_logging': True
             }
         }
@@ -304,11 +324,16 @@ class GameMonitor:
                 # Check current state
                 with self._state_lock:
                     if self.state == SystemState.RUNNING:
+                        # Calculate uptime safely
+                        with self._performance_lock:
+                            uptime_start = self.performance_stats.get('uptime_start', time.time())
+                            uptime = time.time() - uptime_start
+                        
                         self.advanced_logger.warning(
                             "System start requested but already running",
                             extra_data={
                                 'current_state': self.state.value,
-                                'uptime': time.time() - self.performance_stats.get('uptime_start', time.time()),
+                                'uptime': uptime,
                                 'action_taken': 'ignored'
                             }
                         )
@@ -358,6 +383,10 @@ class GameMonitor:
                 
                 total_time = time.time() - start_time
                 
+                # Get uptime_start safely for logging
+                with self._performance_lock:
+                    uptime_start = self.performance_stats['uptime_start']
+                
                 # Log successful startup
                 self.advanced_logger.info(
                     f"Game Monitor System started successfully in {total_time*1000:.2f}ms",
@@ -368,7 +397,7 @@ class GameMonitor:
                             'state_update_ms': state_update_time * 1000
                         },
                         'final_state': self.state.value,
-                        'uptime_start': self.performance_stats['uptime_start'],
+                        'uptime_start': uptime_start,
                         'system_status': 'operational',
                         'subsystems_status': {
                             'hotkey_manager': 'running',
@@ -431,27 +460,114 @@ class GameMonitor:
                 raise
     
     def stop(self):
-        """Stop the game monitoring system"""
-        with self._state_lock:
-            if self.state == SystemState.STOPPED:
-                return
-            
-            self.state = SystemState.STOPPING
+        """Stop the game monitoring system with graceful shutdown procedures"""
+        shutdown_start = time.time()
+        trace_id = self.performance_monitor.start_operation(
+            'game_monitor', 'system_shutdown',
+            context={'current_state': self.state.value}
+        )
         
-        try:
-            logger.info("Stopping Game Monitor System...")
-            
-            # Stop hotkey manager
-            self.hotkey_manager.stop()
-            
-            # Update state
+        with self.advanced_logger.operation_context('game_monitor', 'shutdown'):
             with self._state_lock:
-                self.state = SystemState.STOPPED
+                if self.state == SystemState.STOPPED:
+                    self.advanced_logger.info("System shutdown requested but already stopped")
+                    self.performance_monitor.finish_operation(trace_id, success=True, operation_data={'already_stopped': True})
+                    return
+                
+                previous_state = self.state
+                self.state = SystemState.STOPPING
             
-            logger.info("Game Monitor System stopped")
+            shutdown_phases = []
             
-        except Exception as e:
-            logger.error(f"Error during shutdown: {e}")
+            try:
+                self.advanced_logger.info(
+                    "Initiating graceful system shutdown",
+                    extra_data={
+                        'previous_state': previous_state.value,
+                        'shutdown_sequence': ['hotkey_manager', 'vision_system', 'database']
+                    }
+                )
+                logger.info("Stopping Game Monitor System...")
+                
+                # Phase 1: Stop hotkey manager to prevent new events
+                phase_start = time.time()
+                try:
+                    self.hotkey_manager.stop()
+                    shutdown_phases.append({'phase': 'hotkey_manager', 'time': time.time() - phase_start, 'success': True})
+                except Exception as e:
+                    shutdown_phases.append({'phase': 'hotkey_manager', 'time': time.time() - phase_start, 'success': False, 'error': str(e)})
+                    self.advanced_logger.warning(f"Error stopping hotkey manager: {e}")
+                
+                # Phase 2: Allow current operations to complete (timeout)
+                phase_start = time.time()
+                try:
+                    import time
+                    time.sleep(0.5)  # Brief pause to allow current operations to finish
+                    shutdown_phases.append({'phase': 'operation_completion', 'time': time.time() - phase_start, 'success': True})
+                except Exception as e:
+                    shutdown_phases.append({'phase': 'operation_completion', 'time': time.time() - phase_start, 'success': False, 'error': str(e)})
+                
+                # Phase 3: Clean up resources (vision system, database connections)
+                phase_start = time.time()
+                cleanup_errors = []
+                try:
+                    # Vision system cleanup
+                    if hasattr(self.vision_system, 'cleanup'):
+                        self.vision_system.cleanup()
+                    
+                    # Database cleanup happens automatically via connection manager
+                    
+                    shutdown_phases.append({'phase': 'resource_cleanup', 'time': time.time() - phase_start, 'success': True})
+                except Exception as e:
+                    cleanup_errors.append(str(e))
+                    shutdown_phases.append({'phase': 'resource_cleanup', 'time': time.time() - phase_start, 'success': False, 'error': str(e)})
+                    self.advanced_logger.warning(f"Error during resource cleanup: {e}")
+                
+                # Update state
+                with self._state_lock:
+                    self.state = SystemState.STOPPED
+                
+                shutdown_time = time.time() - shutdown_start
+                self.advanced_logger.info(
+                    "Game Monitor System shutdown completed",
+                    extra_data={
+                        'shutdown_time_ms': shutdown_time * 1000,
+                        'shutdown_phases': shutdown_phases,
+                        'cleanup_errors': cleanup_errors if cleanup_errors else None
+                    }
+                )
+                logger.info(f"Game Monitor System stopped successfully in {shutdown_time:.3f}s")
+                
+                # Finish performance tracking
+                self.performance_monitor.finish_operation(trace_id, success=True, operation_data={'shutdown_phases': shutdown_phases})
+                
+            except Exception as e:
+                # Comprehensive shutdown error handling
+                shutdown_time = time.time() - shutdown_start
+                
+                error_context = ErrorContext(
+                    component="main_controller",
+                    operation="system_shutdown",
+                    user_data={'shutdown_time': shutdown_time, 'shutdown_phases': shutdown_phases},
+                    system_state={'previous_state': previous_state.value},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.GRACEFUL_DEGRADATION)
+                
+                # Force state to stopped even if errors occurred
+                with self._state_lock:
+                    self.state = SystemState.STOPPED
+                
+                # Finish performance tracking with error
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                if not recovery_result.recovery_successful:
+                    logger.critical(f"Critical errors during shutdown: {e}")
+                    raise
+                else:
+                    logger.warning(f"Shutdown completed with recoverable errors: {e}")
     
     def pause(self):
         """Pause the system"""
@@ -587,7 +703,7 @@ class GameMonitor:
                                     'validation_ms': validation_time * 1000,
                                     'data_processing_ms': processing_time_stage * 1000
                                 },
-                                'performance_status': 'EXCELLENT' if total_processing_time < 0.5 else 'GOOD' if total_processing_time < 1.0 else 'SLOW',
+                                'performance_status': 'EXCELLENT' if total_processing_time < Performance.EXCELLENT_THRESHOLD else 'GOOD' if total_processing_time < Performance.GOOD_THRESHOLD else 'SLOW',
                                 'data_extracted': {
                                     'traders_count': processed_data.get('traders_found', 0),
                                     'trade_ids_generated': len(processed_data.get('trade_ids', []))
@@ -663,13 +779,38 @@ class GameMonitor:
                         }
                     )
                     
-                    # Record vision processing error
+                    # Record vision processing error with advanced error handling
+                    error_id = self.error_recovery_manager.record_error(
+                        component="vision_system",
+                        operation="trader_list_capture",
+                        error=Exception("Vision processing returned no results"),
+                        category=ErrorCategory.OCR,
+                        severity=ErrorSeverity.MEDIUM,
+                        context={
+                            'region_name': region.name,
+                            'processing_time_ms': total_processing_time * 1000,
+                            'hotkey': 'F1',
+                            'trace_id': trace_id
+                        }
+                    )
+                    
+                    # Attempt automated recovery
+                    recovery_success = self.automated_recovery.execute_recovery(
+                        "vision_system", "Vision processing returned no results"
+                    )
+                    
+                    if recovery_success:
+                        logger.info(f"Automated recovery succeeded for error {error_id}")
+                    
+                    # Also record with legacy error tracker for compatibility
                     self.error_tracker.record_error(
                         'game_monitor', 'trader_list_capture_vision_failed',
                         Exception("Vision processing returned no results"),
                         context={
                             'region_name': region.name,
-                            'processing_time_ms': total_processing_time * 1000
+                            'processing_time_ms': total_processing_time * 1000,
+                            'error_id': error_id,
+                            'recovery_attempted': recovery_success
                         },
                         trace_id=trace_id
                     )
@@ -689,46 +830,163 @@ class GameMonitor:
                         warnings=[]
                     )
                 
-            except Exception as e:
-                # Comprehensive error handling
+            except TimeoutError as e:
+                # Handle timeout errors specifically
                 total_processing_time = time.time() - start_time
                 self._update_performance_stats(total_processing_time, False)
                 
-                self.advanced_logger.error(
-                    f"Trader list capture failed with exception: {str(e)}",
-                    error=e,
-                    extra_data={
-                        'total_processing_time_ms': total_processing_time * 1000,
+                error_context = ErrorContext(
+                    component='game_monitor',
+                    operation='trader_list_capture_timeout',
+                    user_data={
                         'hotkey_type': 'F1',
-                        'system_state': self.state.value,
+                        'processing_time_ms': total_processing_time * 1000,
                         'event_timestamp': event.timestamp,
-                        'failure_type': 'exception',
                         'region_name': self.screen_regions['trader_list'].name
-                    }
+                    },
+                    system_state={'state': self.state.value},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id,
+                    performance_data={'processing_time': total_processing_time}
                 )
                 
-                # Record exception error
-                self.error_tracker.record_error(
-                    'game_monitor', 'trader_list_capture_exception', e,
+                # Record error with advanced error handling system
+                error_id = self.error_recovery_manager.record_error(
+                    component="game_monitor",
+                    operation="trader_list_capture",
+                    error=e,
+                    category=ErrorCategory.PERFORMANCE,
+                    severity=ErrorSeverity.HIGH,
                     context={
                         'hotkey_type': 'F1',
                         'processing_time_ms': total_processing_time * 1000,
-                        'event_timestamp': event.timestamp
-                    },
-                    trace_id=trace_id
+                        'event_timestamp': event.timestamp,
+                        'region_name': self.screen_regions['trader_list'].name,
+                        'trace_id': trace_id
+                    }
                 )
                 
-                # Finish performance tracking with error
+                # Attempt automated recovery
+                recovery_success = self.automated_recovery.execute_recovery(
+                    "game_monitor", f"Timeout in trader list capture: {str(e)}"
+                )
+                
+                # Also use legacy error handler for compatibility
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY)
+                
+                # Combine recovery results
+                combined_success = recovery_success or recovery_result.recovery_successful
+                
+                # Finish performance tracking
                 self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
                 
-                logger.error(f"Error in trader list capture: {e}")
-                
                 return ProcessingResult(
-                    success=False,
+                    success=combined_success,
                     processing_time=total_processing_time,
                     data_extracted={},
                     confidence=0.0,
-                    errors=[str(e)],
+                    errors=["Timeout error in trader list capture"],
+                    warnings=[]
+                )
+                
+            except (OSError, IOError) as e:
+                # Handle file/system I/O errors
+                total_processing_time = time.time() - start_time
+                self._update_performance_stats(total_processing_time, False)
+                
+                error_context = ErrorContext(
+                    component='game_monitor',
+                    operation='trader_list_capture_io_error',
+                    user_data={
+                        'hotkey_type': 'F1',
+                        'error_type': type(e).__name__,
+                        'processing_time_ms': total_processing_time * 1000
+                    },
+                    system_state={'state': self.state.value},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+                
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                return ProcessingResult(
+                    success=recovery_result.recovery_successful,
+                    processing_time=total_processing_time,
+                    data_extracted={},
+                    confidence=0.0,
+                    errors=[f"I/O error in trader list capture: {str(e)}"],
+                    warnings=[]
+                )
+                
+            except (MemoryError, ResourceWarning) as e:
+                # Handle memory/resource errors
+                total_processing_time = time.time() - start_time
+                self._update_performance_stats(total_processing_time, False)
+                
+                error_context = ErrorContext(
+                    component='game_monitor',
+                    operation='trader_list_capture_resource_error',
+                    user_data={
+                        'hotkey_type': 'F1',
+                        'error_type': type(e).__name__,
+                        'processing_time_ms': total_processing_time * 1000
+                    },
+                    system_state={'state': self.state.value},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.GRACEFUL_DEGRADATION)
+                
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                return ProcessingResult(
+                    success=recovery_result.recovery_successful,
+                    processing_time=total_processing_time,
+                    data_extracted={},
+                    confidence=0.0,
+                    errors=[f"Resource error in trader list capture: {str(e)}"],
+                    warnings=[]
+                )
+                
+            except Exception as e:
+                # Handle all other unexpected errors
+                total_processing_time = time.time() - start_time
+                self._update_performance_stats(total_processing_time, False)
+                
+                error_context = ErrorContext(
+                    component='game_monitor',
+                    operation='trader_list_capture_unexpected',
+                    user_data={
+                        'hotkey_type': 'F1',
+                        'error_type': type(e).__name__,
+                        'processing_time_ms': total_processing_time * 1000,
+                        'event_timestamp': event.timestamp,
+                        'region_name': self.screen_regions['trader_list'].name
+                    },
+                    system_state={'state': self.state.value},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id,
+                    performance_data={'processing_time': total_processing_time}
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY_WITH_BACKOFF)
+                
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                # If recovery was not successful, re-raise the error
+                if not recovery_result.recovery_successful:
+                    logger.critical(f"Critical error in trader list capture: {e}")
+                    raise
+                
+                return ProcessingResult(
+                    success=recovery_result.recovery_successful,
+                    processing_time=total_processing_time,
+                    data_extracted={},
+                    confidence=0.0,
+                    errors=[f"Unexpected error in trader list capture: {str(e)}"],
                     warnings=[]
                 )
     
@@ -777,17 +1035,86 @@ class GameMonitor:
                 warnings=[]
             )
             
-        except Exception as e:
+        except (KeyError, AttributeError) as e:
+            # Handle configuration/attribute errors
             processing_time = time.time() - start_time
             self._update_performance_stats(processing_time, False)
             
-            logger.error(f"Error in item scan capture: {e}")
+            error_context = ErrorContext(
+                component='game_monitor',
+                operation='item_scan_capture_config_error',
+                user_data={
+                    'hotkey_type': 'F2',
+                    'error_type': type(e).__name__,
+                    'processing_time_ms': processing_time * 1000
+                },
+                system_state={'state': self.state.value},
+                timestamp=datetime.now()
+            )
+            
+            recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.SKIP)
+            
             return ProcessingResult(
-                success=False,
+                success=recovery_result.recovery_successful,
                 processing_time=processing_time,
                 data_extracted={},
                 confidence=0.0,
-                errors=[str(e)],
+                errors=[f"Configuration error in item scan: {str(e)}"],
+                warnings=[]
+            )
+        
+        except TimeoutError as e:
+            # Handle timeout errors
+            processing_time = time.time() - start_time
+            self._update_performance_stats(processing_time, False)
+            
+            error_context = ErrorContext(
+                component='game_monitor',
+                operation='item_scan_capture_timeout',
+                user_data={
+                    'hotkey_type': 'F2',
+                    'processing_time_ms': processing_time * 1000
+                },
+                system_state={'state': self.state.value},
+                timestamp=datetime.now()
+            )
+            
+            recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY)
+            
+            return ProcessingResult(
+                success=recovery_result.recovery_successful,
+                processing_time=processing_time,
+                data_extracted={},
+                confidence=0.0,
+                errors=[f"Timeout in item scan: {str(e)}"],
+                warnings=[]
+            )
+            
+        except Exception as e:
+            # Handle all other unexpected errors
+            processing_time = time.time() - start_time
+            self._update_performance_stats(processing_time, False)
+            
+            error_context = ErrorContext(
+                component='game_monitor',
+                operation='item_scan_capture_unexpected',
+                user_data={
+                    'hotkey_type': 'F2',
+                    'error_type': type(e).__name__,
+                    'processing_time_ms': processing_time * 1000
+                },
+                system_state={'state': self.state.value},
+                timestamp=datetime.now()
+            )
+            
+            recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+            
+            return ProcessingResult(
+                success=recovery_result.recovery_successful,
+                processing_time=processing_time,
+                data_extracted={},
+                confidence=0.0,
+                errors=[f"Error in item scan capture: {str(e)}"],
                 warnings=[]
             )
     
@@ -832,17 +1159,87 @@ class GameMonitor:
                 warnings=[]
             )
             
-        except Exception as e:
+        except (MemoryError, OverflowError) as e:
+            # Handle memory/processing overflow errors specific to large screenshots
             processing_time = time.time() - start_time
             self._update_performance_stats(processing_time, False)
             
-            logger.error(f"Error in inventory capture: {e}")
+            error_context = ErrorContext(
+                component='game_monitor',
+                operation='inventory_capture_memory_error',
+                user_data={
+                    'hotkey_type': 'F3',
+                    'error_type': type(e).__name__,
+                    'processing_time_ms': processing_time * 1000
+                },
+                system_state={'state': self.state.value},
+                timestamp=datetime.now()
+            )
+            
+            recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.GRACEFUL_DEGRADATION)
+            
             return ProcessingResult(
-                success=False,
+                success=recovery_result.recovery_successful,
                 processing_time=processing_time,
                 data_extracted={},
                 confidence=0.0,
-                errors=[str(e)],
+                errors=[f"Memory error in inventory capture: {str(e)}"],
+                warnings=[]
+            )
+            
+        except (OSError, IOError) as e:
+            # Handle screenshot I/O errors
+            processing_time = time.time() - start_time
+            self._update_performance_stats(processing_time, False)
+            
+            error_context = ErrorContext(
+                component='game_monitor',
+                operation='inventory_capture_io_error',
+                user_data={
+                    'hotkey_type': 'F3',
+                    'error_type': type(e).__name__,
+                    'processing_time_ms': processing_time * 1000
+                },
+                system_state={'state': self.state.value},
+                timestamp=datetime.now()
+            )
+            
+            recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY)
+            
+            return ProcessingResult(
+                success=recovery_result.recovery_successful,
+                processing_time=processing_time,
+                data_extracted={},
+                confidence=0.0,
+                errors=[f"I/O error in inventory capture: {str(e)}"],
+                warnings=[]
+            )
+            
+        except Exception as e:
+            # Handle all other unexpected errors
+            processing_time = time.time() - start_time
+            self._update_performance_stats(processing_time, False)
+            
+            error_context = ErrorContext(
+                component='game_monitor',
+                operation='inventory_capture_unexpected',
+                user_data={
+                    'hotkey_type': 'F3',
+                    'error_type': type(e).__name__,
+                    'processing_time_ms': processing_time * 1000
+                },
+                system_state={'state': self.state.value},
+                timestamp=datetime.now()
+            )
+            
+            recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+            
+            return ProcessingResult(
+                success=recovery_result.recovery_successful,
+                processing_time=processing_time,
+                data_extracted={},
+                confidence=0.0,
+                errors=[f"Error in inventory capture: {str(e)}"],
                 warnings=[]
             )
     
@@ -917,29 +1314,30 @@ class GameMonitor:
         }
     
     def _update_performance_stats(self, processing_time: float, success: bool):
-        """Update performance statistics"""
-        self.performance_stats['total_captures'] += 1
-        self.performance_stats['total_processing_time'] += processing_time
+        """Update performance statistics with thread safety"""
+        with self._performance_lock:
+            self.performance_stats['total_captures'] += 1
+            self.performance_stats['total_processing_time'] += processing_time
+            
+            if success:
+                self.performance_stats['successful_captures'] += 1
+            else:
+                self.performance_stats['failed_captures'] += 1
+            
+            # Update timing stats
+            self.performance_stats['avg_processing_time'] = (
+                self.performance_stats['total_processing_time'] / 
+                self.performance_stats['total_captures']
+            )
+            
+            self.performance_stats['fastest_capture'] = min(
+                self.performance_stats['fastest_capture'], processing_time
+            )
+            self.performance_stats['slowest_capture'] = max(
+                self.performance_stats['slowest_capture'], processing_time
+            )
         
-        if success:
-            self.performance_stats['successful_captures'] += 1
-        else:
-            self.performance_stats['failed_captures'] += 1
-        
-        # Update timing stats
-        self.performance_stats['avg_processing_time'] = (
-            self.performance_stats['total_processing_time'] / 
-            self.performance_stats['total_captures']
-        )
-        
-        self.performance_stats['fastest_capture'] = min(
-            self.performance_stats['fastest_capture'], processing_time
-        )
-        self.performance_stats['slowest_capture'] = max(
-            self.performance_stats['slowest_capture'], processing_time
-        )
-        
-        # Performance warnings
+        # Performance warnings (outside lock to avoid holding lock during logging)
         if processing_time > self.config['performance']['warning_threshold']:
             logger.warning(f"Slow capture processing: {processing_time:.3f}s")
         
@@ -947,48 +1345,120 @@ class GameMonitor:
             logger.error(f"Capture exceeded time limit: {processing_time:.3f}s")
     
     def get_performance_stats(self) -> Dict[str, Any]:
-        """Get comprehensive performance statistics"""
-        stats = self.performance_stats.copy()
+        """Get comprehensive performance statistics with thread safety"""
+        with self._performance_lock:
+            stats = self.performance_stats.copy()
+            
+            # Calculate uptime (inside lock to ensure consistency)
+            if stats.get('uptime_start'):
+                stats['uptime_seconds'] = time.time() - stats['uptime_start']
+            else:
+                stats['uptime_seconds'] = 0.0
+            
+            # Calculate success rate (inside lock to ensure consistency)
+            if stats['total_captures'] > 0:
+                stats['success_rate'] = stats['successful_captures'] / stats['total_captures']
+            else:
+                stats['success_rate'] = 0.0
         
-        # Add subsystem stats
+        # Add subsystem stats (outside lock since they have their own synchronization)
         stats['hotkey_manager'] = self.hotkey_manager.get_statistics()
         stats['vision_system'] = self.vision_system.get_statistics()
         stats['validator'] = self.validator.get_statistics()
         stats['database'] = {}  # Database stats could be added
         
-        # Calculate uptime
-        if stats['uptime_start']:
-            stats['uptime_seconds'] = time.time() - stats['uptime_start']
-        else:
-            stats['uptime_seconds'] = 0.0
-        
-        # Calculate success rate
-        if stats['total_captures'] > 0:
-            stats['success_rate'] = stats['successful_captures'] / stats['total_captures']
-        else:
-            stats['success_rate'] = 0.0
-        
         return stats
     
     def reset_performance_stats(self):
-        """Reset all performance statistics"""
-        self.performance_stats = {
-            'total_captures': 0,
-            'successful_captures': 0,
-            'failed_captures': 0,
-            'avg_processing_time': 0.0,
-            'total_processing_time': 0.0,
-            'fastest_capture': float('inf'),
-            'slowest_capture': 0.0,
-            'uptime_start': time.time() if self.get_state() == SystemState.RUNNING else None
-        }
+        """Reset all performance statistics with thread safety"""
+        with self._performance_lock:
+            current_state = self.get_state()
+            self.performance_stats = {
+                'total_captures': 0,
+                'successful_captures': 0,
+                'failed_captures': 0,
+                'avg_processing_time': 0.0,
+                'total_processing_time': 0.0,
+                'fastest_capture': float('inf'),
+                'slowest_capture': 0.0,
+                'uptime_start': time.time() if current_state == SystemState.RUNNING else None
+            }
         
-        # Reset subsystem stats
+        # Reset subsystem stats (outside lock since they have their own synchronization)
         self.hotkey_manager.reset_statistics()
         self.vision_system.reset_statistics()
         self.validator.reset_statistics()
         
         logger.info("Performance statistics reset")
+    
+    def get_error_analytics_report(self) -> Dict[str, Any]:
+        """Get comprehensive error analytics report"""
+        try:
+            return self.error_analytics.generate_analytics_report()
+        except Exception as e:
+            logger.error(f"Failed to generate error analytics report: {e}")
+            return {}
+    
+    def get_recovery_statistics(self) -> Dict[str, Any]:
+        """Get automated recovery statistics"""
+        try:
+            return self.automated_recovery.get_recovery_statistics()
+        except Exception as e:
+            logger.error(f"Failed to get recovery statistics: {e}")
+            return {}
+    
+    def get_system_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive system health status"""
+        try:
+            component_health = self.error_recovery_manager.get_component_health_status()
+            error_stats = self.error_recovery_manager.get_error_statistics()
+            recent_errors = self.error_recovery_manager.get_recent_errors(limit=10)
+            
+            return {
+                'component_health': {comp: health.__dict__ for comp, health in component_health.items()},
+                'error_statistics': error_stats,
+                'recent_errors': [error.__dict__ for error in recent_errors],
+                'recovery_statistics': self.get_recovery_statistics(),
+                'system_state': self.state.value,
+                'uptime_seconds': self.get_performance_stats().get('uptime_seconds', 0),
+                'performance_score': self._calculate_overall_performance_score()
+            }
+        except Exception as e:
+            logger.error(f"Failed to get system health status: {e}")
+            return {'error': str(e)}
+    
+    def _calculate_overall_performance_score(self) -> float:
+        """Calculate overall system performance score (0-100)"""
+        try:
+            perf_stats = self.get_performance_stats()
+            
+            # Base metrics
+            success_rate = perf_stats.get('success_rate', 0.0)
+            avg_processing_time = perf_stats.get('avg_processing_time', 1.0)
+            
+            # Calculate score components
+            success_score = success_rate * 40  # 40% weight on success rate
+            
+            # Performance score (faster = better, target < 1 second)
+            performance_score = max(0, (1.0 - min(avg_processing_time, 2.0) / 2.0)) * 40  # 40% weight
+            
+            # System health score
+            error_stats = self.error_recovery_manager.get_error_statistics()
+            total_errors = error_stats.get('total_errors', 0)
+            resolved_errors = error_stats.get('resolved_errors', 0)
+            
+            if total_errors > 0:
+                error_resolution_rate = resolved_errors / total_errors
+                health_score = error_resolution_rate * 20  # 20% weight
+            else:
+                health_score = 20  # Perfect score if no errors
+            
+            total_score = success_score + performance_score + health_score
+            return min(100, max(0, total_score))
+            
+        except Exception as e:
+            logger.error(f"Failed to calculate performance score: {e}")
+            return 0.0
     
     def get_system_info(self) -> Dict[str, Any]:
         """Get comprehensive system information"""

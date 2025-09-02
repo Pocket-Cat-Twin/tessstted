@@ -43,6 +43,8 @@ from .database_manager import get_database
 from .advanced_logger import get_vision_logger
 from .error_tracker import ErrorTracker
 from .performance_logger import PerformanceMonitor
+from .error_handler import ErrorHandler, ErrorContext, ErrorCategory, RecoveryStrategy, get_error_handler
+from .constants import OCR
 
 logger = logging.getLogger(__name__)  # Keep for compatibility
 
@@ -78,6 +80,7 @@ class VisionSystem:
         self.advanced_logger = get_vision_logger()
         self.error_tracker = ErrorTracker()
         self.performance_monitor = PerformanceMonitor()
+        self.error_handler = get_error_handler()
         
         with self.advanced_logger.operation_context('vision_system', 'initialization'):
             try:
@@ -92,20 +95,24 @@ class VisionSystem:
                 # OCR configuration for different regions
                 config_start = time.time()
                 self.ocr_configs = {
-                    'trader_name': '--psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-',
-                    'quantity': '--psm 8 -c tessedit_char_whitelist=0123456789',
-                    'price': '--psm 8 -c tessedit_char_whitelist=0123456789.',
+                    'trader_name': f'--psm 8 -c tessedit_char_whitelist={OCR.TRADER_NAME_WHITELIST}',
+                    'quantity': f'--psm 8 -c tessedit_char_whitelist={OCR.QUANTITY_WHITELIST}',
+                    'price': f'--psm 8 -c tessedit_char_whitelist={OCR.PRICE_WHITELIST}',
                     'item_name': '--psm 7 -l eng+rus',
                     'general': '--psm 6 -l eng+rus'
                 }
                 config_time = time.time() - config_start
+                
+                # OCR timeout configuration (in seconds)
+                self.ocr_timeout = 30  # Default 30 seconds timeout for OCR operations
                 
                 self.advanced_logger.debug(
                     f"OCR configurations loaded for {len(self.ocr_configs)} region types",
                     extra_data={
                         'config_count': len(self.ocr_configs),
                         'region_types': list(self.ocr_configs.keys()),
-                        'config_load_time_ms': config_time * 1000
+                        'config_load_time_ms': config_time * 1000,
+                        'ocr_timeout_seconds': self.ocr_timeout
                     }
                 )
                 
@@ -191,26 +198,75 @@ class VisionSystem:
                 
                 logger.info("VisionSystem initialized")
                 
-            except Exception as e:
-                # Log initialization failure
+            except ImportError as e:
+                # Handle missing dependency errors
                 init_time = time.time() - init_start
                 
-                self.advanced_logger.error(
-                    f"VisionSystem initialization failed: {str(e)}",
-                    error=e,
-                    extra_data={
-                        'initialization_time_ms': init_time * 1000,
-                        'initialization_stage': 'unknown'
-                    }
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='initialization_import_error',
+                    user_data={
+                        'missing_module': str(e),
+                        'initialization_time_ms': init_time * 1000
+                    },
+                    system_state={'libraries_available': {'pyautogui': PYAUTOGUI_AVAILABLE, 'opencv': OPENCV_AVAILABLE, 'ocr': OCR_AVAILABLE}},
+                    timestamp=datetime.now()
                 )
                 
-                # Record initialization error
-                self.error_tracker.record_error(
-                    'vision_system', 'initialization', e,
-                    context={'initialization_time_ms': init_time * 1000}
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+                
+                if not recovery_result.recovery_successful:
+                    raise
+                    
+            except (OSError, PermissionError) as e:
+                # Handle system/permission errors
+                init_time = time.time() - init_start
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='initialization_system_error',
+                    user_data={
+                        'error_type': type(e).__name__,
+                        'initialization_time_ms': init_time * 1000
+                    },
+                    system_state={},
+                    timestamp=datetime.now()
                 )
                 
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.GRACEFUL_DEGRADATION)
+                
+                if not recovery_result.recovery_successful:
+                    raise
+                    
+            except Exception as e:
+                # Handle all other unexpected initialization errors
+                init_time = time.time() - init_start
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='initialization_unexpected',
+                    user_data={
+                        'error_type': type(e).__name__,
+                        'initialization_time_ms': init_time * 1000
+                    },
+                    system_state={},
+                    timestamp=datetime.now()
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.USER_INTERVENTION)
+                
+                # For initialization errors, we usually can't recover
+                self.advanced_logger.critical(f"Critical initialization error: {e}")
                 raise
+    
+    def __del__(self):
+        """Cleanup resources when VisionSystem is destroyed"""
+        try:
+            # This helps ensure any remaining resources are cleaned up
+            if hasattr(self, 'stats') and hasattr(self, 'advanced_logger'):
+                self.advanced_logger.debug("VisionSystem cleanup - releasing resources")
+        except:
+            pass  # Don't raise exceptions in destructor
     
     def _check_dependencies(self):
         """Check and log available dependencies with comprehensive logging"""
@@ -282,23 +338,56 @@ class VisionSystem:
                     }
                 )
                 
-            except Exception as e:
+            except ImportError as e:
+                # Handle import errors during dependency check
                 deps_time = time.time() - deps_start
                 
-                self.advanced_logger.error(
-                    f"Dependency check failed: {str(e)}",
-                    error=e,
-                    extra_data={
-                        'check_time_ms': deps_time * 1000,
-                        'fallback_action': 'assuming_simulation_mode'
-                    }
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='dependency_check_import_error',
+                    user_data={
+                        'missing_import': str(e),
+                        'check_time_ms': deps_time * 1000
+                    },
+                    system_state={'simulation_mode': True},
+                    timestamp=datetime.now()
                 )
                 
-                # Record dependency check error
-                self.error_tracker.record_error(
-                    'vision_system', 'dependency_check', e,
-                    context={'check_phase': 'library_detection'}
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+                
+            except AttributeError as e:
+                # Handle attribute errors during library checks
+                deps_time = time.time() - deps_start
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='dependency_check_attribute_error',
+                    user_data={
+                        'attribute_error': str(e),
+                        'check_time_ms': deps_time * 1000
+                    },
+                    system_state={'simulation_mode': True},
+                    timestamp=datetime.now()
                 )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.SKIP)
+                
+            except Exception as e:
+                # Handle other unexpected dependency check errors
+                deps_time = time.time() - deps_start
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='dependency_check_unexpected',
+                    user_data={
+                        'error_type': type(e).__name__,
+                        'check_time_ms': deps_time * 1000
+                    },
+                    system_state={'fallback_mode': 'simulation'},
+                    timestamp=datetime.now()
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.GRACEFUL_DEGRADATION)
     
     def _get_library_impact(self, library_name: str) -> str:
         """Get impact description for missing library"""
@@ -408,6 +497,8 @@ class VisionSystem:
                     }
                 )
                 
+                # IMPORTANT: Caller is responsible for cleaning up this screenshot image
+                # to prevent memory leaks. Call self.cleanup_image(screenshot) when done.
                 return screenshot
                 
             except Exception as e:
@@ -539,6 +630,12 @@ class VisionSystem:
                         'size_preserved': original_size == processed_size
                     }
                 )
+                
+                # Note: processed_image will be returned and used by caller
+                # The caller is responsible for cleaning up this image
+                # Adding cleanup hint as attribute for memory management awareness
+                if hasattr(processed_image, '_needs_cleanup'):
+                    processed_image._needs_cleanup = True
                 
                 return processed_image
                 
@@ -746,39 +843,118 @@ class VisionSystem:
                     cached=False
                 )
                 
-            except Exception as e:
-                # Comprehensive error logging
+            except ImportError as e:
+                # Handle OCR library not available
                 processing_time = time.time() - start_time
                 
-                self.advanced_logger.error(
-                    f"OCR processing failed for {region_type}: {str(e)}",
-                    error=e,
-                    extra_data={
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='ocr_import_error',
+                    user_data={
                         'region_type': region_type,
-                        'use_cache': use_cache,
-                        'ocr_available': OCR_AVAILABLE,
-                        'processing_time_ms': processing_time * 1000,
-                        'image_hash': image_hash[:16] + '...' if image_hash else None
-                    }
-                )
-                
-                # Record error for tracking
-                self.error_tracker.record_error(
-                    'vision_system', 'perform_ocr', e,
-                    context={
-                        'region_type': region_type,
-                        'use_cache': use_cache,
-                        'image_available': image is not None
+                        'missing_library': str(e),
+                        'processing_time_ms': processing_time * 1000
                     },
+                    system_state={'ocr_available': OCR_AVAILABLE},
+                    timestamp=datetime.now(),
                     trace_id=trace_id
                 )
                 
-                # Finish performance tracking with error
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+                
                 self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
                 
-                # Return empty result on error
                 return OCRResult(
-                    text="",
+                    text="[OCR_UNAVAILABLE]",
+                    confidence=0.0,
+                    processing_time=processing_time,
+                    region_type=region_type,
+                    cached=False
+                )
+                
+            except (OSError, IOError) as e:
+                # Handle file/image I/O errors
+                processing_time = time.time() - start_time
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='ocr_io_error',
+                    user_data={
+                        'region_type': region_type,
+                        'error_type': type(e).__name__,
+                        'processing_time_ms': processing_time * 1000
+                    },
+                    system_state={'image_hash': image_hash[:16] + '...' if image_hash else None},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY)
+                
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                return OCRResult(
+                    text="[IO_ERROR]",
+                    confidence=0.0,
+                    processing_time=processing_time,
+                    region_type=region_type,
+                    cached=False
+                )
+                
+            except TimeoutError as e:
+                # Handle OCR timeout
+                processing_time = time.time() - start_time
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='ocr_timeout',
+                    user_data={
+                        'region_type': region_type,
+                        'processing_time_ms': processing_time * 1000
+                    },
+                    system_state={'timeout_threshold_exceeded': True},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.SKIP)
+                
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                return OCRResult(
+                    text="[TIMEOUT]",
+                    confidence=0.0,
+                    processing_time=processing_time,
+                    region_type=region_type,
+                    cached=False
+                )
+                
+            except Exception as e:
+                # Handle all other unexpected OCR errors
+                processing_time = time.time() - start_time
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='ocr_unexpected_error',
+                    user_data={
+                        'region_type': region_type,
+                        'error_type': type(e).__name__,
+                        'use_cache': use_cache,
+                        'processing_time_ms': processing_time * 1000,
+                        'image_available': image is not None
+                    },
+                    system_state={'ocr_available': OCR_AVAILABLE, 'image_hash': image_hash[:16] + '...' if image_hash else None},
+                    timestamp=datetime.now(),
+                    trace_id=trace_id
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY_WITH_BACKOFF)
+                
+                self.performance_monitor.finish_operation(trace_id, success=False, error_count=1)
+                
+                # If recovery was successful, could potentially retry, but for now return error result
+                return OCRResult(
+                    text="[ERROR]",
                     confidence=0.0,
                     processing_time=processing_time,
                     region_type=region_type,
@@ -817,9 +993,36 @@ class VisionSystem:
                     }
                 )
                 
-                # Perform OCR
+                # Perform OCR with timeout handling
                 text_extraction_start = time.time()
-                text = pytesseract.image_to_string(processed_image, config=config).strip()
+                try:
+                    # Set timeout for OCR operation (default 30 seconds)
+                    ocr_timeout = getattr(self, 'ocr_timeout', 30)
+                    import signal
+                    
+                    def timeout_handler(signum, frame):
+                        raise TimeoutError(f"OCR operation timed out after {ocr_timeout} seconds")
+                    
+                    # Set timeout alarm for Unix systems
+                    if hasattr(signal, 'SIGALRM'):
+                        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(ocr_timeout)
+                    
+                    text = pytesseract.image_to_string(processed_image, config=config).strip()
+                    
+                    # Clear timeout alarm
+                    if hasattr(signal, 'SIGALRM'):
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, old_handler)
+                        
+                except TimeoutError as timeout_e:
+                    # Clear timeout alarm if it was set
+                    if hasattr(signal, 'SIGALRM'):
+                        signal.alarm(0)
+                        if 'old_handler' in locals():
+                            signal.signal(signal.SIGALRM, old_handler)
+                    raise timeout_e
+                    
                 text_extraction_time = time.time() - text_extraction_start
                 
                 self.advanced_logger.debug(
@@ -837,8 +1040,18 @@ class VisionSystem:
                 confidence_method = "fallback"
                 
                 try:
+                    # Apply timeout to confidence calculation as well
+                    if hasattr(signal, 'SIGALRM'):
+                        old_conf_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(ocr_timeout)
+                    
                     data = pytesseract.image_to_data(processed_image, config=config, 
                                                    output_type=pytesseract.Output.DICT)
+                    
+                    # Clear timeout alarm
+                    if hasattr(signal, 'SIGALRM'):
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, old_conf_handler)
                     confidences = [int(conf) for conf in data['conf'] if int(conf) > 0]
                     
                     if confidences:
@@ -893,17 +1106,157 @@ class VisionSystem:
                     }
                 )
                 
+                # Clean up processed image to prevent memory leak
+                # Only clean up if processed_image is different from original image
+                if processed_image is not image:
+                    self.cleanup_image(processed_image)
+                
                 return text, confidence
                 
-            except Exception as e:
-                # Comprehensive error logging
+            except pytesseract.pytesseract.TesseractNotFoundError as e:
+                # Handle specific case where Tesseract binary is not found
                 total_time = time.time() - start_time
                 
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='ocr_tesseract_not_found',
+                    user_data={
+                        'region_type': region_type,
+                        'error_message': str(e),
+                        'processing_time_ms': total_time * 1000
+                    },
+                    system_state={
+                        'tesseract_installed': False,
+                        'ocr_fallback_available': True
+                    },
+                    timestamp=datetime.now()
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.FALLBACK)
+                
                 self.advanced_logger.error(
-                    f"OCR execution failed for {region_type}: {str(e)}",
+                    f"Tesseract binary not found for {region_type}. Please install Tesseract OCR.",
                     error=e,
                     extra_data={
                         'region_type': region_type,
+                        'solution': 'Install Tesseract OCR binary and ensure it is in PATH',
+                        'fallback_action': 'returning_empty_result',
+                        'elapsed_time_ms': total_time * 1000
+                    }
+                )
+                
+                # Record critical error for tracking
+                self.error_tracker.record_error(
+                    'vision_system', '_execute_ocr_tesseract_not_found', e,
+                    context={
+                        'region_type': region_type,
+                        'tesseract_installation_required': True
+                    }
+                )
+                
+                # Clean up processed image
+                try:
+                    if 'processed_image' in locals() and processed_image is not image:
+                        self.cleanup_image(processed_image)
+                except:
+                    pass
+                
+                return "", 0.0
+                
+            except pytesseract.pytesseract.TesseractError as e:
+                # Handle Tesseract processing errors (data files, config issues, etc.)
+                total_time = time.time() - start_time
+                
+                error_context = ErrorContext(
+                    component='vision_system',
+                    operation='ocr_tesseract_processing_error',
+                    user_data={
+                        'region_type': region_type,
+                        'tesseract_status': str(e),
+                        'processing_time_ms': total_time * 1000
+                    },
+                    system_state={
+                        'tesseract_config': self.ocr_configs.get(region_type, 'default'),
+                        'recovery_strategy': 'retry_with_fallback_config'
+                    },
+                    timestamp=datetime.now()
+                )
+                
+                recovery_result = self.error_handler.handle_error(e, error_context, RecoveryStrategy.RETRY)
+                
+                self.advanced_logger.error(
+                    f"Tesseract processing error for {region_type}: {str(e)}",
+                    error=e,
+                    extra_data={
+                        'region_type': region_type,
+                        'tesseract_status': str(e),
+                        'config_used': self.ocr_configs.get(region_type, self.ocr_configs['general']),
+                        'fallback_action': 'attempting_retry_with_basic_config',
+                        'elapsed_time_ms': total_time * 1000
+                    }
+                )
+                
+                # Record error for tracking
+                self.error_tracker.record_error(
+                    'vision_system', '_execute_ocr_tesseract_error', e,
+                    context={
+                        'region_type': region_type,
+                        'tesseract_config': self.ocr_configs.get(region_type, 'default'),
+                        'retry_attempted': True
+                    }
+                )
+                
+                # Try fallback with basic config
+                try:
+                    self.advanced_logger.info(f"Attempting OCR retry with basic config for {region_type}")
+                    
+                    # Apply timeout to fallback OCR as well
+                    if hasattr(signal, 'SIGALRM'):
+                        fallback_timeout = getattr(self, 'ocr_timeout', 30)
+                        def fallback_timeout_handler(signum, frame):
+                            raise TimeoutError(f"Fallback OCR operation timed out after {fallback_timeout} seconds")
+                        
+                        old_fallback_handler = signal.signal(signal.SIGALRM, fallback_timeout_handler)
+                        signal.alarm(fallback_timeout)
+                    
+                    fallback_text = pytesseract.image_to_string(processed_image, config='').strip()
+                    
+                    # Clear timeout alarm
+                    if hasattr(signal, 'SIGALRM'):
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, old_fallback_handler)
+                    
+                    # Clean up processed image
+                    if processed_image is not image:
+                        self.cleanup_image(processed_image)
+                    
+                    return fallback_text, 0.5  # Lower confidence due to fallback
+                    
+                except Exception as fallback_e:
+                    self.advanced_logger.error(
+                        f"Fallback OCR also failed for {region_type}: {str(fallback_e)}",
+                        error=fallback_e
+                    )
+                
+                # Clean up processed image
+                try:
+                    if 'processed_image' in locals() and processed_image is not image:
+                        self.cleanup_image(processed_image)
+                except:
+                    pass
+                
+                return "", 0.0
+                
+            except Exception as e:
+                # Handle all other unexpected errors
+                total_time = time.time() - start_time
+                
+                self.advanced_logger.error(
+                    f"Unexpected OCR execution error for {region_type}: {str(e)}",
+                    error=e,
+                    extra_data={
+                        'region_type': region_type,
+                        'error_type': type(e).__name__,
                         'tesseract_available': OCR_AVAILABLE,
                         'config': self.ocr_configs.get(region_type, self.ocr_configs['general']),
                         'elapsed_time_ms': total_time * 1000,
@@ -921,6 +1274,13 @@ class VisionSystem:
                     }
                 )
                 
+                # Clean up processed image even in error case to prevent memory leak
+                try:
+                    if 'processed_image' in locals() and processed_image is not image:
+                        self.cleanup_image(processed_image)
+                except:
+                    pass  # Don't let cleanup errors mask the original error
+                
                 return "", 0.0
     
     def _simulate_ocr(self, region_type: str) -> str:
@@ -935,13 +1295,14 @@ class VisionSystem:
         return simulation_data.get(region_type, 'Sample')
     
     def _generate_image_hash(self, image: Any) -> str:
-        """Generate hash for image caching"""
+        """Generate hash for image caching with proper memory management"""
+        buffer = None
         try:
             # Convert image to bytes
             if hasattr(image, 'tobytes'):
                 image_bytes = image.tobytes()
             else:
-                # Fallback for PIL images
+                # Fallback for PIL images with proper buffer cleanup
                 buffer = io.BytesIO()
                 image.save(buffer, format='PNG')
                 image_bytes = buffer.getvalue()
@@ -951,12 +1312,40 @@ class VisionSystem:
         except Exception as e:
             logger.warning(f"Failed to generate image hash: {e}")
             return None
+        finally:
+            # Always clean up buffer to prevent memory leaks
+            if buffer is not None:
+                buffer.close()
+                del buffer
+    
+    def cleanup_image(self, image: Any):
+        """
+        Clean up image resources to prevent memory leaks.
+        Call this when done with an image to free memory immediately.
+        """
+        if image is None:
+            return
+        
+        try:
+            # Close PIL images
+            if hasattr(image, 'close'):
+                image.close()
+            
+            # Clean up numpy arrays
+            if hasattr(image, '__array__'):
+                del image
+        except Exception as e:
+            logger.debug(f"Error during image cleanup: {e}")
     
     def _create_dummy_image(self) -> Any:
-        """Create dummy image for testing"""
+        """Create dummy image for testing with cleanup awareness"""
         try:
             from PIL import Image
-            return Image.new('RGB', (100, 50), color='white')
+            dummy = Image.new('RGB', (100, 50), color='white')
+            # Mark for cleanup awareness
+            if hasattr(dummy, '_needs_cleanup'):
+                dummy._needs_cleanup = True
+            return dummy
         except:
             return None
     

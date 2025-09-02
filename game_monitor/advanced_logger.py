@@ -20,6 +20,8 @@ from contextlib import contextmanager
 from enum import Enum
 import queue
 
+from .constants import Queues
+
 
 class LogLevel(Enum):
     """Extended log levels for comprehensive tracking"""
@@ -97,7 +99,7 @@ class StructuredLogger:
         self._setup_loggers()
         
         # GUI log queue for system log display
-        self.gui_log_queue = queue.Queue(maxsize=1000)
+        self.gui_log_queue = queue.Queue(maxsize=Queues.MAX_HOTKEY_QUEUE_SIZE * 10)  # 1000 for GUI logs
         
         # Performance tracking
         self._active_operations = {}
@@ -137,6 +139,17 @@ class StructuredLogger:
     def _create_json_formatter(self):
         """Create JSON formatter for structured logs"""
         class JSONFormatter(logging.Formatter):
+            def _serialize_for_json(self, obj):
+                """Convert non-serializable objects to JSON-compatible format"""
+                if hasattr(obj, '__class__') and hasattr(obj.__class__, '__name__'):
+                    # Handle Enum objects (like HotkeyType)
+                    if hasattr(obj, 'value'):
+                        return obj.value
+                    # Handle other objects by converting to string
+                    if obj.__class__.__name__ in ['HotkeyType', 'CaptureEvent']:
+                        return str(obj)
+                return str(obj)
+            
             def format(self, record):
                 log_entry = {
                     'timestamp': datetime.now(timezone.utc).isoformat(),
@@ -149,7 +162,7 @@ class StructuredLogger:
                 if hasattr(record, 'structured_data'):
                     log_entry.update(record.structured_data)
                 
-                return json.dumps(log_entry, ensure_ascii=False)
+                return json.dumps(log_entry, ensure_ascii=False, default=self._serialize_for_json)
         
         return JSONFormatter()
     

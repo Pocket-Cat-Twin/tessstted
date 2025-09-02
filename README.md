@@ -32,12 +32,20 @@ High-performance game item monitoring system with real-time OCR, database integr
 - 4GB RAM (minimum), 8GB recommended
 - Windows 10/11, Ubuntu 18.04+, or macOS 10.15+
 - Screen resolution: 1024x768 minimum
+- **Display Environment**: X11 or GUI environment (required for screen capture and GUI interface)
 
 ### Dependencies
 - **OCR Engine**: Tesseract OCR 5.0+
 - **Computer Vision**: OpenCV 4.8+
 - **GUI Framework**: tkinter (included with Python)
 - **Database**: SQLite 3.35+
+
+### ⚠️ Headless Environment Limitations
+When running in headless environments (servers, containers, CI/CD):
+- **Screen Capture**: `pyautogui` and `opencv` require display access
+- **GUI Interface**: `tkinter` requires X11 or equivalent GUI system
+- **Limited Functionality**: Only database operations and validation systems work in headless mode
+- **Solution**: Use X virtual framebuffer (`xvfb`) or run in GUI environment for full functionality
 
 ## 🚀 Quick Start
 
@@ -368,6 +376,24 @@ python test_system.py --diagnose
 
 # Check system resources
 python -c "import psutil; print(f'RAM: {psutil.virtual_memory().percent}%, CPU: {psutil.cpu_percent()}%')"
+```
+
+**Issue**: Display/DISPLAY errors in headless environment
+```bash
+# Error: 'DISPLAY' environment variable not set
+# Solution 1: Install and use xvfb (virtual display)
+sudo apt install xvfb
+xvfb-run -a python main.py
+
+# Solution 2: Set up X11 forwarding (if using SSH)
+ssh -X user@server
+python main.py
+
+# Solution 3: Use GUI environment or desktop
+# Install desktop environment on server and use VNC/RDP
+
+# For testing only (limited functionality):
+python verify_installation.py  # Works in headless mode
 ```
 
 **Issue**: Hotkeys not working

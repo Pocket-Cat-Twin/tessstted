@@ -15,23 +15,31 @@ from datetime import datetime
 import os
 import sys
 from dataclasses import dataclass
+import weakref
+import gc
 
 # Add the parent directory to the path to import game_monitor modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from .constants import GUI, APP_TITLE, Performance
+from .error_handler import get_error_handler, ErrorContext, ErrorCategory, RecoveryStrategy
+from .advanced_logger import get_logger
 
 from game_monitor.main_controller import GameMonitor
 from game_monitor.database_manager import DatabaseManager
 from game_monitor.region_selector import RegionSelector, CoordinateInputDialog, RegionManager, RegionConfig
 from game_monitor.vision_system import ScreenRegion, get_vision_system
 
+logger = get_logger(__name__)  # Use centralized logger
+
 
 @dataclass
 class GUIConfig:
     """Configuration for GUI appearance and behavior"""
-    window_width: int = 1200
-    window_height: int = 800
-    refresh_rate: int = 1000  # ms
-    log_max_lines: int = 1000
+    window_width: int = GUI.DEFAULT_WIDTH
+    window_height: int = GUI.DEFAULT_HEIGHT
+    refresh_rate: int = int(GUI.STATISTICS_UPDATE_INTERVAL * 1000)  # ms
+    log_max_lines: int = GUI.MAX_LOG_LINES
     theme: str = "default"
 
 
@@ -43,10 +51,10 @@ class StatusIndicator:
         self.label.place(x=x, y=y)
         
         self.status = tk.Label(parent, text="●", font=("Arial", 16), fg="red")
-        self.status.place(x=x+100, y=y-2)
+        self.status.place(x=x+GUI.STATUS_INDICATOR_X_OFFSET, y=y-2)
         
         self.text_label = tk.Label(parent, text="Stopped", font=("Arial", 9))
-        self.text_label.place(x=x+120, y=y+2)
+        self.text_label.place(x=x+GUI.STATUS_INDICATOR_Y_OFFSET, y=y+2)
     
     def set_status(self, active: bool, text: str = ""):
         """Update status indicator"""
@@ -66,7 +74,24 @@ class PerformancePanel:
         
         # Create metrics display
         self.metrics = {}
+        self._cleanup_performed = False
         self.create_metrics()
+    
+    def cleanup(self):
+        """Clean up panel resources"""
+        if not self._cleanup_performed:
+            self._cleanup_performed = True
+            self.metrics.clear()
+            if hasattr(self, 'frame') and self.frame:
+                self.frame.destroy()
+                self.frame = None
+    
+    def __del__(self):
+        """Destructor to ensure cleanup"""
+        try:
+            self.cleanup()
+        except Exception:
+            pass
     
     def create_metrics(self):
         """Create performance metric displays"""
@@ -107,8 +132,36 @@ class TradesStatisticsPanel:
         self.frame = ttk.LabelFrame(parent_frame, text="Trading Statistics", padding=10)
         self.frame.pack(fill="both", expand=True, padx=5, pady=5)
         
+        self.stats_labels = {}
+        self.trades_tree = None
+        self._cleanup_performed = False
+        
         self.create_statistics_display()
         self.create_recent_trades_table()
+    
+    def cleanup(self):
+        """Clean up panel resources"""
+        if not self._cleanup_performed:
+            self._cleanup_performed = True
+            
+            # Clear tree items to free memory
+            if self.trades_tree:
+                for item in self.trades_tree.get_children():
+                    self.trades_tree.delete(item)
+                    
+            self.stats_labels.clear()
+            self.db_manager = None
+            
+            if hasattr(self, 'frame') and self.frame:
+                self.frame.destroy()
+                self.frame = None
+    
+    def __del__(self):
+        """Destructor to ensure cleanup"""
+        try:
+            self.cleanup()
+        except Exception:
+            pass
     
     def create_statistics_display(self):
         """Create statistics summary display"""
@@ -151,12 +204,12 @@ class TradesStatisticsPanel:
         
         # Configure columns
         columns_config = [
-            ("Time", 120),
-            ("Trader", 120),
-            ("Item", 150),
-            ("Quantity", 80),
-            ("Price", 100),
-            ("Confidence", 80)
+            ("Time", GUI.TABLE_COLUMN_TIME),
+            ("Trader", GUI.TABLE_COLUMN_TRADER),
+            ("Item", GUI.TABLE_COLUMN_ITEM),
+            ("Quantity", GUI.TABLE_COLUMN_QUANTITY),
+            ("Price", GUI.TABLE_COLUMN_PRICE),
+            ("Confidence", GUI.TABLE_COLUMN_CONFIDENCE)
         ]
         
         for col, width in columns_config:
@@ -172,14 +225,31 @@ class TradesStatisticsPanel:
         scrollbar.pack(side="right", fill="y")
     
     def update_statistics(self):
-        """Update statistics display with latest data"""
+        """Update statistics display with latest data and centralized error handling"""
+        update_start = time.time()
+        
         try:
-            # Get trade statistics
-            total_trades = self.db_manager.get_total_trades_count()
-            unique_traders = self.db_manager.get_unique_traders_count()
-            unique_items = self.db_manager.get_unique_items_count()
+            # Get trade statistics with individual error handling
+            total_trades = 0
+            unique_traders = 0
+            unique_items = 0
             
-            # Update labels
+            try:
+                total_trades = self.db_manager.get_total_trades_count()
+            except Exception as e:
+                logger.warning(f"Failed to get total trades count: {e}")
+                
+            try:
+                unique_traders = self.db_manager.get_unique_traders_count()
+            except Exception as e:
+                logger.warning(f"Failed to get unique traders count: {e}")
+                
+            try:
+                unique_items = self.db_manager.get_unique_items_count()
+            except Exception as e:
+                logger.warning(f"Failed to get unique items count: {e}")
+            
+            # Update labels with fallback values
             self.stats_labels["Total Trades"].config(text=str(total_trades))
             self.stats_labels["Unique Traders"].config(text=str(unique_traders))
             self.stats_labels["Unique Items"].config(text=str(unique_items))
@@ -187,35 +257,81 @@ class TradesStatisticsPanel:
             # Update recent trades table
             self.update_recent_trades()
             
+            update_time = time.time() - update_start
+            if update_time > 0.1:  # Log if taking too long
+                logger.debug(f"Statistics update took {update_time:.3f}s")
+            
         except Exception as e:
-            print(f"Error updating statistics: {e}")
+            update_time = time.time() - update_start
+            
+            error_context = ErrorContext(
+                component="gui_interface",
+                operation="update_statistics",
+                user_data={'update_time': update_time},
+                system_state={'db_manager_available': self.db_manager is not None},
+                timestamp=datetime.now()
+            )
+            
+            error_handler = get_error_handler()
+            recovery_result = error_handler.handle_error(e, error_context, RecoveryStrategy.SKIP)
+            
+            if not recovery_result.recovery_successful:
+                logger.error(f"Critical error updating GUI statistics: {e}")
+            else:
+                logger.warning(f"Statistics update failed, continuing: {e}")
     
-    def update_recent_trades(self, limit: int = 20):
-        """Update recent trades table"""
+    def update_recent_trades(self, limit: int = GUI.DEFAULT_RECENT_TRADES_LIMIT):
+        """Update recent trades table with memory management"""
+        if self._cleanup_performed or not self.trades_tree or not self.db_manager:
+            return
+            
         try:
-            # Clear existing items
-            for item in self.trades_tree.get_children():
-                self.trades_tree.delete(item)
+            # Clear existing items to prevent memory accumulation
+            children = self.trades_tree.get_children()
+            if children:
+                self.trades_tree.delete(*children)  # More efficient bulk delete
             
             # Get recent trades
             trades = self.db_manager.get_recent_trades(limit)
             
-            for trade in trades:
-                # Format timestamp
-                timestamp = datetime.fromisoformat(trade[0]).strftime("%H:%M:%S")
-                
-                # Insert into table
-                self.trades_tree.insert("", "end", values=(
-                    timestamp,
-                    trade[1],  # trader_nickname
-                    trade[2],  # item_name
-                    trade[3],  # quantity
-                    f"{trade[4]:.2f}",  # price
-                    f"{trade[5]:.1f}%"   # confidence
-                ))
+            # Limit the number of items to prevent memory issues
+            max_display_items = min(limit, GUI.MAX_DISPLAY_ITEMS)
+            for trade in trades[:max_display_items]:
+                try:
+                    # Format timestamp
+                    timestamp = datetime.fromisoformat(trade[0]).strftime("%H:%M:%S")
+                    
+                    # Insert into table
+                    self.trades_tree.insert("", "end", values=(
+                        timestamp,
+                        str(trade[1])[:GUI.TRADER_NAME_TRUNCATE_LENGTH],  # Truncate long trader names
+                        str(trade[2])[:GUI.ITEM_NAME_TRUNCATE_LENGTH],  # Truncate long item names
+                        str(trade[3]),
+                        f"{float(trade[4]):.2f}",
+                        f"{float(trade[5]):.1f}%"
+                    ))
+                except (ValueError, TypeError, IndexError) as e:
+                    # Skip malformed trade data with better logging
+                    logger.warning(f"Skipping malformed trade data: {e}")
+                    continue
                 
         except Exception as e:
-            print(f"Error updating recent trades: {e}")
+            if not self._cleanup_performed:
+                error_context = ErrorContext(
+                    component="gui_interface",
+                    operation="update_recent_trades",
+                    user_data={'limit': limit, 'trades_tree_exists': self.trades_tree is not None},
+                    system_state={'cleanup_performed': self._cleanup_performed},
+                    timestamp=datetime.now()
+                )
+                
+                error_handler = get_error_handler()
+                recovery_result = error_handler.handle_error(e, error_context, RecoveryStrategy.SKIP)
+                
+                if not recovery_result.recovery_successful:
+                    logger.error(f"Critical error updating recent trades display: {e}")
+                else:
+                    logger.warning(f"Recent trades update failed, continuing: {e}")
 
 
 class SettingsDialog:
@@ -225,6 +341,7 @@ class SettingsDialog:
         self.parent = parent
         self.config_manager = config_manager
         self.dialog = None
+        self._cleanup_performed = False
         
         self.settings = {
             "hotkey_f1": "F1",
@@ -232,8 +349,8 @@ class SettingsDialog:
             "hotkey_f3": "F3",
             "hotkey_f4": "F4",
             "hotkey_f5": "F5",
-            "ocr_confidence_threshold": 85,
-            "response_time_target": 1000,
+            "ocr_confidence_threshold": GUI.DEFAULT_CONFIDENCE_THRESHOLD,
+            "response_time_target": GUI.DEFAULT_RESPONSE_TIME_TARGET,
             "database_pool_size": 5
         }
     
@@ -244,6 +361,13 @@ class SettingsDialog:
         self.dialog.geometry("400x500")
         self.dialog.transient(self.parent)
         self.dialog.grab_set()
+        
+        # Set up proper cleanup on dialog close
+        self.dialog.protocol("WM_DELETE_WINDOW", self._on_dialog_close)
+        
+        # Add to parent's active dialogs if it has dialog management
+        if hasattr(self.parent, '_active_dialogs'):
+            self.parent._active_dialogs.add(self.dialog)
         
         self.create_settings_interface()
     
@@ -316,14 +440,30 @@ class SettingsDialog:
         )
         
         threshold_var = tk.IntVar(value=self.settings["ocr_confidence_threshold"])
-        threshold_scale = tk.Scale(parent, from_=50, to=100, orient="horizontal",
-                                 variable=threshold_var, length=200)
+        threshold_scale = tk.Scale(parent, from_=GUI.SCALE_MIN_VALUE, to=GUI.SCALE_MAX_VALUE, orient="horizontal",
+                                 variable=threshold_var, length=GUI.SCALE_LENGTH)
         threshold_scale.grid(row=0, column=1, padx=10, pady=5)
+    
+    def _on_dialog_close(self):
+        """Handle dialog close with proper cleanup"""
+        if not self._cleanup_performed:
+            self._cleanup_performed = True
+            
+            # Remove from parent's active dialogs
+            if hasattr(self.parent, '_active_dialogs') and self.dialog in self.parent._active_dialogs:
+                self.parent._active_dialogs.discard(self.dialog)
+            
+            # Clean up references
+            self.config_manager = None
+            self.settings = None
+        
+        if self.dialog:
+            self.dialog.destroy()
     
     def save_settings(self):
         """Save settings and close dialog"""
         messagebox.showinfo("Settings", "Settings saved successfully!")
-        self.dialog.destroy()
+        self._on_dialog_close()
 
 
 class ManualVerificationDialog:
@@ -334,6 +474,8 @@ class ManualVerificationDialog:
         self.verification_callback = verification_callback
         self.dialog = None
         self.current_data = None
+        self._cleanup_performed = False
+        self.entries = {}
     
     def show_verification(self, capture_data: Dict):
         """Show verification dialog with capture data"""
@@ -344,6 +486,13 @@ class ManualVerificationDialog:
         self.dialog.geometry("600x400")
         self.dialog.transient(self.parent)
         self.dialog.grab_set()
+        
+        # Set up proper cleanup on dialog close
+        self.dialog.protocol("WM_DELETE_WINDOW", self._on_dialog_close)
+        
+        # Add to parent's active dialogs if it has dialog management
+        if hasattr(self.parent, '_active_dialogs'):
+            self.parent._active_dialogs.add(self.dialog)
         
         self.create_verification_interface()
     
@@ -369,7 +518,7 @@ class ManualVerificationDialog:
             tk.Label(data_frame, text=f"{field.replace('_', ' ').title()}:", 
                     font=("Arial", 10, "bold")).grid(row=i, column=0, sticky="w", padx=10, pady=5)
             
-            entry = tk.Entry(data_frame, width=30)
+            entry = tk.Entry(data_frame, width=GUI.ENTRY_FIELD_WIDTH)
             if self.current_data and field in self.current_data:
                 entry.insert(0, str(self.current_data[field]))
             entry.grid(row=i, column=1, padx=10, pady=5)
@@ -387,6 +536,23 @@ class ManualVerificationDialog:
         ttk.Button(button_frame, text="Cancel", 
                   command=self.dialog.destroy).pack(side="right")
     
+    def _on_dialog_close(self):
+        """Handle dialog close with proper cleanup"""
+        if not self._cleanup_performed:
+            self._cleanup_performed = True
+            
+            # Remove from parent's active dialogs
+            if hasattr(self.parent, '_active_dialogs') and self.dialog in self.parent._active_dialogs:
+                self.parent._active_dialogs.discard(self.dialog)
+            
+            # Clean up references
+            self.current_data = None
+            self.entries.clear()
+            self.verification_callback = None
+        
+        if self.dialog:
+            self.dialog.destroy()
+    
     def approve_data(self):
         """Approve the verification data"""
         # Get corrected data from entries
@@ -395,13 +561,15 @@ class ManualVerificationDialog:
             corrected_data[field] = entry.get()
         
         # Call verification callback
-        self.verification_callback(corrected_data, approved=True)
-        self.dialog.destroy()
+        if self.verification_callback:
+            self.verification_callback(corrected_data, approved=True)
+        self._on_dialog_close()
     
     def reject_data(self):
         """Reject the verification data"""
-        self.verification_callback(None, approved=False)
-        self.dialog.destroy()
+        if self.verification_callback:
+            self.verification_callback(None, approved=False)
+        self._on_dialog_close()
 
 
 class MainWindow:
@@ -409,21 +577,30 @@ class MainWindow:
     
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Game Monitor System - v1.0")
-        self.root.geometry("1200x800")
-        self.root.minsize(800, 600)
+        self.root.title(APP_TITLE)
+        self.root.geometry(f"{GUI.DEFAULT_WIDTH}x{GUI.DEFAULT_HEIGHT}")
+        self.root.minsize(GUI.MIN_WINDOW_WIDTH, GUI.MIN_WINDOW_HEIGHT)
         
         # Initialize components
         self.game_monitor = None
         self.db_manager = None
         self.config = GUIConfig()
         self.running = False
+        self._cleanup_performed = False
         
         # GUI components
         self.status_indicators = {}
         self.performance_panel = None
         self.statistics_panel = None
         self.log_text = None
+        
+        # Timer management for memory cleanup
+        self._active_timers = set()
+        self._refresh_timer_id = None
+        self._is_shutting_down = False
+        
+        # Dialog management
+        self._active_dialogs = set()
         
         # Initialize GUI
         self.create_interface()
@@ -573,23 +750,33 @@ class MainWindow:
                                f"Failed to initialize Game Monitor:\n{e}")
     
     def setup_data_refresh(self):
-        """Setup automatic data refresh"""
+        """Setup automatic data refresh with proper timer management"""
         def refresh_data():
+            if self._is_shutting_down:
+                return
+                
             try:
-                if self.statistics_panel:
+                if self.statistics_panel and hasattr(self, 'statistics_panel'):
                     self.statistics_panel.update_statistics()
                 
-                if self.performance_panel and self.game_monitor:
+                if self.performance_panel and self.game_monitor and hasattr(self, 'performance_panel'):
                     self.update_performance_metrics()
                 
             except Exception as e:
-                print(f"Error during data refresh: {e}")
+                if not self._is_shutting_down:
+                    print(f"Error during data refresh: {e}")
             
-            # Schedule next refresh
-            self.root.after(self.config.refresh_rate, refresh_data)
+            # Schedule next refresh only if not shutting down
+            if not self._is_shutting_down and hasattr(self, 'root') and self.root.winfo_exists():
+                self._refresh_timer_id = self.root.after(int(GUI.STATISTICS_UPDATE_INTERVAL * 1000), refresh_data)
+                if self._refresh_timer_id:
+                    self._active_timers.add(self._refresh_timer_id)
         
         # Start refresh cycle
-        self.root.after(1000, refresh_data)
+        if not self._is_shutting_down:
+            initial_timer = self.root.after(1000, refresh_data)
+            if initial_timer:
+                self._active_timers.add(initial_timer)
     
     def update_performance_metrics(self):
         """Update performance metrics display"""
@@ -610,31 +797,47 @@ class MainWindow:
             self.performance_panel.update_metric("Total Captures", 
                                                 str(stats.get('total_captures', 0)))
             
-            # System resource usage
-            import psutil
-            self.performance_panel.update_metric("Memory Usage", 
-                                                f"{psutil.virtual_memory().percent:.1f}%")
-            self.performance_panel.update_metric("CPU Usage", 
-                                                f"{psutil.cpu_percent():.1f}%")
+            # System resource usage (with error handling)
+            try:
+                import psutil
+                memory_percent = psutil.virtual_memory().percent
+                cpu_percent = psutil.cpu_percent()
+                
+                self.performance_panel.update_metric("Memory Usage", 
+                                                    f"{memory_percent:.1f}%")
+                self.performance_panel.update_metric("CPU Usage", 
+                                                    f"{cpu_percent:.1f}%")
+            except ImportError:
+                # psutil not available, show placeholder
+                self.performance_panel.update_metric("Memory Usage", "N/A")
+                self.performance_panel.update_metric("CPU Usage", "N/A")
+            except Exception as e:
+                print(f"Warning: Error getting system resource usage: {e}")
             
         except Exception as e:
             print(f"Error updating performance metrics: {e}")
     
     def add_log_message(self, message: str, level: str = "INFO"):
-        """Add message to log display"""
-        if not self.log_text:
+        """Add message to log display with memory management"""
+        if not self.log_text or self._is_shutting_down:
             return
         
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        formatted_message = f"[{timestamp}] {level}: {message}\n"
-        
-        self.log_text.insert("end", formatted_message)
-        self.log_text.see("end")
-        
-        # Limit log size
-        lines = int(self.log_text.index("end-1c").split('.')[0])
-        if lines > self.config.log_max_lines:
-            self.log_text.delete("1.0", "2.0")
+        try:
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            formatted_message = f"[{timestamp}] {level}: {message}\n"
+            
+            self.log_text.insert("end", formatted_message)
+            self.log_text.see("end")
+            
+            # Limit log size to prevent memory growth
+            lines = int(self.log_text.index("end-1c").split('.')[0])
+            if lines > self.config.log_max_lines:
+                # Delete multiple lines at once for better performance
+                lines_to_delete = max(1, lines - self.config.log_max_lines + GUI.LOG_CLEANUP_BATCH_SIZE)  # Delete extra lines
+                self.log_text.delete(GUI.TEXT_DELETE_START, f"{lines_to_delete}.0")
+        except (tk.TclError, AttributeError):
+            # Widget was destroyed or not available
+            pass
     
     def start_system(self):
         """Start the monitoring system"""
@@ -800,13 +1003,84 @@ Developed with Python, tkinter, OpenCV, and Tesseract OCR."""
         messagebox.showinfo("About Game Monitor", about_text)
     
     def on_closing(self):
-        """Handle application closing"""
+        """Handle application closing with proper cleanup"""
         if self.running:
             if messagebox.askokcancel("Quit", "System is running. Stop and quit?"):
                 self.stop_system()
+                self._perform_cleanup()
                 self.root.destroy()
         else:
+            self._perform_cleanup()
             self.root.destroy()
+    
+    def _perform_cleanup(self):
+        """Perform comprehensive memory cleanup"""
+        if self._cleanup_performed:
+            return
+            
+        try:
+            self._is_shutting_down = True
+            self._cleanup_performed = True
+            
+            # Cancel all active timers
+            if hasattr(self, 'root') and self.root.winfo_exists():
+                for timer_id in self._active_timers.copy():
+                    try:
+                        self.root.after_cancel(timer_id)
+                    except tk.TclError:
+                        pass  # Timer already cancelled or completed
+                self._active_timers.clear()
+            
+            # Close all active dialogs
+            for dialog in self._active_dialogs.copy():
+                try:
+                    if hasattr(dialog, 'destroy'):
+                        dialog.destroy()
+                except tk.TclError:
+                    pass  # Dialog already destroyed
+            self._active_dialogs.clear()
+            
+            # Clean up database manager
+            if hasattr(self, 'db_manager') and self.db_manager:
+                try:
+                    self.db_manager.close()
+                    self.db_manager = None
+                except Exception as e:
+                    print(f"Warning: Error closing database manager: {e}")
+            
+            # Clean up game monitor
+            if hasattr(self, 'game_monitor') and self.game_monitor:
+                try:
+                    if hasattr(self.game_monitor, 'stop'):
+                        self.game_monitor.stop()
+                    self.game_monitor = None
+                except Exception as e:
+                    print(f"Warning: Error stopping game monitor: {e}")
+            
+            # Clean up GUI component references
+            if hasattr(self, 'performance_panel') and self.performance_panel:
+                self.performance_panel.cleanup()
+                self.performance_panel = None
+            
+            if hasattr(self, 'statistics_panel') and self.statistics_panel:
+                self.statistics_panel.cleanup()
+                self.statistics_panel = None
+            
+            self.status_indicators.clear()
+            self.log_text = None
+            
+            # Force garbage collection
+            gc.collect()
+            
+        except Exception as e:
+            print(f"Warning: Error during cleanup: {e}")
+    
+    def __del__(self):
+        """Destructor to ensure cleanup on garbage collection"""
+        try:
+            self._perform_cleanup()
+        except Exception:
+            pass  # Ignore cleanup errors during destruction
     
     def run(self):
         """Start the GUI application"""
@@ -822,8 +1096,12 @@ Developed with Python, tkinter, OpenCV, and Tesseract OCR."""
         
         self.add_log_message("GUI started successfully")
         
-        # Start the GUI main loop
-        self.root.mainloop()
+        try:
+            # Start the GUI main loop
+            self.root.mainloop()
+        finally:
+            # Ensure cleanup happens even if mainloop exits unexpectedly
+            self._perform_cleanup()
     
     def show_region_selection_dialog(self):
         """Show region selection and calibration interface"""
@@ -836,6 +1114,16 @@ Developed with Python, tkinter, OpenCV, and Tesseract OCR."""
         dialog.geometry("600x500")
         dialog.transient(self.root)
         dialog.grab_set()
+        
+        # Add to active dialogs for proper cleanup
+        self._active_dialogs.add(dialog)
+        
+        # Set up cleanup on dialog close
+        original_destroy = dialog.destroy
+        def cleanup_and_destroy():
+            self._active_dialogs.discard(dialog)
+            original_destroy()
+        dialog.destroy = cleanup_and_destroy
         
         # Initialize region manager
         region_manager = RegionManager()
@@ -986,6 +1274,16 @@ Developed with Python, tkinter, OpenCV, and Tesseract OCR."""
         dialog.transient(self.root)
         dialog.grab_set()
         
+        # Add to active dialogs for proper cleanup
+        self._active_dialogs.add(dialog)
+        
+        # Set up cleanup on dialog close
+        original_destroy = dialog.destroy
+        def cleanup_and_destroy():
+            self._active_dialogs.discard(dialog)
+            original_destroy()
+        dialog.destroy = cleanup_and_destroy
+        
         # Get vision system
         vision_system = get_vision_system()
         
@@ -1084,11 +1382,31 @@ Files Exist: Output={summary['output_file_exists']}, Detailed={summary['detailed
         summary_text = tk.Text(summary_frame, height=5, font=('Consolas', 9))
         summary_text.pack(fill="x")
         
-        # Auto-update summary
-        def refresh_summary():
-            update_summary()
-            dialog.after(2000, refresh_summary)  # Update every 2 seconds
+        # Auto-update summary with proper timer management
+        active_timer_ids = set()
         
+        def refresh_summary():
+            try:
+                if dialog.winfo_exists():
+                    update_summary()
+                    # Schedule next refresh
+                    timer_id = dialog.after(2000, refresh_summary)
+                    active_timer_ids.add(timer_id)
+            except tk.TclError:
+                # Dialog was destroyed, stop scheduling updates
+                pass
+        
+        # Set up cleanup when dialog closes
+        def on_dialog_destroy():
+            for timer_id in active_timer_ids.copy():
+                try:
+                    dialog.after_cancel(timer_id)
+                except tk.TclError:
+                    pass
+            active_timer_ids.clear()
+            dialog.destroy()
+        
+        dialog.protocol("WM_DELETE_WINDOW", on_dialog_destroy)
         refresh_summary()
         
         # Close button
