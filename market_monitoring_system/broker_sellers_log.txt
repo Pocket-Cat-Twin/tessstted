@@ -1,0 +1,96 @@
+BROKER SELLER-ITEM EXTRACTION LOG
+=================================
+Total sections processed: 3
+Total seller-item pairs: 59
+
+
+--- Processing Broker Section 1 ---
+Raw section:
+
+Oriharukon Ore
+: 13
+Name
+Karabas
+Kailinha
+Shiilka
+Delfino
+Kage
+Eilina
+shcoolpalo
+THAILAND
+t2t2
+Minni
+Sluzhanka
+Steatorrhea
+evilos
+...
+Found item name: 'Oriharukon Ore' from line: 'Oriharukon Ore'
+Found 'Name' header at line 2
+Found 13 sellers: ['Karabas', 'Kailinha', 'Shiilka', 'Delfino', 'Kage']...
+✓ Created 13 seller-item pairs
+
+--- Processing Broker Section 2 ---
+Raw section:
+
+Stone of Purity
+:
+24
+Name
+BaskoFF
+Kailinha
+MrBass
+SeriousMASS
+IIapTu3aHKa
+FjorinFromDion
+FeralGuN
+LordWespe
+Fadmaschosch
+JJ5297
+V1RUS
+Satane
+shcoolpalo
+Espinaca
+Hikaru
+THAILAND
+spoilexe
+f1ster
+t2t2
+K...
+Found item name: 'Stone of Purity' from line: 'Stone of Purity'
+Found 'Name' header at line 3
+Found 23 sellers: ['BaskoFF', 'Kailinha', 'MrBass', 'SeriousMASS', 'IIapTu3aHKa']...
+✓ Created 23 seller-item pairs
+
+--- Processing Broker Section 3 ---
+Raw section:
+
+Mithril Ore
+#
+: 27
+Name
+Doublefister
+LordWespe
+moneyman
+Kage
+V1RUS
+GromTor
+Gordao
+Satane
+Sayfery
+Taupa
+typee
+Espinaca
+THAILAND
+MeninaSemNome
+BafflGVEl
+Kalaji
+Doneste
+Sucubus
+Miks2kz
+f1ster
+Chim
+Ovosh...
+Found item name: 'Mithril Ore' from line: 'Mithril Ore'
+Found 'Name' header at line 3
+Found 23 sellers: ['Doublefister', 'LordWespe', 'moneyman', 'Kage', 'V1RUS']...
+✓ Created 23 seller-item pairs

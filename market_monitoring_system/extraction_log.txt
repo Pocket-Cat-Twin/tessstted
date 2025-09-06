@@ -1,0 +1,142 @@
+TRADE DATA EXTRACTION LOG
+========================
+Total sections processed: 7
+Successful extractions: 7
+
+
+--- Processing Trade Instance 1 ---
+Raw text:
+
+Items to Sell Marrio
+99+
+Animal Bone (111)
+Unit Price : 620 Adena
+Total Price : 68,820 Adena
+(68 Thousand 820 Adena)
+Quantity : 111
+Weight : 2
+A material used to make Dwarven items. St
+ID : 1,872
+Pri...
+Found seller: 'Marrio'
+Found unit price: '620' from line: 'Unit Price : 620 Adena'
+Found item name: 'Animal Bone' from line: 'Animal Bone (111)'
+Found quantity: '111' from line: 'Quantity : 111'
+✓ Successfully extracted: {'seller': 'Marrio', 'item_name': 'Animal Bone', 'unit_price': '620', 'quantity': '111'}
+
+--- Processing Trade Instance 2 ---
+Raw text:
+
+Items to Sell Taupa
+Mithril Ore (10)
+Unit Price : 8,888 Adena
+Total Price : 88,880 Adena
+(88 Thousand 880 Adena)
+Quantity : 10
+Weight : 2
+Sell A material used to make Dwarven items.
+ID : 1,876
+Price ...
+Found seller: 'Taupa'
+Found unit price: '8888' from line: 'Unit Price : 8,888 Adena'
+Found item name: 'Mithril Ore' from line: 'Mithril Ore (10)'
+Found quantity: '10' from line: 'Quantity : 10'
+✓ Successfully extracted: {'seller': 'Taupa', 'item_name': 'Mithril Ore', 'unit_price': '8888', 'quantity': '10'}
+
+--- Processing Trade Instance 3 ---
+Raw text:
+
+Items to Sell Taupa
+Steel (12)
+Unit Price : 8,666 Adena
+Total Price : 103,992 Adena
+(103 Thousand 992 Adena)
+Quantity : 12
+Weight : 2
+A material used to make Dwarven items.
+ID : 1,880
+Price (adena) :...
+Found seller: 'Taupa'
+Found unit price: '8666' from line: 'Unit Price : 8,666 Adena'
+Found item name: 'Steel' from line: 'Steel (12)'
+Found quantity: '12' from line: 'Quantity : 12'
+✓ Successfully extracted: {'seller': 'Taupa', 'item_name': 'Steel', 'unit_price': '8666', 'quantity': '12'}
+
+--- Processing Trade Instance 4 ---
+Raw text:
+
+Items to Sell Taupa
+Metallic Fiber (43)
+Unit Price : 1,222 Adena
+Total Price : 52,546 Adena
+(52 Thousand 546 Adena)
+Quantity : 43
+Weight : 2
+A material used to make Dwarven items.
+ID : 1,895
+Price (a...
+Found seller: 'Taupa'
+Found unit price: '1222' from line: 'Unit Price : 1,222 Adena'
+Found item name: 'Metallic Fiber' from line: 'Metallic Fiber (43)'
+Found quantity: '43' from line: 'Quantity : 43'
+✓ Successfully extracted: {'seller': 'Taupa', 'item_name': 'Metallic Fiber', 'unit_price': '1222', 'quantity': '43'}
+
+--- Processing Trade Instance 5 ---
+Raw text:
+
+Items to Sell Taupa
+Charcoal (208)
+Unit Price : 333 Adena
+Total Price : 69,264 Adena
+(69 Thousand 264 Adena)
+Quantity : 208
+Weight : 2
+A material used to make Dwarven items.
+Sell List
+ID : 1,871
+Pric...
+Found seller: 'Taupa'
+Found unit price: '333' from line: 'Unit Price : 333 Adena'
+Found item name: 'Charcoal' from line: 'Charcoal (208)'
+Found quantity: '208' from line: 'Quantity : 208'
+✓ Successfully extracted: {'seller': 'Taupa', 'item_name': 'Charcoal', 'unit_price': '333', 'quantity': '208'}
+
+--- Processing Trade Instance 6 ---
+Raw text:
+
+Items to Sell Taupa
+Silver Nugget (920)
+Unit Price : 175 Adena
+Total Price : 161,000 Adena
+(161 Thousand Adena)
+Quantity : 920
+Weight : 2
+A material used to make Dwarven items.
+Sell List
+ID : 1,873
+P...
+Found seller: 'Taupa'
+Found unit price: '175' from line: 'Unit Price : 175 Adena'
+Found item name: 'Silver Nugget' from line: 'Silver Nugget (920)'
+Found quantity: '920' from line: 'Quantity : 920'
+✓ Successfully extracted: {'seller': 'Taupa', 'item_name': 'Silver Nugget', 'unit_price': '175', 'quantity': '920'}
+
+--- Processing Trade Instance 7 ---
+Raw text:
+
+Items to Sell Taupa
+Cord (32)
+Unit Price : 999 Adena
+Total Price : 31,968 Adena
+(31 Thousand 968 Adena)
+Quantity : 32
+Weight : 2
+A material used to make Dwarven items.
+Sell List
+ID : 1,884
+Price (ade...
+Found seller: 'Taupa'
+Found unit price: '999' from line: 'Unit Price : 999 Adena'
+Found item name: 'Cord' from line: 'Cord (32)'
+Found quantity: '32' from line: 'Quantity : 32'
+✓ Successfully extracted: {'seller': 'Taupa', 'item_name': 'Cord', 'unit_price': '999', 'quantity': '32'}

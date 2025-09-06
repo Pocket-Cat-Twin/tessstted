@@ -1,0 +1,44 @@
+{
+    "hotkey_mappings": {
+        "F1": {
+            "display_name": "Main Products Page",
+            "default_area": [100, 100, 800, 600],
+            "recommended_interval": 30,
+            "usage_notes": "Use for capturing main product listings"
+        },
+        "F2": {
+            "display_name": "Sellers Page", 
+            "default_area": [100, 100, 800, 600],
+            "recommended_interval": 60,
+            "usage_notes": "Use for capturing seller information"
+        },
+        "F3": {
+            "display_name": "Price Comparison",
+            "default_area": [100, 100, 800, 600], 
+            "recommended_interval": 45,
+            "usage_notes": "Use for capturing price comparison data"
+        },
+        "F4": {
+            "display_name": "Inventory Status",
+            "default_area": [100, 100, 800, 600],
+            "recommended_interval": 30,
+            "usage_notes": "Use for capturing inventory status"
+        }
+    },
+    "area_presets": {
+        "full_screen": [0, 0, 1920, 1080],
+        "left_half": [0, 0, 960, 1080],
+        "right_half": [960, 0, 1920, 1080],
+        "center_square": [460, 290, 1460, 790],
+        "top_bar": [0, 0, 1920, 200],
+        "main_content": [100, 100, 1820, 980]
+    },
+    "validation_rules": {
+        "min_area_width": 200,
+        "min_area_height": 200,
+        "max_area_width": 4000,
+        "max_area_height": 3000,
+        "min_merge_interval": 10,
+        "max_merge_interval": 300
+    }
+}

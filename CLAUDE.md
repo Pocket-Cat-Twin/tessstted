@@ -41,3 +41,192 @@ When working with my code:
 
 The key is to write clean, testable, functional code that evolves through small, safe increments. Every change should be driven by a test that describes the desired behavior, and the implementation should be the simplest thing that makes that test pass. When in doubt, favor simplicity and readability over cleverness.
 
+## Project Learnings - Market Monitoring System (September 2025)
+
+### Critical Implementation Insights
+
+**Python Import Structure for Complex Projects:**
+- Relative imports (`from ..module`) break when running scripts directly
+- Solution: Use absolute imports (`from module`) with proper PYTHONPATH setup
+- Create launcher scripts (run.py) to handle path setup before importing main modules
+- Always add __init__.py files to make directories proper Python packages
+
+**Enterprise-Grade Python Architecture Patterns:**
+- Use dataclasses for structured data with built-in serialization
+- Implement thread-safe operations with proper locking mechanisms  
+- Context managers (__enter__/__exit__) are essential for resource cleanup
+- Configuration validation should fail fast with clear error messages
+- Dependency injection pattern makes testing and modularity much easier
+
+**Database Design for Monitoring Systems:**
+- Status tables (NEW/CHECKED/UNCHECKED) need proper indexing for performance
+- Use UNIQUE constraints to prevent duplicate monitoring entries
+- Implement proper transaction boundaries for data consistency
+- Connection pooling and timeout handling are critical for reliability
+- Always use parameterized queries to prevent SQL injection
+
+**External API Integration Best Practices:**
+- Implement exponential backoff retry logic for transient failures
+- Rate limiting detection and handling prevents API abuse penalties
+- Proper timeout settings prevent hanging operations
+- Always validate API responses before processing
+- Clean up resources (images, temporary files) immediately after processing
+
+**Logging Architecture for Production Systems:**
+- Multi-format logging (text + JSON) serves different use cases
+- Structured logging with extra fields enables better monitoring
+- Log rotation with size limits prevents disk space issues
+- Performance logging helps identify bottlenecks
+- Never log sensitive information (API keys, personal data)
+
+**Configuration Management Patterns:**
+- JSON schema validation catches configuration errors early
+- Environment-specific configs should override base configuration
+- Hot-reload capability improves development experience
+- Configuration summaries help with debugging and monitoring
+- Default values should be production-safe
+
+### Technical Gotchas Discovered
+
+**Scheduler Integration Issues:**
+- APScheduler jobs need unique IDs to prevent conflicts
+- Job coalescing prevents overlapping executions
+- Background schedulers need proper shutdown handling
+- Thread-local storage is needed for database connections in scheduled jobs
+
+**Image Processing Pipeline:**
+- PIL/Pillow image objects must be closed explicitly to prevent memory leaks
+- OCR preprocessing (grayscale, contrast) significantly improves accuracy
+- Image size limits are critical for API compatibility
+- Temporary file cleanup must happen even if processing fails
+
+**Error Handling Strategies:**
+- Separate validation errors from runtime errors with different exception types
+- Error statistics help identify systemic problems
+- Graceful degradation (screenshot capture failure shouldn't stop OCR processing)
+- Health checks should validate all critical system dependencies
+
+**Performance Optimization Insights:**
+- Connection reuse (database, HTTP) reduces overhead significantly  
+- Lazy loading of expensive resources improves startup time
+- Proper indexing strategy based on actual query patterns
+- Memory management in long-running processes requires active cleanup
+
+### Architecture Decisions That Worked Well
+
+**Modular Component Design:**
+- Each module has single responsibility with clear interfaces
+- Components can be tested independently
+- Configuration injection enables flexible deployment scenarios
+- Error boundaries prevent cascade failures between components
+
+**Event-Driven Processing:**
+- Hotkey triggers with timer-based processing handles bursty workloads
+- Status lifecycle management provides auditability
+- Change detection patterns scale well with data volume
+- Asynchronous processing improves user experience
+
+**Production-Ready Features:**
+- Signal handling for graceful shutdown prevents data corruption
+- Health monitoring enables proactive issue detection
+- Statistics collection helps with performance tuning
+- Comprehensive error reporting aids troubleshooting
+
+### What Would Be Done Differently Next Time
+
+**Testing Strategy:**
+- Unit tests should be written alongside implementation, not after
+- Integration tests for database schema migrations are essential
+- Mock external APIs to enable reliable automated testing
+- Performance benchmarks help catch regressions early
+
+**Documentation Approach:**
+- API documentation should be generated from code annotations
+- Configuration examples should cover common deployment scenarios
+- Troubleshooting guide should be based on actual production issues
+- Architecture diagrams help new developers understand system flow
+
+**Development Workflow:**
+- Feature flags would enable safer gradual rollouts
+- Database migrations should be versioned and reversible
+- Configuration changes should be validated in staging environment
+- Monitoring and alerting should be implemented from the start
+
+These learnings would have significantly accelerated development if known upfront, particularly the Python import structure issues and the need for proper resource cleanup patterns in long-running processes.
+
+## Critical Timer Logic Fix (September 2025)
+
+**CRITICAL GOTCHA - Status Update Timer Logic:**
+When implementing timer-based status transitions in monitoring systems, always consider whether timer resets are needed during re-processing:
+
+- **Problem**: SQL CASE statement `status_changed_at = CASE WHEN status != ? THEN CURRENT_TIMESTAMP ELSE status_changed_at END` only updates timestamp when status actually changes
+- **Issue**: Re-processing CHECKED items preserved old timers instead of resetting to full duration
+- **Solution**: Always update `status_changed_at = CURRENT_TIMESTAMP` when item is re-processed to reset timer to full duration
+
+**Business Logic Impact:**
+- Timer resets ensure consistent behavior when items are continuously monitored
+- Prevents premature status transitions due to accumulated time from previous processing
+- Critical for systems where "freshness" of data detection should restart countdown timers
+
+**Implementation Pattern:**
+```sql
+-- Wrong: Preserves old timer when status doesn't change
+UPDATE table SET status_changed_at = CASE WHEN status != ? THEN CURRENT_TIMESTAMP ELSE status_changed_at END
+
+-- Correct: Always reset timer when item is re-processed
+UPDATE table SET status_changed_at = CURRENT_TIMESTAMP
+```
+
+This timer logic issue could have caused significant operational problems in production if not caught during development testing.
+
+## Database Migration Removal (September 2025)
+
+**CRITICAL SIMPLIFICATION - Complete Migration System Removal:**
+Successfully removed entire database migration system from Market Monitoring System, creating a finalized database schema approach:
+
+**Key Changes Implemented:**
+- **Removed Migration Constants:** Deleted `CURRENT_DB_VERSION` and `MIGRATIONS` dictionary (~35 lines)
+- **Removed Migration Methods:** Deleted `_get_database_version()`, `_set_database_version()`, `_run_migrations()` (~85 lines) 
+- **Removed Version Table:** Eliminated `db_version` table from schema
+- **Simplified Initialization:** Database now uses only `_initialize_database()` method
+
+**Final Database Schema Consolidation:**
+All previous migration changes consolidated into base SCHEMA_SQL:
+- `items` table: includes `processing_type` field (from migration 4)
+- `sellers_current` table: includes `processing_type` + `last_updated` fields (from migrations 3,4)
+- `monitoring_queue` table: includes `processing_type` field (from migration 4)  
+- `sales_log` table: created directly in base schema (from migration 4)
+- `changes_log`, `ocr_sessions`: unchanged (already final)
+
+**Architecture Benefits:**
+- **Code Reduction:** Eliminated ~100 lines of complex migration logic
+- **Performance Improvement:** No version checking overhead during initialization
+- **Maintenance Simplification:** Single schema definition, no version management complexity
+- **Deployment Simplicity:** New databases created with complete schema immediately
+
+**Implementation Pattern for Future Projects:**
+```python
+# Before: Complex migration system
+CURRENT_DB_VERSION = 4
+MIGRATIONS = {1: [...], 2: [...], 3: [...], 4: [...]}
+self._run_migrations()
+
+# After: Direct final schema
+SCHEMA_SQL = {...}  # Contains all final fields
+self._initialize_database()
+```
+
+**Testing Validation:**
+- Created comprehensive test verifying all expected tables created
+- Confirmed all fields from previous migrations included in base schema
+- Verified `db_version` table properly excluded
+- All database operations function correctly without migration system
+
+**Important Considerations:**
+- Approach works best when migration history can be consolidated into final schema
+- Existing databases with complete schema continue working without changes  
+- Very old databases (missing fields from removed migrations) would need manual schema updates
+- Future schema changes will require careful planning without automated migration support
+
+This approach should be considered for mature projects where migration history can be safely consolidated into a final schema definition, significantly reducing codebase complexity and improving system reliability.
+
