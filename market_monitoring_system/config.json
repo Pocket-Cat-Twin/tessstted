@@ -43,7 +43,20 @@
         "max_retries": 3,
         "timeout": 30,
         "retry_delay": 5,
-        "max_image_size_mb": 20
+        "max_image_size_mb": 20,
+        "primary_auth_method": "api_key",
+        "fallback_auth_method": "bearer",
+        "primary_api_format": "ocr",
+        "fallback_api_format": "vision",
+        "enable_fallback": true,
+        "fallback_api_url": "https://vision.api.cloud.yandex.net/vision/v1/batchAnalyze",
+        "supported_formats": [".jpg", ".jpeg", ".png", ".pdf"],
+        "mime_types": {
+            ".jpg": "JPEG",
+            ".jpeg": "JPEG",
+            ".png": "PNG",
+            ".pdf": "PDF"
+        }
     },
     "monitoring": {
         "status_check_interval": 10,

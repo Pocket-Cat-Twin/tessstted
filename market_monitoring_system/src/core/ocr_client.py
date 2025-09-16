@@ -65,13 +65,18 @@ class YandexOCRClient:
         
         # Session for connection reuse
         self.session = requests.Session()
+        
+        # Set authorization header based on primary auth method
+        auth_header = self._get_auth_header(self.config.primary_auth_method)
         self.session.headers.update({
-            'Authorization': f'Bearer {self.config.api_key}',
+            'Authorization': auth_header,
             'Content-Type': 'application/json',
             'User-Agent': 'MarketMonitoring/1.0'
         })
         
-        # Processing statistics
+        self.logger.info(f"OCR client initialized with {self.config.primary_auth_method} auth, {self.config.primary_api_format} format")
+        
+        # Processing statistics (enhanced for dual API tracking)
         self._stats = {
             'total_requests': 0,
             'successful_requests': 0,
@@ -81,8 +86,34 @@ class YandexOCRClient:
             'average_response_time': 0.0,
             'last_request_time': None,
             'rate_limit_hits': 0,
-            'api_errors': {}
+            'api_errors': {},
+            # Dual API tracking
+            'ocr_api_requests': 0,
+            'ocr_api_successes': 0,
+            'vision_api_requests': 0,
+            'vision_api_successes': 0,
+            'fallback_usage': 0,
+            'api_key_auth_requests': 0,
+            'bearer_auth_requests': 0
         }
+    
+    def _get_auth_header(self, auth_method: str) -> str:
+        """
+        Generate authentication header based on method.
+        
+        Args:
+            auth_method: 'api_key' or 'bearer'
+            
+        Returns:
+            Authentication header string
+        """
+        if auth_method == "api_key":
+            return f'Api-Key {self.config.api_key}'
+        elif auth_method == "bearer":
+            return f'Bearer {self.config.api_key}'
+        else:
+            self.logger.warning(f"Unknown auth method '{auth_method}', using api_key")
+            return f'Api-Key {self.config.api_key}'
     
     def send_image_for_recognition(self, image_path: Path, 
                                  language_codes: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
@@ -114,11 +145,8 @@ class YandexOCRClient:
             
             self.logger.info(f"Starting OCR request {session_id} for {image_path.name} ({file_size_mb:.1f}MB)")
             
-            # Prepare request payload
-            payload = self._prepare_ocr_request(image_path, language_codes)
-            
-            # Send request with retry logic
-            response = self._send_request_with_retry(payload, session_id)
+            # Try dual API approach with fallback
+            response = self._send_dual_api_request(image_path, language_codes, session_id)
             
             if response:
                 # Update statistics
@@ -143,17 +171,17 @@ class YandexOCRClient:
             self._stats['total_requests'] += 1
             self._stats['last_request_time'] = datetime.now().isoformat()
     
-    def _prepare_ocr_request(self, image_path: Path, 
-                           language_codes: Optional[List[str]] = None) -> Dict[str, Any]:
+    def _prepare_vision_request(self, image_path: Path, 
+                              language_codes: Optional[List[str]] = None) -> Dict[str, Any]:
         """
-        Prepare OCR request payload.
+        Prepare Vision API request payload (legacy format).
         
         Args:
             image_path: Path to image file
             language_codes: Optional language codes
             
         Returns:
-            Request payload dictionary
+            Request payload dictionary for Vision API
         """
         try:
             # Read and encode image
@@ -179,16 +207,203 @@ class YandexOCRClient:
             return payload
             
         except Exception as e:
-            raise OCRError(f"Failed to prepare OCR request: {e}")
+            raise OCRError(f"Failed to prepare Vision API request: {e}")
     
-    def _send_request_with_retry(self, payload: Dict[str, Any], 
-                               session_id: str) -> Optional[Dict[str, Any]]:
+    def _prepare_ocr_request(self, image_path: Path, 
+                           language_codes: Optional[List[str]] = None) -> Dict[str, Any]:
         """
-        Send request with retry logic.
+        Prepare OCR API request payload (simplified format from YANDEX_OCR.py).
+        
+        Args:
+            image_path: Path to image file
+            language_codes: Optional language codes
+            
+        Returns:
+            Request payload dictionary for OCR API
+        """
+        try:
+            # Read and encode image
+            with open(image_path, 'rb') as image_file:
+                image_data = image_file.read()
+            
+            image_base64 = base64.b64encode(image_data).decode('utf-8')
+            
+            # Get MIME type from file extension
+            mime_type = self._get_mime_type(image_path)
+            
+            # Prepare OCR API request payload (from YANDEX_OCR.py format)
+            payload = {
+                "mimeType": mime_type,
+                "languageCodes": language_codes or ["en"],
+                "model": "page",
+                "content": image_base64
+            }
+            
+            return payload
+            
+        except Exception as e:
+            raise OCRError(f"Failed to prepare OCR API request: {e}")
+    
+    def _get_mime_type(self, image_path: Path) -> str:
+        """
+        Get MIME type from file extension using configuration.
+        
+        Args:
+            image_path: Path to image file
+            
+        Returns:
+            MIME type string
+        """
+        ext = image_path.suffix.lower()
+        return self.config.mime_types.get(ext, 'JPEG')
+    
+    def _prepare_request_payload(self, image_path: Path, api_format: str,
+                               language_codes: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Prepare request payload based on API format.
+        
+        Args:
+            image_path: Path to image file
+            api_format: 'ocr' or 'vision'
+            language_codes: Optional language codes
+            
+        Returns:
+            Request payload dictionary
+        """
+        if api_format == "ocr":
+            return self._prepare_ocr_request(image_path, language_codes)
+        elif api_format == "vision":
+            return self._prepare_vision_request(image_path, language_codes)
+        else:
+            raise OCRError(f"Unknown API format: {api_format}")
+    
+    def _send_dual_api_request(self, image_path: Path, 
+                             language_codes: Optional[List[str]], 
+                             session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Send request using dual API approach with fallback.
+        
+        Args:
+            image_path: Path to image file
+            language_codes: Optional language codes
+            session_id: Session identifier for logging
+            
+        Returns:
+            OCR response or None if failed
+        """
+        # Try primary API format first
+        primary_format = self.config.primary_api_format
+        primary_auth = self.config.primary_auth_method
+        
+        self.logger.info(f"Trying primary API: {primary_format} format with {primary_auth} auth")
+        
+        try:
+            # Prepare payload for primary format
+            payload = self._prepare_request_payload(image_path, primary_format, language_codes)
+            
+            # Update auth header for primary method
+            auth_header = self._get_auth_header(primary_auth)
+            original_auth = self.session.headers.get('Authorization')
+            self.session.headers['Authorization'] = auth_header
+            
+            # Track primary API attempt
+            self._track_api_attempt(primary_format, primary_auth)
+            
+            # Send request with primary API
+            response = self._send_request_with_retry_to_url(
+                payload, self.config.api_url, session_id, f"primary-{primary_format}"
+            )
+            
+            if response:
+                # Success with primary API
+                self._track_api_success(primary_format, primary_auth)
+                self.logger.info(f"Primary API ({primary_format}) succeeded")
+                return response
+            
+        except Exception as e:
+            self.logger.warning(f"Primary API ({primary_format}) failed: {e}")
+        finally:
+            # Restore original auth header
+            if 'original_auth' in locals() and original_auth:
+                self.session.headers['Authorization'] = original_auth
+        
+        # Try fallback API if enabled and primary failed
+        if not self.config.enable_fallback:
+            self.logger.info("Fallback disabled, primary API failed")
+            return None
+            
+        fallback_format = self.config.fallback_api_format
+        fallback_auth = self.config.fallback_auth_method
+        fallback_url = self.config.fallback_api_url
+        
+        self.logger.info(f"Trying fallback API: {fallback_format} format with {fallback_auth} auth")
+        self._stats['fallback_usage'] += 1
+        
+        try:
+            # Prepare payload for fallback format
+            payload = self._prepare_request_payload(image_path, fallback_format, language_codes)
+            
+            # Update auth header for fallback method
+            auth_header = self._get_auth_header(fallback_auth)
+            original_auth = self.session.headers.get('Authorization')
+            self.session.headers['Authorization'] = auth_header
+            
+            # Track fallback API attempt
+            self._track_api_attempt(fallback_format, fallback_auth)
+            
+            # Send request with fallback API
+            response = self._send_request_with_retry_to_url(
+                payload, fallback_url, session_id, f"fallback-{fallback_format}"
+            )
+            
+            if response:
+                # Success with fallback API
+                self._track_api_success(fallback_format, fallback_auth)
+                self.logger.info(f"Fallback API ({fallback_format}) succeeded")
+                return response
+            else:
+                self.logger.error(f"Fallback API ({fallback_format}) also failed")
+                
+        except Exception as e:
+            self.logger.error(f"Fallback API ({fallback_format}) failed: {e}")
+        finally:
+            # Restore original auth header
+            if 'original_auth' in locals() and original_auth:
+                self.session.headers['Authorization'] = original_auth
+        
+        # Both APIs failed
+        return None
+    
+    def _track_api_attempt(self, api_format: str, auth_method: str) -> None:
+        """Track API attempt in statistics."""
+        if api_format == "ocr":
+            self._stats['ocr_api_requests'] += 1
+        elif api_format == "vision":
+            self._stats['vision_api_requests'] += 1
+            
+        if auth_method == "api_key":
+            self._stats['api_key_auth_requests'] += 1
+        elif auth_method == "bearer":
+            self._stats['bearer_auth_requests'] += 1
+    
+    def _track_api_success(self, api_format: str, auth_method: str) -> None:
+        """Track API success in statistics."""
+        if api_format == "ocr":
+            self._stats['ocr_api_successes'] += 1
+        elif api_format == "vision":
+            self._stats['vision_api_successes'] += 1
+    
+    def _send_request_with_retry_to_url(self, payload: Dict[str, Any], 
+                                      url: str, session_id: str, 
+                                      api_type: str) -> Optional[Dict[str, Any]]:
+        """
+        Send request to specific URL with retry logic.
         
         Args:
             payload: Request payload
+            url: Target URL
             session_id: Session identifier for logging
+            api_type: API type for logging (e.g., "primary-ocr", "fallback-vision")
             
         Returns:
             OCR response or None if failed
@@ -198,13 +413,13 @@ class YandexOCRClient:
         for attempt in range(self.config.max_retries + 1):
             try:
                 if attempt > 0:
-                    self.logger.info(f"OCR request {session_id} retry attempt {attempt}")
+                    self.logger.info(f"Retry {attempt} for {api_type} request {session_id}")
                     time.sleep(self.config.retry_delay * attempt)  # Exponential backoff
                     self._stats['retry_attempts'] += 1
                 
                 # Send request
                 response = self.session.post(
-                    self.config.api_url,
+                    url,
                     json=payload,
                     timeout=self.config.timeout
                 )
@@ -221,32 +436,49 @@ class YandexOCRClient:
                         # Longer delay for rate limiting
                         time.sleep(self.config.retry_delay * 2)
                     
-                    self.logger.warning(f"Retryable error for {session_id}: {last_error}")
+                    self.logger.warning(f"Retryable error for {api_type} {session_id}: {last_error}")
                     continue
                 
                 else:
                     # Non-retryable error
                     error_msg = f"HTTP {response.status_code}: {response.text[:200]}"
                     self._record_api_error(response.status_code, error_msg)
-                    self.logger.error(f"Non-retryable error for {session_id}: {error_msg}")
+                    self.logger.error(f"Non-retryable error for {api_type} {session_id}: {error_msg}")
                     return None
                 
             except requests.exceptions.Timeout:
                 last_error = f"Request timeout after {self.config.timeout}s"
-                self.logger.warning(f"Timeout for {session_id} (attempt {attempt + 1})")
+                self.logger.warning(f"Timeout for {api_type} {session_id} (attempt {attempt + 1})")
                 
             except requests.exceptions.ConnectionError as e:
                 last_error = f"Connection error: {str(e)[:200]}"
-                self.logger.warning(f"Connection error for {session_id}: {last_error}")
+                self.logger.warning(f"Connection error for {api_type} {session_id}: {last_error}")
                 
             except Exception as e:
                 last_error = f"Unexpected error: {str(e)[:200]}"
-                self.logger.error(f"Unexpected error for {session_id}: {last_error}")
+                self.logger.error(f"Unexpected error for {api_type} {session_id}: {last_error}")
                 break  # Don't retry for unexpected errors
         
         # All attempts failed
-        self.logger.error(f"OCR request {session_id} failed after {self.config.max_retries + 1} attempts. Last error: {last_error}")
+        self.logger.error(f"{api_type.title()} request {session_id} failed after {self.config.max_retries + 1} attempts. Last error: {last_error}")
         return None
+    
+    def _send_request_with_retry(self, payload: Dict[str, Any], 
+                               session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Send request with retry logic (legacy method for backward compatibility).
+        
+        Args:
+            payload: Request payload
+            session_id: Session identifier for logging
+            
+        Returns:
+            OCR response or None if failed
+        """
+        # Call new URL-specific method with default API URL for backward compatibility
+        return self._send_request_with_retry_to_url(
+            payload, self.config.api_url, session_id, "legacy"
+        )
     
     def _process_successful_response(self, response: requests.Response) -> Dict[str, Any]:
         """
@@ -272,12 +504,12 @@ class YandexOCRClient:
         except Exception as e:
             raise OCRError(f"Failed to process successful response: {e}")
     
-    def extract_text_from_response(self, api_response: Dict[str, Any]) -> str:
+    def _extract_text_from_vision_response(self, api_response: Dict[str, Any]) -> str:
         """
-        Extract text content from OCR API response.
+        Extract text content from Vision API response (legacy format).
         
         Args:
-            api_response: OCR API response dictionary
+            api_response: Vision API response dictionary
             
         Returns:
             Extracted text content
@@ -305,8 +537,94 @@ class YandexOCRClient:
             return extracted_text
             
         except Exception as e:
-            self.logger.error(f"Failed to extract text from OCR response: {e}")
+            self.logger.error(f"Failed to extract text from Vision API response: {e}")
             return ""
+    
+    def _extract_text_from_ocr_response(self, api_response: Dict[str, Any]) -> str:
+        """
+        Extract text content from OCR API response (YANDEX_OCR.py format).
+        
+        Args:
+            api_response: OCR API response dictionary
+            
+        Returns:
+            Extracted text content
+        """
+        try:
+            # OCR API has simpler structure: result.textAnnotation.fullText
+            result = api_response.get('result', {})
+            text_annotation = result.get('textAnnotation', {})
+            extracted_text = text_annotation.get('fullText', '')
+            
+            if extracted_text:
+                extracted_text = extracted_text.strip()
+                self.logger.debug(f"Extracted {len(extracted_text)} characters from OCR API response")
+                return extracted_text
+            else:
+                self.logger.warning("No fullText found in OCR API response")
+                return ""
+                
+        except Exception as e:
+            self.logger.error(f"Failed to extract text from OCR API response: {e}")
+            return ""
+    
+    def extract_text_from_response(self, api_response: Dict[str, Any]) -> str:
+        """
+        Extract text content from API response (auto-detect format).
+        
+        Args:
+            api_response: API response dictionary
+            
+        Returns:
+            Extracted text content
+        """
+        try:
+            # Try OCR API format first (simpler structure)
+            if self._is_ocr_api_response(api_response):
+                self.logger.debug("Detected OCR API response format")
+                return self._extract_text_from_ocr_response(api_response)
+            else:
+                self.logger.debug("Using Vision API response format")
+                return self._extract_text_from_vision_response(api_response)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to extract text from API response: {e}")
+            return ""
+    
+    def _is_ocr_api_response(self, api_response: Dict[str, Any]) -> bool:
+        """
+        Detect if response is from OCR API or Vision API.
+        
+        Args:
+            api_response: API response dictionary
+            
+        Returns:
+            True if OCR API format, False if Vision API format
+        """
+        try:
+            result = api_response.get('result', {})
+            text_annotation = result.get('textAnnotation', {})
+            
+            # OCR API has 'fullText' field, Vision API has 'blocks' field
+            has_full_text = 'fullText' in text_annotation
+            has_blocks = 'blocks' in text_annotation
+            
+            if has_full_text and not has_blocks:
+                return True  # OCR API format
+            elif has_blocks and not has_full_text:
+                return False  # Vision API format
+            elif has_full_text and has_blocks:
+                # Both present, prefer OCR format
+                self.logger.debug("Response has both fullText and blocks, using OCR format")
+                return True
+            else:
+                # Neither present, default to Vision format for backward compatibility
+                self.logger.warning("Response format unclear, defaulting to Vision API format")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Error detecting response format: {e}")
+            return False  # Default to Vision API format
     
     def process_image_full_pipeline(self, image_path: Path, 
                                   cleanup_image: bool = True,
@@ -413,7 +731,7 @@ class YandexOCRClient:
         """
         stats = self._stats.copy()
         
-        # Calculate success rate
+        # Calculate overall success rates
         total_requests = stats['total_requests']
         if total_requests > 0:
             stats['success_rate'] = stats['successful_requests'] / total_requests
@@ -421,6 +739,53 @@ class YandexOCRClient:
         else:
             stats['success_rate'] = 0.0
             stats['failure_rate'] = 0.0
+        
+        # Calculate OCR API success rates
+        ocr_requests = stats['ocr_api_requests']
+        if ocr_requests > 0:
+            stats['ocr_api_success_rate'] = stats['ocr_api_successes'] / ocr_requests
+            stats['ocr_api_failure_rate'] = (ocr_requests - stats['ocr_api_successes']) / ocr_requests
+        else:
+            stats['ocr_api_success_rate'] = 0.0
+            stats['ocr_api_failure_rate'] = 0.0
+        
+        # Calculate Vision API success rates
+        vision_requests = stats['vision_api_requests']
+        if vision_requests > 0:
+            stats['vision_api_success_rate'] = stats['vision_api_successes'] / vision_requests
+            stats['vision_api_failure_rate'] = (vision_requests - stats['vision_api_successes']) / vision_requests
+        else:
+            stats['vision_api_success_rate'] = 0.0
+            stats['vision_api_failure_rate'] = 0.0
+        
+        # Calculate authentication method usage
+        total_auth_requests = stats['api_key_auth_requests'] + stats['bearer_auth_requests']
+        if total_auth_requests > 0:
+            stats['api_key_usage_rate'] = stats['api_key_auth_requests'] / total_auth_requests
+            stats['bearer_usage_rate'] = stats['bearer_auth_requests'] / total_auth_requests
+        else:
+            stats['api_key_usage_rate'] = 0.0
+            stats['bearer_usage_rate'] = 0.0
+        
+        # Add API preference summary
+        if ocr_requests > 0 or vision_requests > 0:
+            if ocr_requests > vision_requests:
+                stats['preferred_api'] = 'OCR API'
+            elif vision_requests > ocr_requests:
+                stats['preferred_api'] = 'Vision API'
+            else:
+                stats['preferred_api'] = 'Equal usage'
+        else:
+            stats['preferred_api'] = 'No API usage yet'
+        
+        # Add configuration summary
+        stats['config_summary'] = {
+            'primary_api_format': self.config.primary_api_format,
+            'primary_auth_method': self.config.primary_auth_method,
+            'fallback_enabled': self.config.enable_fallback,
+            'fallback_api_format': self.config.fallback_api_format,
+            'fallback_auth_method': self.config.fallback_auth_method
+        }
         
         return stats
     

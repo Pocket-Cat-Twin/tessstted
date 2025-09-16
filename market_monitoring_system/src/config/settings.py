@@ -26,13 +26,28 @@ class HotkeyConfig:
 
 @dataclass  
 class YandexOCRConfig:
-    """Configuration for Yandex OCR API."""
+    """Configuration for Yandex OCR API with dual API support."""
     api_key: str
     api_url: str
     max_retries: int = 3
     timeout: int = 30
     retry_delay: int = 5
     max_image_size_mb: int = 20
+    
+    # Dual API support configuration (backward compatible defaults)
+    primary_auth_method: str = "api_key"
+    fallback_auth_method: str = "bearer"
+    primary_api_format: str = "ocr"
+    fallback_api_format: str = "vision"
+    enable_fallback: bool = True
+    fallback_api_url: str = "https://vision.api.cloud.yandex.net/vision/v1/batchAnalyze"
+    supported_formats: List[str] = field(default_factory=lambda: [".jpg", ".jpeg", ".png", ".pdf"])
+    mime_types: Dict[str, str] = field(default_factory=lambda: {
+        ".jpg": "JPEG",
+        ".jpeg": "JPEG", 
+        ".png": "PNG",
+        ".pdf": "PDF"
+    })
 
 
 @dataclass
@@ -197,7 +212,21 @@ class SettingsManager:
                 max_retries=ocr_data.get('max_retries', 3),
                 timeout=ocr_data.get('timeout', 30),
                 retry_delay=ocr_data.get('retry_delay', 5),
-                max_image_size_mb=ocr_data.get('max_image_size_mb', 20)
+                max_image_size_mb=ocr_data.get('max_image_size_mb', 20),
+                # Dual API support (backward compatible)
+                primary_auth_method=ocr_data.get('primary_auth_method', 'api_key'),
+                fallback_auth_method=ocr_data.get('fallback_auth_method', 'bearer'),
+                primary_api_format=ocr_data.get('primary_api_format', 'ocr'),
+                fallback_api_format=ocr_data.get('fallback_api_format', 'vision'),
+                enable_fallback=ocr_data.get('enable_fallback', True),
+                fallback_api_url=ocr_data.get('fallback_api_url', 'https://vision.api.cloud.yandex.net/vision/v1/batchAnalyze'),
+                supported_formats=ocr_data.get('supported_formats', [".jpg", ".jpeg", ".png", ".pdf"]),
+                mime_types=ocr_data.get('mime_types', {
+                    ".jpg": "JPEG",
+                    ".jpeg": "JPEG", 
+                    ".png": "PNG",
+                    ".pdf": "PDF"
+                })
             )
         except KeyError as e:
             raise ConfigurationError(f"Missing required OCR configuration: {e}")

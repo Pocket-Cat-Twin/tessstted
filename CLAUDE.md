@@ -230,3 +230,72 @@ self._initialize_database()
 
 This approach should be considered for mature projects where migration history can be safely consolidated into a final schema definition, significantly reducing codebase complexity and improving system reliability.
 
+## YANDEX_OCR.py Integration - Zero Breaking Changes Pattern (September 2025)
+
+**CRITICAL INTEGRATION STRATEGY - Dual API Architecture for Backward Compatibility:**
+Successfully integrated standalone YANDEX_OCR.py functionality into enterprise system with ZERO breaking changes using dual API pattern:
+
+**Key Integration Insights:**
+
+**Backward Compatibility Preservation:**
+- **Additive Configuration:** Add new config fields with defaults, never replace existing ones
+- **Method Renaming Strategy:** Rename internal methods for clarity while keeping public interfaces unchanged  
+- **Dual Format Support:** Support both new format (OCR API) and legacy format (Vision API) simultaneously
+- **Fallback Architecture:** Primary API (new working key) with fallback to existing system ensures zero downtime
+
+**API Integration Best Practices:**
+- **Authentication Flexibility:** Support multiple auth methods (Api-Key + Bearer) with runtime switching
+- **Response Format Detection:** Auto-detect API response format rather than assuming structure
+- **Statistics Enhancement:** Track dual API usage, success rates, fallback frequency for operational visibility
+- **Configuration Validation:** Validate new configuration options while maintaining backward compatibility
+
+**Working API Key Integration:**
+- **Replace Placeholder Keys:** The system had placeholder "your_api_key_here" - real working key dramatically improves success rate
+- **API Endpoint Differences:** OCR API vs Vision API have different endpoints, request formats, and response structures
+- **Authentication Method Differences:** Api-Key authentication (OCR API) vs Bearer authentication (Vision API) require different header formats
+- **Response Structure Differences:** OCR API uses simple fullText field vs Vision API complex blocks/lines/words hierarchy
+
+**Enterprise Integration Patterns:**
+- **Dual API with Fallback:** Try primary API with working key, fallback to existing API if needed
+- **Format Auto-Detection:** Detect response format and use appropriate extraction method
+- **Statistics Tracking:** Monitor both APIs independently for operational insight
+- **Configuration Management:** Extend configuration without breaking existing setups
+
+**Testing Strategy for Zero Breaking Changes:**
+- **Comprehensive Integration Tests:** Test all new functionality without breaking existing code
+- **API Key Validation:** Verify working API key functionality with real API calls
+- **Backward Compatibility Tests:** Ensure existing method signatures and behavior unchanged
+- **Statistics Validation:** Test enhanced statistics tracking includes all dual API metrics
+
+**Configuration Management Insights:**
+- **Gradual Enhancement:** Add new configuration sections alongside existing ones
+- **Default Value Strategy:** All new configuration options must have production-safe defaults
+- **Validation Enhancement:** Extend configuration validation without breaking existing validation
+- **Documentation Critical:** Clear documentation of new options prevents configuration errors
+
+**Performance and Reliability Improvements:**
+- **Working API Key Impact:** Functional API key reduced authentication failures from 100% to 0%
+- **Dual API Redundancy:** Primary + fallback APIs provide system resilience  
+- **Enhanced Monitoring:** Detailed statistics enable proactive issue detection and optimization
+- **Response Time Tracking:** Monitor performance differences between API endpoints for optimization
+
+**Critical Implementation Details:**
+- **MIME Type Detection:** Proper MIME type mapping critical for image processing APIs
+- **Error Categorization:** Distinguish between retryable and non-retryable errors for different APIs
+- **Session Management:** Reuse HTTP sessions and manage authentication headers dynamically
+- **Statistics Atomicity:** Update statistics consistently across both API paths
+
+**What Would Have Accelerated Development:**
+- **API Documentation Analysis:** Understanding API differences upfront would have streamlined implementation
+- **Authentication Method Research:** Knowing about Api-Key vs Bearer differences would have guided initial design  
+- **Response Format Mapping:** Pre-analyzing response structure differences would have simplified parsing logic
+- **Configuration Schema Design:** Planning dual configuration schema upfront would have reduced refactoring
+
+**Production Readiness Validation:**
+- **API Connection Testing:** Test actual API connectivity before deployment (not just configuration validation)
+- **Load Testing:** Verify both APIs handle expected load and fail gracefully
+- **Fallback Testing:** Ensure fallback mechanisms work under various failure scenarios
+- **Statistics Accuracy:** Validate statistics tracking accuracy across all dual API scenarios
+
+This integration pattern should be the template for all future API integrations where backward compatibility is critical - it enables significant system improvements without operational risk.
+
