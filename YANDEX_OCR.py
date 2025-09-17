@@ -15,7 +15,7 @@ from pathlib import Path
 # НАСТРОЙКИ
 # =============================================================================
 
-API_KEY = "your_api_key_here"
+API_KEY = os.getenv('YANDEX_API_KEY', 'your_api_key_here')
 OCR_URL = "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText"
 
 # Поддерживаемые форматы файлов

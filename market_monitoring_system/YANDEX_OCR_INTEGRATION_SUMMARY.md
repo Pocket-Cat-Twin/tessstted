@@ -13,7 +13,7 @@ Successfully integrated the standalone YANDEX_OCR.py script functionality into t
 - Legacy functionality preserved with fallback mechanisms
 
 ### ✅ Working API Key Integration
-- Replaced placeholder API key with functional key: `your_api_key_here`
+- Replaced placeholder API key with functional key: `[REDACTED]`
 - API connection test confirms functionality
 - Primary OCR API endpoint: `https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText`
 
