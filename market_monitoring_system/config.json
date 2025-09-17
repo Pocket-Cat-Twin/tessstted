@@ -1,7 +1,7 @@
 {
     "hotkeys": {
         "F1": {
-            "area": [100, 100, 800, 600],
+            "area": [735, 305, 1180, 675],
             "folder": "F1",
             "merge_interval": 30,
             "enabled": true,
@@ -10,7 +10,7 @@
             "processing_type": "full"
         },
         "F2": {
-            "area": [100, 100, 800, 600],
+            "area": [650, 50, 935, 450],
             "folder": "F2",
             "merge_interval": 60,
             "enabled": true,
@@ -37,27 +37,28 @@
             "processing_type": "full"
         }
     },
-    "yandex_ocr": {
-        "api_key": "your_api_key_here",
-        "api_url": "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText",
-        "max_retries": 3,
-        "timeout": 30,
-        "retry_delay": 5,
-        "max_image_size_mb": 20,
-        "primary_auth_method": "api_key",
-        "fallback_auth_method": "bearer",
-        "primary_api_format": "ocr",
-        "fallback_api_format": "vision",
-        "enable_fallback": true,
-        "fallback_api_url": "https://vision.api.cloud.yandex.net/vision/v1/batchAnalyze",
-        "supported_formats": [".jpg", ".jpeg", ".png", ".pdf"],
-        "mime_types": {
-            ".jpg": "JPEG",
-            ".jpeg": "JPEG",
-            ".png": "PNG",
-            ".pdf": "PDF"
-        }
-    },
+"yandex_ocr": {
+    "api_key": "t1.9euelZrHxpnLipPJyMaZjJKUlJWJy-3rnpWai5WQk5iXjsyLk42RyI3OmZzl8_dRY1U5-e8DdHoY_d3z9xESUzn57wN0ehj9zef1656VmpeWxorPnY6ZypjMj5jMlZOR7_zF656VmpeWxorPnY6ZypjMj5jMlZOR.-NK1ZuKYs5aTlOTCNLFX0vasp_2CQEji4F38PW-EvXbFWAm2GPlNmoWbazMWrX0K8ZLIn8nDoMBSPG9sRsg-CQ",
+    "folder_id": "aje30djqbvdp18pv59ok",
+    "api_url": "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText",
+    "max_retries": 3,
+    "timeout": 30,
+    "retry_delay": 5,
+    "max_image_size_mb": 20,
+    "primary_auth_method": "bearer",
+    "fallback_auth_method": "api_key",
+    "primary_api_format": "ocr",
+    "fallback_api_format": "vision",
+    "enable_fallback": true,
+    "fallback_api_url": "https://vision.api.cloud.yandex.net/vision/v1/batchAnalyze",
+    "supported_formats": [".jpg", ".jpeg", ".png", ".pdf"],
+    "mime_types": {
+        ".jpg": "JPEG",
+        ".jpeg": "JPEG",
+        ".png": "PNG",
+        ".pdf": "PDF"
+    }
+},
     "monitoring": {
         "status_check_interval": 10,
         "cleanup_old_data_days": 30,
