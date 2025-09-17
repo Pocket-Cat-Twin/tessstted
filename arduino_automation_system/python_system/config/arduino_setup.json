@@ -1,0 +1,213 @@
+{
+    "arduino_connection": {
+        "windows_com_ports": [
+            "COM3",
+            "COM4", 
+            "COM5",
+            "COM6",
+            "COM7",
+            "COM8"
+        ],
+        "linux_ports": [
+            "/dev/ttyUSB0",
+            "/dev/ttyACM0",
+            "/dev/ttyUSB1", 
+            "/dev/ttyACM1"
+        ],
+        "macos_ports": [
+            "/dev/cu.usbmodem*",
+            "/dev/cu.usbserial*"
+        ],
+        "auto_detection": {
+            "enabled": true,
+            "detection_timeout": 10,
+            "test_command": "PING",
+            "expected_response": "PONG"
+        },
+        "connection_parameters": {
+            "baudrate": 9600,
+            "timeout": 5,
+            "write_timeout": 5,
+            "inter_byte_timeout": None,
+            "exclusive": true
+        },
+        "retry_logic": {
+            "max_attempts": 3,
+            "retry_delay": 2,
+            "exponential_backoff": false
+        }
+    },
+    "arduino_hardware": {
+        "supported_boards": [
+            {
+                "name": "Arduino Micro",
+                "usb_hid_support": true,
+                "recommended": true,
+                "notes": "Native USB HID support for Mouse/Keyboard"
+            },
+            {
+                "name": "Arduino Leonardo", 
+                "usb_hid_support": true,
+                "recommended": true,
+                "notes": "Native USB HID support for Mouse/Keyboard"
+            },
+            {
+                "name": "Arduino Uno",
+                "usb_hid_support": false,
+                "recommended": false,
+                "notes": "Requires additional hardware for HID functionality"
+            }
+        ],
+        "required_libraries": [
+            {
+                "name": "Mouse.h",
+                "version": "built-in",
+                "description": "USB HID Mouse control"
+            },
+            {
+                "name": "Keyboard.h", 
+                "version": "built-in",
+                "description": "USB HID Keyboard control"
+            }
+        ]
+    },
+    "windows_specific": {
+        "driver_installation": {
+            "automatic": true,
+            "manual_driver_url": "https://www.arduino.cc/en/Guide/DriverInstallation",
+            "common_issues": [
+                "Windows may require driver installation on first connection",
+                "Antivirus software may flag Arduino USB activity",
+                "Windows power management may affect USB ports"
+            ]
+        },
+        "device_manager": {
+            "location": "Device Manager > Ports (COM & LPT)",
+            "arduino_entry": "Arduino Micro (COMx)",
+            "troubleshooting": [
+                "If Arduino not listed, try different USB port",
+                "Update Arduino drivers if connection fails",
+                "Restart Windows if USB recognition issues persist"
+            ]
+        },
+        "security_considerations": [
+            "Windows may prompt for Arduino driver installation - allow it",
+            "Arduino will appear as USB keyboard/mouse - this is normal",
+            "Add Arduino IDE to antivirus exceptions if needed",
+            "No additional permissions required for HID functionality"
+        ]
+    },
+    "communication_protocol": {
+        "command_format": {
+            "click": "CLICK:x,y",
+            "type": "TYPE:text_string",
+            "key": "KEY:keycode",
+            "hotkey": "HOTKEY:combination", 
+            "delay": "DELAY:milliseconds",
+            "ping": "PING"
+        },
+        "response_format": {
+            "success": "OK",
+            "error": "ERROR:description",
+            "ready": "READY",
+            "ping_response": "PONG",
+            "heartbeat": "HEARTBEAT"
+        },
+        "special_characters": {
+            "line_terminator": "\\n",
+            "command_separator": ":",
+            "coordinate_separator": ",",
+            "escape_sequences": {
+                "newline": "\\n",
+                "carriage_return": "\\r",
+                "tab": "\\t"
+            }
+        }
+    },
+    "performance_tuning": {
+        "serial_buffer_size": 64,
+        "command_processing_time": "~10ms",
+        "mouse_movement_time": "~50ms",
+        "keyboard_input_time": "~20ms per character",
+        "optimization_tips": [
+            "Use direct USB connection (avoid USB hubs)",
+            "Close unnecessary programs during automation",
+            "Disable Windows USB power management",
+            "Monitor serial buffer for command backlog"
+        ]
+    },
+    "troubleshooting": {
+        "common_issues": [
+            {
+                "issue": "Arduino not detected",
+                "solutions": [
+                    "Check USB cable connection",
+                    "Try different USB ports",
+                    "Install Arduino drivers", 
+                    "Restart Arduino IDE"
+                ]
+            },
+            {
+                "issue": "Upload failed",
+                "solutions": [
+                    "Ensure Arduino Micro selected in IDE",
+                    "Verify correct COM port selected",
+                    "Close Serial Monitor before upload",
+                    "Press reset button if needed"
+                ]
+            },
+            {
+                "issue": "Serial communication timeout",
+                "solutions": [
+                    "Verify baud rate is 9600",
+                    "Check COM port in use by other programs",
+                    "Restart Arduino connection",
+                    "Check USB cable quality"
+                ]
+            },
+            {
+                "issue": "Mouse/Keyboard not working",
+                "solutions": [
+                    "Verify Arduino Micro (not Uno)",
+                    "Check Mouse.h/Keyboard.h libraries",
+                    "Restart computer after first connection",
+                    "Verify Windows USB device recognition"
+                ]
+            }
+        ],
+        "diagnostic_commands": [
+            {
+                "command": "PING",
+                "expected": "PONG",
+                "purpose": "Test basic communication"
+            },
+            {
+                "command": "DELAY:1000", 
+                "expected": "OK",
+                "purpose": "Test command processing"
+            },
+            {
+                "command": "KEY:SPACE",
+                "expected": "OK", 
+                "purpose": "Test keyboard functionality"
+            }
+        ]
+    },
+    "development_environment": {
+        "arduino_ide": {
+            "minimum_version": "1.8.0",
+            "recommended_version": "2.0+",
+            "download_url": "https://www.arduino.cc/en/software"
+        },
+        "board_configuration": {
+            "board": "Arduino AVR Boards > Arduino Micro",
+            "programmer": "AVR ISP",
+            "verify_settings": "Tools menu in Arduino IDE"
+        },
+        "serial_monitor": {
+            "baud_rate": 9600,
+            "line_ending": "Newline",
+            "usage": "Tools > Serial Monitor for debugging"
+        }
+    }
+}

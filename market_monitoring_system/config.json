@@ -1,0 +1,85 @@
+{
+    "hotkeys": {
+        "F1": {
+            "area": [735, 305, 1180, 675],
+            "folder": "F1",
+            "merge_interval": 30,
+            "enabled": true,
+            "description": "Полная обработка товаров (цена, количество)",
+            "screenshot_type": "individual_seller_items",
+            "processing_type": "full"
+        },
+        "F2": {
+            "area": [650, 50, 935, 450],
+            "folder": "F2",
+            "merge_interval": 60,
+            "enabled": true,
+            "description": "Минимальная обработка связок продавец-товар",
+            "screenshot_type": "individual_seller_items",
+            "processing_type": "minimal"
+        },
+        "F3": {
+            "area": [100, 100, 800, 600],
+            "folder": "F3",
+            "merge_interval": 45,
+            "enabled": true,
+            "description": "Дополнительная полная обработка товаров",
+            "screenshot_type": "individual_seller_items",
+            "processing_type": "full"
+        },
+        "F4": {
+            "area": [100, 100, 800, 600],
+            "folder": "F4",
+            "merge_interval": 90,
+            "enabled": false,
+            "description": "Обзор товаров (отключена)",
+            "screenshot_type": "item_overview",
+            "processing_type": "full"
+        }
+    },
+    "yandex_ocr": {
+        "api_key": "YOUR_YANDEX_OCR_API_KEY_HERE",
+        "api_url": "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText",
+        "max_retries": 3,
+        "timeout": 30,
+        "max_image_size_mb": 20,
+        "supported_formats": [".jpg", ".jpeg", ".png", ".pdf"],
+        "mime_types": {
+            ".jpg": "JPEG",
+            ".jpeg": "JPEG",
+            ".png": "PNG",
+            ".pdf": "PDF"
+        }
+    },
+    "monitoring": {
+        "status_check_interval": 10,
+        "cleanup_old_data_days": 30,
+        "max_screenshots_per_batch": 50,
+        "status_transition_delay": 10
+    },
+    "paths": {
+        "temp_screenshots": "data/temp/screenshots",
+        "temp_merged": "data/temp/merged",
+        "database": "database/market_data.db",
+        "logs": "data/logs"
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "max_log_size_mb": 100,
+        "backup_count": 5,
+        "console_output": true
+    },
+    "database": {
+        "connection_timeout": 30,
+        "max_retries": 3,
+        "backup_enabled": true,
+        "vacuum_interval_days": 7
+    },
+    "image_processing": {
+        "max_image_width": 4000,
+        "max_image_height": 8000,
+        "jpeg_quality": 85,
+        "optimize_for_ocr": true
+    }
+}

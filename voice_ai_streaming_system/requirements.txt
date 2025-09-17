@@ -1,0 +1,69 @@
+# Voice-to-AI Streaming System Dependencies
+
+# Core Audio Processing
+pyaudio==0.2.11
+numpy==1.24.3
+scipy==1.11.1
+soundfile==0.12.1
+webrtcvad==2.0.10
+
+# Global Hotkey Support
+pynput==1.7.6
+keyboard==0.13.5
+
+# Speech-to-Text Services - New Implementation
+SpeechRecognition==3.10.0
+
+# Yandex SpeechKit gRPC Dependencies
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+yandexcloud>=0.228.0
+protobuf>=4.25.0
+
+# WhisperX Dependencies
+whisperx>=3.1.0
+torch>=2.0.0
+torchaudio>=2.0.0
+transformers>=4.30.0
+faster-whisper>=0.10.0
+
+# OpenRouter AI Service (OpenAI-compatible)
+openai>=1.12.0
+requests==2.31.0
+httpx==0.25.0
+
+# Windows System Integration
+pywin32==306; sys_platform == "win32"
+win32gui; sys_platform == "win32"
+
+# UI Framework
+tkinter-tooltip==2.1.0
+Pillow==10.0.0
+
+# Threading and Async
+asyncio-throttle==1.0.2
+threading-timer==1.0.0
+
+# Configuration and Logging
+pyyaml==6.0.1
+colorlog==6.7.0
+python-dotenv==1.0.0
+
+# Audio Format Support
+pydub==0.25.1
+mutagen==1.47.0
+
+# System Monitoring
+psutil==5.9.5
+py-cpuinfo==9.0.0
+
+# Development and Testing
+pytest==7.4.0
+pytest-asyncio==0.21.1
+pytest-mock==3.11.1
+black==23.7.0
+flake8==6.0.0
+
+# Packaging and Distribution
+pyinstaller==5.13.2
+auto-py-to-exe==2.41.0

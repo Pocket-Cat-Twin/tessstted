@@ -1,0 +1,10 @@
+2025-09-17 02:01:02.430 [    INFO] logger:setup_logging:128 - Logging system initialized
+2025-09-17 02:01:02.431 [    INFO] logger:setup_logging:129 - Log level: INFO
+2025-09-17 02:01:02.431 [    INFO] logger:setup_logging:130 - Console logging: True
+2025-09-17 02:01:02.431 [    INFO] logger:setup_logging:131 - File logging: True
+2025-09-17 02:01:02.431 [    INFO] logger:setup_logging:133 - Log directory: /home/codespace/tessstted/voice_ai_streaming_system/data/logs
+2025-09-17 02:01:02.431 [    INFO] main:test_logging:96 - Test log message
+2025-09-17 02:01:02.431 [ WARNING] main:test_logging:98 - Test warning message
+2025-09-17 02:01:02.431 [    INFO] event_bus:__init__:106 - EventBus initialized
+2025-09-17 02:01:02.431 [    INFO] state_manager:__init__:160 - StateManager initialized
+2025-09-17 02:01:02.432 [    INFO] state_manager:set_system_state:204 - System state changed: starting -> ready
