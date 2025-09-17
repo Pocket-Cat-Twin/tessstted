@@ -1877,3 +1877,92 @@
 2025-09-17 13:43:47,661 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:43:57 MSK)" (scheduled at 2025-09-17 13:43:47.654805+03:00)
 2025-09-17 13:43:47,662 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
 2025-09-17 13:43:47,663 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:43:57 MSK)" executed successfully
+2025-09-17 13:43:57,659 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:07 MSK)" (scheduled at 2025-09-17 13:43:57.654805+03:00)
+2025-09-17 13:43:57,659 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
+2025-09-17 13:43:57,660 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:07 MSK)" executed successfully
+2025-09-17 13:44:07,663 - apscheduler.executors.default - INFO - Running job "Process F1 screenshots (trigger: interval[0:00:30], next run at: 2025-09-17 13:44:37 MSK)" (scheduled at 2025-09-17 13:44:07.651806+03:00)
+2025-09-17 13:44:07,663 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:17 MSK)" (scheduled at 2025-09-17 13:44:07.654805+03:00)
+2025-09-17 13:44:07,664 - apscheduler.executors.default - INFO - Job "Process F1 screenshots (trigger: interval[0:00:30], next run at: 2025-09-17 13:44:37 MSK)" executed successfully
+2025-09-17 13:44:07,664 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
+2025-09-17 13:44:07,665 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:17 MSK)" executed successfully
+2025-09-17 13:44:17,659 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:27 MSK)" (scheduled at 2025-09-17 13:44:17.654805+03:00)
+2025-09-17 13:44:17,660 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
+2025-09-17 13:44:17,660 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:27 MSK)" executed successfully
+2025-09-17 13:44:22,660 - apscheduler.executors.default - INFO - Running job "Process F3 screenshots (trigger: interval[0:00:45], next run at: 2025-09-17 13:45:07 MSK)" (scheduled at 2025-09-17 13:44:22.653805+03:00)
+2025-09-17 13:44:22,661 - apscheduler.executors.default - INFO - Job "Process F3 screenshots (trigger: interval[0:00:45], next run at: 2025-09-17 13:45:07 MSK)" executed successfully
+2025-09-17 13:44:27,662 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:37 MSK)" (scheduled at 2025-09-17 13:44:27.654805+03:00)
+2025-09-17 13:44:27,663 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
+2025-09-17 13:44:27,663 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:37 MSK)" executed successfully
+2025-09-17 13:44:37,655 - apscheduler.executors.default - INFO - Running job "Process F1 screenshots (trigger: interval[0:00:30], next run at: 2025-09-17 13:45:07 MSK)" (scheduled at 2025-09-17 13:44:37.651806+03:00)
+2025-09-17 13:44:37,655 - apscheduler.executors.default - INFO - Running job "Process F2 screenshots (trigger: interval[0:01:00], next run at: 2025-09-17 13:45:37 MSK)" (scheduled at 2025-09-17 13:44:37.652805+03:00)
+2025-09-17 13:44:37,655 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:47 MSK)" (scheduled at 2025-09-17 13:44:37.654805+03:00)
+2025-09-17 13:44:37,657 - apscheduler.executors.default - INFO - Job "Process F1 screenshots (trigger: interval[0:00:30], next run at: 2025-09-17 13:45:07 MSK)" executed successfully
+2025-09-17 13:44:37,657 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
+2025-09-17 13:44:37,657 - core.image_processor - INFO - Processing 4 screenshots for F2
+2025-09-17 13:44:37,657 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:47 MSK)" executed successfully
+2025-09-17 13:44:37,726 - core.image_processor - INFO - Successfully merged 3 images into merged_20250917_134437_659_d43862e0.jpg (700x1800) in 0.068s
+2025-09-17 13:44:37,730 - core.image_processor - INFO - Cleaned up source files: 4 successful, 0 failed
+2025-09-17 13:44:37,731 - core.database_manager - INFO - Created OCR session 20 for hotkey F2
+2025-09-17 13:44:37,732 - utils.scheduler - INFO - Submitted OCR job ocr_F2_1758105877_5fa3a8ec for F2 (session 20)
+2025-09-17 13:44:37,732 - core.ocr_queue - INFO - Worker OCRWorker-1 processing job ocr_F2_1758105877_5fa3a8ec (attempt 1)
+2025-09-17 13:44:37,732 - apscheduler.executors.default - INFO - Job "Process F2 screenshots (trigger: interval[0:01:00], next run at: 2025-09-17 13:45:37 MSK)" executed successfully
+2025-09-17 13:44:37,732 - core.ocr_client - INFO - Starting OCR request e616b3b4 for merged_20250917_134437_659_d43862e0.jpg (0.2MB)
+2025-09-17 13:44:37,733 - core.ocr_client - INFO - Trying primary API: ocr format with api_key auth
+2025-09-17 13:44:37,840 - core.ocr_client - ERROR - Non-retryable error for primary-ocr e616b3b4: HTTP 401: {"error":{"grpcCode":16,"httpCode":401,"message":"Unknown api key 'AQVN****wxyz (5BDA1EF9)'","httpStatus":"Unauthorized","details":[]}}
+2025-09-17 13:44:37,840 - core.ocr_client - INFO - Trying fallback API: vision format with bearer auth
+2025-09-17 13:44:37,938 - core.ocr_client - ERROR - Non-retryable error for fallback-vision e616b3b4: HTTP 401: {
+ "code": 16,
+ "message": "The token is invalid",
+ "details": [
+  {
+   "@type": "type.googleapis.com/google.rpc.RequestInfo",
+   "requestId": "d1a2eecb-87e4-44fd-b1da-cdfe5c64497e"
+  }
+ ]
+}
+
+2025-09-17 13:44:37,939 - core.ocr_client - ERROR - Fallback API (vision) also failed
+2025-09-17 13:44:37,939 - core.ocr_queue - ERROR - Job ocr_F2_1758105877_5fa3a8ec failed on attempt 1: OCR processing returned no result
+2025-09-17 13:44:37,940 - core.ocr_queue - INFO - Requeuing job ocr_F2_1758105877_5fa3a8ec for retry in 2s
+2025-09-17 13:44:39,941 - core.ocr_queue - INFO - Worker OCRWorker-1 processing job ocr_F2_1758105877_5fa3a8ec (attempt 2)
+2025-09-17 13:44:39,941 - core.ocr_client - INFO - Starting OCR request 3097e55c for merged_20250917_134437_659_d43862e0.jpg (0.2MB)
+2025-09-17 13:44:39,943 - core.ocr_client - INFO - Trying primary API: ocr format with api_key auth
+2025-09-17 13:44:40,041 - core.ocr_client - ERROR - Non-retryable error for primary-ocr 3097e55c: HTTP 401: {"error":{"grpcCode":16,"httpCode":401,"message":"Unknown api key 'AQVN****wxyz (5BDA1EF9)'","httpStatus":"Unauthorized","details":[]}}
+2025-09-17 13:44:40,042 - core.ocr_client - INFO - Trying fallback API: vision format with bearer auth
+2025-09-17 13:44:40,149 - core.ocr_client - ERROR - Non-retryable error for fallback-vision 3097e55c: HTTP 401: {
+ "code": 16,
+ "message": "The token is invalid",
+ "details": [
+  {
+   "@type": "type.googleapis.com/google.rpc.RequestInfo",
+   "requestId": "ab60d5f9-493c-4ee5-8dc9-3b15a561b171"
+  }
+ ]
+}
+
+2025-09-17 13:44:40,149 - core.ocr_client - ERROR - Fallback API (vision) also failed
+2025-09-17 13:44:40,150 - core.ocr_queue - ERROR - Job ocr_F2_1758105877_5fa3a8ec failed on attempt 2: OCR processing returned no result
+2025-09-17 13:44:40,150 - core.ocr_queue - INFO - Requeuing job ocr_F2_1758105877_5fa3a8ec for retry in 4s
+2025-09-17 13:44:44,152 - core.ocr_queue - INFO - Worker OCRWorker-1 processing job ocr_F2_1758105877_5fa3a8ec (attempt 3)
+2025-09-17 13:44:44,153 - core.ocr_client - INFO - Starting OCR request dd50d459 for merged_20250917_134437_659_d43862e0.jpg (0.2MB)
+2025-09-17 13:44:44,153 - core.ocr_client - INFO - Trying primary API: ocr format with api_key auth
+2025-09-17 13:44:44,251 - core.ocr_client - ERROR - Non-retryable error for primary-ocr dd50d459: HTTP 401: {"error":{"grpcCode":16,"httpCode":401,"message":"Unknown api key 'AQVN****wxyz (5BDA1EF9)'","httpStatus":"Unauthorized","details":[]}}
+2025-09-17 13:44:44,252 - core.ocr_client - INFO - Trying fallback API: vision format with bearer auth
+2025-09-17 13:44:44,349 - core.ocr_client - ERROR - Non-retryable error for fallback-vision dd50d459: HTTP 401: {
+ "code": 16,
+ "message": "The token is invalid",
+ "details": [
+  {
+   "@type": "type.googleapis.com/google.rpc.RequestInfo",
+   "requestId": "f67dbb8f-5a20-4154-af68-fb702148f957"
+  }
+ ]
+}
+
+2025-09-17 13:44:44,349 - core.ocr_client - ERROR - Fallback API (vision) also failed
+2025-09-17 13:44:44,350 - core.ocr_queue - ERROR - Job ocr_F2_1758105877_5fa3a8ec failed on attempt 3: OCR processing returned no result
+2025-09-17 13:44:44,351 - utils.scheduler - ERROR - OCR failed for F2: OCR processing returned no result (OCR job ocr_F2_1758105877_5fa3a8ec)
+2025-09-17 13:44:44,351 - core.ocr_queue - ERROR - Job ocr_F2_1758105877_5fa3a8ec permanently failed: OCR processing returned no result
+2025-09-17 13:44:47,669 - apscheduler.executors.default - INFO - Running job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:57 MSK)" (scheduled at 2025-09-17 13:44:47.654805+03:00)
+2025-09-17 13:44:47,670 - utils.scheduler - INFO - Status check cycle completed: 0 transitions, 0 inactive combinations removed
+2025-09-17 13:44:47,670 - apscheduler.executors.default - INFO - Job "Status check and transition cycle (trigger: interval[0:00:10], next run at: 2025-09-17 13:44:57 MSK)" executed successfully
