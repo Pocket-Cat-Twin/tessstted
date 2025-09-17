@@ -91,6 +91,10 @@ void processCommand(String cmd) {
     if (cmd.startsWith("CLICK:")) {
         executeClickCommand(cmd);
     }
+    // Parse and execute MOVE command
+    else if (cmd.startsWith("MOVE:")) {
+        executeMoveCommand(cmd);
+    }
     // Parse and execute TYPE command
     else if (cmd.startsWith("TYPE:")) {
         executeTypeCommand(cmd);
@@ -313,6 +317,37 @@ void executeHotkeyCommand(String cmd) {
         Serial.println("OK");
     } catch (...) {
         Serial.println("ERROR:HOTKEY_FAILED");
+    }
+}
+
+void executeMoveCommand(String cmd) {
+    // Expected format: MOVE:delta_x,delta_y
+    int colonIndex = cmd.indexOf(':');
+    int commaIndex = cmd.indexOf(',', colonIndex);
+    
+    if (colonIndex == -1 || commaIndex == -1) {
+        Serial.println("ERROR:INVALID_MOVE_FORMAT");
+        return;
+    }
+    
+    String deltaXStr = cmd.substring(colonIndex + 1, commaIndex);
+    String deltaYStr = cmd.substring(commaIndex + 1);
+    
+    int deltaX = deltaXStr.toInt();
+    int deltaY = deltaYStr.toInt();
+    
+    // Validate movement range (prevent extreme movements)
+    if (abs(deltaX) > 1000 || abs(deltaY) > 1000) {
+        Serial.println("ERROR:MOVEMENT_TOO_LARGE");
+        return;
+    }
+    
+    try {
+        // Move mouse by relative offset
+        Mouse.move(deltaX, deltaY);
+        Serial.println("OK");
+    } catch (...) {
+        Serial.println("ERROR:MOVE_FAILED");
     }
 }
 

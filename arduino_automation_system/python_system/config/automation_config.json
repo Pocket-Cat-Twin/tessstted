@@ -1,0 +1,147 @@
+{
+    "arduino": {
+        "serial_port": "COM3",
+        "baudrate": 9600,
+        "connection_timeout": 5,
+        "command_retry_attempts": 3,
+        "auto_detect_port": true,
+        "connection_retry_delay": 2
+    },
+    "automation": {
+        "database_monitoring": {
+            "table_name": "sellers_current",
+            "polling_interval_minutes": 1,
+            "sort_priority": ["NEW", "CHECKED", "UNCHECKED", "GONE"],
+            "unique_traders_only": true,
+            "read_only_mode": true,
+            "description": "Monitor sellers_current table for unique trader names (READ-ONLY)"
+        },
+        "coordinates": {
+            "point1": {
+                "x": "PLACEHOLDER_POINT1_X", 
+                "y": "PLACEHOLDER_POINT1_Y",
+                "description": "First click position for array processor"
+            },
+            "point2": {
+                "x": "PLACEHOLDER_POINT2_X", 
+                "y": "PLACEHOLDER_POINT2_Y",
+                "description": "Second click position for array processor"
+            },
+            "ocr_region": {
+                "x": "PLACEHOLDER_OCR_X",
+                "y": "PLACEHOLDER_OCR_Y", 
+                "width": "PLACEHOLDER_OCR_WIDTH",
+                "height": "PLACEHOLDER_OCR_HEIGHT",
+                "description": "Screen region for OCR monitoring (50% change threshold)"
+            }
+        },
+        "mouse_pattern": {
+            "movement_type": "relative_horizontal",
+            "pixels_per_step": "PLACEHOLDER_PIXELS_RIGHT",
+            "steps_count": 9,
+            "delay_between_steps_ms": 500,
+            "execute_hotkey_each_step": true,
+            "description": "9-step horizontal mouse movement with hotkey presses"
+        },
+        "hotkeys": {
+            "main_hotkey": "PLACEHOLDER_MAIN_HOTKEY",
+            "secondary_hotkey": "PLACEHOLDER_SECONDARY_HOTKEY",
+            "chat_hotkey": "PLACEHOLDER_CHAT_HOTKEY",
+            "description": "Hotkey combinations - replace with actual keys (F1, CTRL+C, etc.)"
+        },
+        "names_array": [
+            "PLACEHOLDER_NAME_1",
+            "PLACEHOLDER_NAME_2",
+            "PLACEHOLDER_NAME_3",
+            "PLACEHOLDER_NAME_4",
+            "PLACEHOLDER_NAME_5"
+        ],
+        "delays": {
+            "min_milliseconds": 1000,
+            "max_milliseconds": 2000,
+            "randomization_enabled": true,
+            "use_arduino_delays": true,
+            "description": "Delay configuration with 1-2 second randomization"
+        },
+        "threads": {
+            "main_thread_enabled": true,
+            "secondary_thread_enabled": true,
+            "thread_startup_delay": 3,
+            "thread_coordination_enabled": true
+        }
+    },
+    "tesseract_ocr": {
+        "language": "rus+eng",
+        "oem": 3,
+        "psm": 6,
+        "preprocessing_enabled": true,
+        "confidence_threshold": 60,
+        "image_preprocessing": {
+            "grayscale": true,
+            "contrast_enhancement": true,
+            "noise_reduction": true,
+            "dpi": 300
+        },
+        "change_detection": {
+            "change_threshold_percent": 50,
+            "character_level_comparison": true,
+            "minimum_change_length": 3,
+            "ignore_whitespace": true,
+            "description": "50% character change threshold for OCR detection"
+        }
+    },
+    "database": {
+        "use_existing_db": true,
+        "db_path": "../market_monitoring_system/database/market_data.db",
+        "table_name": "sellers_current",
+        "polling_interval_minutes": 1,
+        "max_processing_attempts": 3,
+        "cleanup_completed_after_hours": 24,
+        "read_only_access": true,
+        "description": "READ-ONLY access to existing market monitoring database"
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "log_to_file": true,
+        "log_file": "automation_system.log",
+        "max_log_size_mb": 50,
+        "backup_count": 3,
+        "console_output": true
+    },
+    "monitoring": {
+        "health_check_interval": 30,
+        "arduino_ping_interval": 60,
+        "performance_monitoring": true,
+        "error_reporting": true,
+        "statistics_collection": true
+    },
+    "safety": {
+        "max_commands_per_minute": 120,
+        "emergency_stop_hotkey": "CTRL+ALT+S",
+        "coordinate_bounds_checking": true,
+        "text_length_limits": true,
+        "command_validation": true
+    },
+    "_placeholder_guide": {
+        "coordinates": "Replace PLACEHOLDER_*_X and PLACEHOLDER_*_Y with actual pixel coordinates",
+        "hotkeys": "Replace PLACEHOLDER_*_HOTKEY with actual hotkey combinations (F1, CTRL+C, ALT+TAB, etc.)",
+        "names": "Replace PLACEHOLDER_NAME_* with actual names to process in array",
+        "ocr_region": "Define small screen area to monitor for changes (x, y, width, height)",
+        "mouse_movement": "Replace PLACEHOLDER_PIXELS_RIGHT with number of pixels to move right each step",
+        "example_coordinates": "x: 100, y: 200 (pixels from top-left of screen)",
+        "example_hotkeys": "F1, F2, CTRL+C, ALT+TAB, WIN+R",
+        "example_names": "PlayerName1, TargetName2, ItemName3",
+        "example_pixels": "50 (pixels to move right each step)"
+    },
+    "_new_features": {
+        "database_monitoring": "READ-ONLY monitoring of sellers_current table",
+        "trader_sorting": "NEW traders first (newest first), then others (newest first)",
+        "trader_deduplication": "Only first occurrence of each trader name",
+        "chat_automation": "Process each trader with /target <trader_name>",
+        "ocr_threshold": "50% character change detection",
+        "mouse_pattern": "Simple 9-step horizontal movement with hotkey presses",
+        "polling_interval": "Check database every 1 minute",
+        "step_delay": "500ms delay between each mouse movement step"
+    }
+}

@@ -1,0 +1,133 @@
+{
+  "audio": {
+    "sample_rate": 16000,
+    "buffer_size": 1024,
+    "channels": 1,
+    "format": "int16",
+    "microphone_device": null,
+    "system_output_device": null,
+    "vad_enabled": true,
+    "vad_aggressiveness": 2,
+    "noise_reduction": true,
+    "auto_gain_control": true
+  },
+  "hotkeys": {
+    "start_recording": "ctrl+shift+f1",
+    "stop_recording": "ctrl+shift+f2",
+    "toggle_overlay": "ctrl+shift+f3",
+    "toggle_settings": "ctrl+shift+f4",
+    "emergency_stop": "ctrl+shift+esc"
+  },
+  "stt": {
+    "primary_provider": "yandex_speechkit",
+    "fallback_provider": "whisperx",
+    "language_code": "ru-RU",
+    "alternative_language": "en-US",
+    "confidence_threshold": 0.7,
+    "enable_profanity_filter": false,
+    "enable_word_time_offsets": true,
+    "max_alternatives": 1,
+    "streaming_enabled": true
+  },
+  "ai": {
+    "provider": "openrouter",
+    "model": "anthropic/claude-3-sonnet",
+    "fallback_model": "openai/gpt-4",
+    "max_tokens": 300,
+    "temperature": 0.7,
+    "stream_response": true,
+    "system_prompt": "You are a helpful AI assistant. Provide concise and relevant responses based on the conversation context.",
+    "response_timeout": 30,
+    "max_retries": 3
+  },
+  "overlay": {
+    "enabled": true,
+    "always_on_top": true,
+    "transparency": 0.9,
+    "position": {
+      "x": 100,
+      "y": 100,
+      "width": 400,
+      "height": 200
+    },
+    "font": {
+      "family": "Arial",
+      "size": 12,
+      "bold": false,
+      "italic": false
+    },
+    "colors": {
+      "text": "#FFFFFF",
+      "background": "#000000",
+      "border": "#333333"
+    },
+    "display_mode": "both",
+    "auto_hide_delay": 10,
+    "fade_animation": true
+  },
+  "ui": {
+    "theme": "dark",
+    "language": "ru",
+    "show_system_tray": true,
+    "minimize_to_tray": true,
+    "start_minimized": false,
+    "show_notifications": true,
+    "notification_duration": 3
+  },
+  "logging": {
+    "level": "INFO",
+    "file_enabled": true,
+    "console_enabled": true,
+    "max_file_size": 10485760,
+    "backup_count": 5,
+    "log_audio_events": false,
+    "log_api_calls": true
+  },
+  "performance": {
+    "max_cpu_usage": 20,
+    "max_memory_usage": 300,
+    "enable_gpu_acceleration": true,
+    "thread_pool_size": 4,
+    "audio_buffer_count": 3,
+    "api_connection_pool_size": 5
+  },
+  "security": {
+    "encrypt_api_keys": true,
+    "auto_clear_recordings": true,
+    "recording_retention_seconds": 300,
+    "disable_audio_logging": true,
+    "validate_certificates": true
+  },
+  "apis": {
+    "yandex_speechkit": {
+      "api_key": null,
+      "folder_id": null,
+      "endpoint": "stt.api.cloud.yandex.net:443",
+      "iam_token": null,
+      "service_account_key": null,
+      "language_code": "ru-RU",
+      "model": "general",
+      "chunk_size": 4000,
+      "enable_streaming": true
+    },
+    "whisperx": {
+      "model_size": "large-v2",
+      "device": "auto",
+      "compute_type": "float16",
+      "batch_size": 16,
+      "language": "auto",
+      "enable_diarization": false,
+      "enable_vad_filter": true,
+      "vad_onset": 0.5,
+      "vad_offset": 0.363,
+      "min_silence_duration": 1.0
+    },
+    "openrouter": {
+      "api_key": null,
+      "base_url": "https://openrouter.ai/api/v1",
+      "site_url": null,
+      "app_name": "Voice AI Streaming System",
+      "http_referer": "http://localhost:5000"
+    }
+  }
+}

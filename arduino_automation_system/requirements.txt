@@ -1,0 +1,75 @@
+# Arduino Automation System Dependencies
+
+# Core Python packages
+pytesseract>=0.3.10        # Free OCR alternative to Yandex OCR
+Pillow>=10.0.0             # Image processing for OCR
+opencv-python>=4.8.0       # Advanced image preprocessing
+pyserial>=3.5              # Arduino serial communication
+mss>=9.0.1                 # Fast screen capture for OCR monitoring
+
+# Optional but recommended
+numpy>=1.24.0              # Numerical operations (used by OpenCV)
+setuptools>=65.0.0         # For package management
+
+# Built-in packages (no installation needed)
+# sqlite3    - Database operations
+# threading  - Multi-threading support  
+# logging    - System logging
+# json       - Configuration management
+# pathlib    - Path operations
+# time       - Timing and delays
+# signal     - Graceful shutdown handling
+# hashlib    - Text change detection
+# random     - Delay randomization
+# dataclasses - Data structures
+# contextlib - Context managers
+# datetime   - Timestamp operations
+# typing     - Type hints
+# enum       - Enumerations
+
+# Installation Notes:
+# 
+# 1. Install Python packages:
+#    pip install -r requirements.txt
+#
+# 2. Install Tesseract OCR system:
+#    Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki
+#    Linux: sudo apt install tesseract-ocr tesseract-ocr-rus
+#    macOS: brew install tesseract
+#
+# 3. Arduino Libraries (install via Arduino IDE):
+#    - Mouse.h (built-in)
+#    - Keyboard.h (built-in)
+#
+# 4. Hardware Requirements:
+#    - Arduino Micro (USB HID support required)
+#    - USB cable for Arduino connection
+#    - Windows computer with available USB port
+
+# Version Compatibility:
+# - Python 3.8+ required
+# - Arduino IDE 1.8.0+ recommended (2.0+ preferred)
+# - Windows 10+ recommended for best Arduino USB HID support
+
+# Common Installation Issues:
+#
+# 1. Tesseract not found:
+#    - Add Tesseract to system PATH
+#    - Or set TESSDATA_PREFIX environment variable
+#
+# 2. Arduino serial connection issues:
+#    - Install Arduino drivers
+#    - Check COM port in Device Manager
+#    - Try different USB ports
+#
+# 3. OpenCV installation problems:
+#    - Use: pip install opencv-python-headless (if no GUI needed)
+#    - Or install Visual C++ redistributables on Windows
+#
+# 4. Permission errors on Linux:
+#    - Add user to dialout group: sudo usermod -a -G dialout $USER
+#    - Logout and login again
+#
+# 5. PIL/Pillow conflicts:
+#    - Uninstall PIL if installed: pip uninstall PIL
+#    - Reinstall Pillow: pip install --upgrade Pillow
