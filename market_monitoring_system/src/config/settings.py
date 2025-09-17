@@ -29,6 +29,7 @@ class YandexOCRConfig:
     """Configuration for Yandex OCR API with dual API support."""
     api_key: str
     api_url: str
+    folder_id: str = ""
     max_retries: int = 3
     timeout: int = 30
     retry_delay: int = 5
@@ -209,6 +210,7 @@ class SettingsManager:
             self.yandex_ocr = YandexOCRConfig(
                 api_key=ocr_data['api_key'],
                 api_url=ocr_data['api_url'],
+                folder_id=ocr_data.get('folder_id', ''),
                 max_retries=ocr_data.get('max_retries', 3),
                 timeout=ocr_data.get('timeout', 30),
                 retry_delay=ocr_data.get('retry_delay', 5),
@@ -310,6 +312,8 @@ class SettingsManager:
                 errors.append("Yandex OCR API key not configured")
             if not self.yandex_ocr.api_url:
                 errors.append("Yandex OCR API URL not configured")
+            if not self.yandex_ocr.folder_id:
+                errors.append("Yandex OCR folder_id not configured")
             if self.yandex_ocr.timeout <= 0:
                 errors.append("OCR timeout must be positive")
         

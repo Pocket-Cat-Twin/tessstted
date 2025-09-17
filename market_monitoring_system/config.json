@@ -1,7 +1,7 @@
 {
     "hotkeys": {
         "F1": {
-            "area": [735, 305, 1185, 675],
+            "area": [100, 100, 800, 600],
             "folder": "F1",
             "merge_interval": 30,
             "enabled": true,
@@ -10,7 +10,7 @@
             "processing_type": "full"
         },
         "F2": {
-            "area": [650, 50, 935, 450],
+            "area": [100, 100, 800, 600],
             "folder": "F2",
             "merge_interval": 60,
             "enabled": true,
@@ -38,7 +38,7 @@
         }
     },
     "yandex_ocr": {
-        "api_key": "AQVN01234567890abcdefghijklmnopqrstuvwxyz",
+        "api_key": "your_api_key_here",
         "api_url": "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText",
         "max_retries": 3,
         "timeout": 30,

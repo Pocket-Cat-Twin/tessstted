@@ -192,7 +192,7 @@ class YandexOCRClient:
             
             # Prepare request payload
             payload = {
-                "folderId": "your_folder_id",  # This should be configured
+                "folderId": self.config.folder_id,
                 "analyze": {
                     "content": image_base64,
                     "features": [{
@@ -803,7 +803,7 @@ class YandexOCRClient:
             ).decode('utf-8')
             
             payload = {
-                "folderId": "test",
+                "folderId": self.config.folder_id,
                 "analyze": {
                     "content": test_image_data,
                     "features": [{
